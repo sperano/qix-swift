@@ -12,7 +12,10 @@ final class BoardImageTests: XCTestCase {
 
         XCTAssertEqual(image.width, Int(Tuning.boardW))
         XCTAssertEqual(image.height, Int(Tuning.boardH))
+        XCTAssertEqual(image.bitsPerComponent, UInt8.bitWidth)
         XCTAssertEqual(image.bitsPerPixel, BoardShapes.bytesPerPixel * UInt8.bitWidth)
+        XCTAssertEqual(image.bytesPerRow, Int(Tuning.boardW) * BoardShapes.bytesPerPixel)
+        XCTAssertEqual(image.colorSpace?.name, CGColorSpace.sRGB)
         XCTAssertEqual(image.alphaInfo, .premultipliedLast)
         let data = try XCTUnwrap(image.dataProvider?.data) as Data
         XCTAssertEqual(data, Data(BoardShapes.claimedPixels(board)))

@@ -23,7 +23,7 @@ final class GameUITests: XCTestCase {
         app.buttons["pause"]
     }
 
-    /// Waits for the screen over the board to show `heading`.
+    /// Waits for the screen over the board to appear, then checks that it shows `heading`.
     private func assertScreen(_ heading: String, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertTrue(screen.waitForExistence(timeout: Self.timeout), "no screen", file: file, line: line)
         XCTAssertTrue(screen.label.contains(heading), "\(screen.label)", file: file, line: line)

@@ -1,9 +1,9 @@
 import CoreGraphics
 import QixKit
 
-/// The sizes of a screen's text over the board, in points: as large as qix-rs's on a board of
-/// `referenceFieldHeight`, smaller where the screen would not fit the board otherwise. Sizes are
-/// multiples of the line size, so a screen keeps its proportions as it shrinks.
+/// The sizes of a screen's text over the board, in points: lines `lineShare` of the board's
+/// height, smaller where the screen would not fit the board otherwise. The other sizes are
+/// multiples of the line size in qix-rs's proportions, so a screen keeps them as it shrinks.
 enum ScreenLayout {
     /// The largest line size, as a fraction of the board's height.
     static let lineShare: CGFloat = 0.05

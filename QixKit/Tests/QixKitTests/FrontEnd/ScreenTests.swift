@@ -136,6 +136,17 @@ final class ScreenTests: XCTestCase {
         XCTAssertEqual(Array(shown.lines.prefix(2)), ["Claimed 75.0%", "Bonus 25,000"])
     }
 
+    func testASplitLevelOfASessionSaysSo() throws {
+        let session = splitLevel()
+        guard case .levelComplete(_, _, split: true) = session.state else {
+            return XCTFail("level not split: \(session.state)")
+        }
+
+        let shown = try XCTUnwrap(Screen(session: session))
+
+        XCTAssertEqual(shown.lines.first, "The Qix are split apart!")
+    }
+
     func testGameOverShowsTheFinalScore() {
         let game = claimedGame()
         let points = claimedCells * Tuning.pointsPerCell

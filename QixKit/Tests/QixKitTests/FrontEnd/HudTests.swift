@@ -95,11 +95,12 @@ final class HudTests: XCTestCase {
     func testTheLevelAndTheLivesAreTheGames() {
         var game = Game(rng: Rng(seed: hudSeed))
         game.startLevel(4)
+        game.lives = Tuning.startingLives - 1
 
         let hud = Hud(game: game, highScore: 0)
 
         XCTAssertEqual(hud.level, "4")
-        XCTAssertEqual(hud.lives, game.lives)
+        XCTAssertEqual(hud.lives, Tuning.startingLives - 1)
     }
 
     func testTheMeterShrinksTwiceThenIsSpent() {

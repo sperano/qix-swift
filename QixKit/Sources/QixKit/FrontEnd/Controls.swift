@@ -64,7 +64,7 @@ public struct Controls: Hashable, Sendable {
         presses.removeAll()
     }
 
-    /// The game pad holds `controls` now, as polled this frame: the ones it did not hold before
+    /// The game pad holds `controls` now, as polled this frame: the ones neither device held before
     /// are pressed.
     public mutating func setPad(_ controls: Set<Control>) {
         presses.formUnion(controls.subtracting(held))

@@ -95,6 +95,18 @@ final class GameLoopTests: XCTestCase {
         XCTAssertEqual(loop.session.game, game)
     }
 
+    func testSuspendingLeavesAPausedGamePaused() {
+        var loop = playingLoop()
+        loop.controls.press(.pause)
+        loop.advance(frame60)
+        XCTAssertEqual(loop.session.state, .paused)
+
+        loop.suspend()
+
+        // A pause tick would have resumed the game.
+        XCTAssertEqual(loop.session.state, .paused)
+    }
+
     func testSuspendingLeavesAScreenOutOfPlayAlone() {
         var loop = titleLoop()
 

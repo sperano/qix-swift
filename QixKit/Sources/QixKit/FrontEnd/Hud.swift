@@ -54,7 +54,8 @@ public struct Hud: Hashable, Sendable {
     }
 
     /// The claimed share of `game`'s board and its threshold, in percent: the share rounded down to
-    /// a tenth, so it never shows the threshold before the board reaches it.
+    /// a tenth, so it never shows a whole-percent threshold before the board reaches it, and the
+    /// threshold rounded to the nearest whole percent.
     private static func claimed(_ game: Game) -> String {
         let fraction = Double(game.board.claimedFraction())
         let shown = (fraction * percent * tenths + tenthsRoundingSlack).rounded(.down) / tenths

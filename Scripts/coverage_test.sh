@@ -12,9 +12,9 @@ trap 'rm -rf "$work"' EXIT
 failures=0
 
 # The source and test files of an export, as `swift test` names them.
-source_file=/work/QixKit/Sources/QixKit/BoardSize.swift
+source_file=/work/QixKit/Sources/QixKit/Board.swift
 other_source_file=/work/QixKit/Sources/QixKit/Rng.swift
-test_file=/work/QixKit/Tests/QixKitTests/BoardSizeTests.swift
+test_file=/work/QixKit/Tests/QixKitTests/BoardTests.swift
 # Lines in each fixture file: the minimum (90 %) is 9 of them.
 lines=10
 at_minimum=9

@@ -2,7 +2,7 @@ import GameController
 import QixKit
 
 /// The game pad connected, polled once a frame: its left stick or D-pad, whichever is pushed
-/// further, A, B and the menu button.
+/// further on each axis, A, B and the menu button.
 enum GamePad {
     /// The current pad's controls, `nil` without an extended game pad.
     @MainActor
@@ -20,7 +20,7 @@ enum GamePad {
     }
 
     /// The one of `first` and `second` further from zero.
-    private static func further(_ first: Float, _ second: Float) -> Float {
+    static func further(_ first: Float, _ second: Float) -> Float {
         abs(first) >= abs(second) ? first : second
     }
 }

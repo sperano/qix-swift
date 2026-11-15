@@ -124,6 +124,11 @@ private func drawUp(_ game: Game, _ height: UInt16) -> Session {
     return session
 }
 
+/// A `splitGame` played up to the split that completes its level.
+func splitLevel() -> Session {
+    drawUp(splitGame(), splitH)
+}
+
 /// A `levelGame` played up to its completion.
 func completedLevel() -> Session {
     drawUp(levelGame(), levelGameHeight)

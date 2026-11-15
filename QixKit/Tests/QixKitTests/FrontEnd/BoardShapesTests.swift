@@ -121,11 +121,12 @@ final class BoardShapesTests: XCTestCase {
 
     func testClaimedPixelsAreTheFillsOfTheirKindsRowByRowAndFreeCellsTransparent() {
         var board = Board(width: 3, height: 2)
-        board.setCell(x: 0, y: 0, to: .claimed(.fast))
+        // Column by column, the fast cell would be the third pixel.
+        board.setCell(x: 1, y: 0, to: .claimed(.fast))
         board.setCell(x: 2, y: 1, to: .claimed(.slow))
         let (fast, slow, free) = (Palette.fastFill, Palette.slowFill, RGBA.transparent)
 
-        let expected = [fast, free, free, free, free, slow].flatMap { [$0.red, $0.green, $0.blue, $0.alpha] }
+        let expected = [free, fast, free, free, free, slow].flatMap { [$0.red, $0.green, $0.blue, $0.alpha] }
         XCTAssertEqual(BoardShapes.claimedPixels(board), expected)
     }
 

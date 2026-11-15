@@ -42,10 +42,21 @@ struct PauseButton: View {
     /// The symbol's size, as a fraction of the column's height.
     static let symbolShare: CGFloat = 0.5
 
+    /// The area that takes the tap in a HUD column of `column`: the column, grown to
+    /// `minimumTarget` on each side that is shorter.
+    static func targetSize(_ column: CGSize) -> CGSize {
+        CGSize(width: max(column.width, minimumTarget), height: max(column.height, minimumTarget))
+    }
+
     let role: PauseButtonRole
     /// The HUD column the button sits in.
     let column: CGRect
     let action: @MainActor () -> Void
+
+    /// The area that takes the tap.
+    private var target: CGSize {
+        Self.targetSize(column.size)
+    }
 
     var body: some View {
         Button {
@@ -54,7 +65,7 @@ struct PauseButton: View {
             Image(systemName: role.symbol)
                 .font(.system(size: column.height * Self.symbolShare))
                 .foregroundStyle(Color(Palette.hudValue))
-                .frame(width: max(column.width, Self.minimumTarget), height: max(column.height, Self.minimumTarget))
+                .frame(width: target.width, height: target.height)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

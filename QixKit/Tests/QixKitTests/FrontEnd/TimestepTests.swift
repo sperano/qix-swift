@@ -39,6 +39,13 @@ final class TimestepTests: XCTestCase {
         XCTAssertEqual(timestep.advance(half), 1)
     }
 
+    func testAFrameJustBelowOneTickPeriodStillRunsOneTick() {
+        var timestep = FixedTimestep()
+        for frame in 0 ..< frames {
+            XCTAssertEqual(timestep.advance(tickPeriod.nextDown), 1, "frame \(frame)")
+        }
+    }
+
     func testAStallIsCappedAndItsBacklogDropped() {
         var timestep = FixedTimestep()
 
@@ -51,6 +58,14 @@ final class TimestepTests: XCTestCase {
 
         XCTAssertEqual(timestep.advance(.nan), 0)
         XCTAssertEqual(timestep.advance(-1), 0)
+        XCTAssertEqual(timestep.advance(tickPeriod), 1)
+    }
+
+    func testAnInfiniteFrameTimeIsAStallThatLeavesTheClockIntact() {
+        var timestep = FixedTimestep()
+
+        XCTAssertEqual(timestep.advance(.infinity), FixedTimestep.maxTicksPerFrame)
+        XCTAssertEqual(timestep.advance(tickPeriod), 1)
         XCTAssertEqual(timestep.advance(tickPeriod), 1)
     }
 }
