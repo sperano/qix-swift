@@ -119,7 +119,7 @@ private func isDeath(_ event: Event) -> Bool {
 }
 
 final class GameSuperSparxTests: XCTestCase {
-    func testASuperSparxEntersTheStixAndKillsTheMarkerAtItsHead() {
+    func testASuperSparxEntersTheStixAndKillsTheMarkerAtItsHead() throws {
         var game = gameWith(.super)
 
         let seen = watch(&game)
@@ -130,8 +130,9 @@ final class GameSuperSparxTests: XCTestCase {
         XCTAssertEqual(points, expected, "\(seen)")
         let death = seen.filter(\.sparxDeath)
         XCTAssertEqual(death.count, 1, "\(seen)")
-        let lastTick = chase[chase.count - 1].tick
-        XCTAssertEqual(death[0].tick, lastTick + Tuning.superSparxStepTicks)
+        let lastTick = try XCTUnwrap(chase.last?.tick, "\(seen)")
+        let deathTick = try XCTUnwrap(death.first?.tick, "\(seen)")
+        XCTAssertEqual(deathTick, lastTick + Tuning.superSparxStepTicks)
     }
 
     func testASuperSparxStepsAlongTheStixEverySuperSparxStepTicks() {

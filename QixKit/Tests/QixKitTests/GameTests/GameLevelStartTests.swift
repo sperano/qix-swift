@@ -161,7 +161,9 @@ final class GameLevelStartTests: XCTestCase {
     func testStartingALevelDropsTheStix() {
         var game = newGame()
         draw(&game, .up, .fast, 1)
+        stand(&game, Tuning.fuseDelayTicks)
         XCTAssertNotNil(game.stix)
+        XCTAssertNotNil(game.fuse, "the fuse did not light")
 
         game.startLevel(nextLevel)
 
@@ -220,6 +222,17 @@ final class GameLevelStartTests: XCTestCase {
         XCTAssertEqual(game.score.points, 0)
         XCTAssertEqual(game.multiplier, Tuning.startingMultiplier)
         XCTAssertEqual(game.claimThreshold, ClaimThreshold())
+    }
+
+    func testARestartCarriesTheRandomSequenceOn() {
+        var game = aPlayedGame()
+        let carried = game.rng
+        XCTAssertNotEqual(carried, Rng(seed: gameSeed), "nothing drawn")
+
+        game.restart()
+
+        XCTAssertEqual(game.qix, Game(rng: carried).qix)
+        XCTAssertNotEqual(game.qix, newGame().qix)
     }
 
     func testARestartFreesTheBoard() {

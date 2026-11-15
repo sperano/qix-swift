@@ -25,6 +25,13 @@ private let fastSpeed: ClosedRange<Float> = 0.9 ... 1.0
 /// oldest of the trail.
 private let previousTicks = 3
 
+/// The free row of the corridor test, between claimed rows, and where its Qix starts along it.
+private let corridorRow: UInt16 = 20
+private let corridorStartX: Float = 10.5
+
+/// The corridor Qix's velocity, mostly across the corridor so every mirror of it leaves the row.
+private let acrossCorridor = Vec2(x: 0.3, y: 0.7)
+
 /// Where on the middle row the spawn test centres its Qix.
 private let spawnX: Float = 40.0
 
@@ -230,6 +237,25 @@ final class QixTests: XCTestCase {
 
         XCTAssertLessThan(qix.vel.x, 0, "\(qix)")
         assertOnFreeCells(board, qix, 0)
+    }
+
+    func testStaysPutAndReversesWhenNoMirrorIsFree() {
+        var board = Board(width: Tuning.boardW, height: Tuning.boardH)
+        for x in 0 ..< Tuning.boardW {
+            board.setCell(x: x, y: corridorRow - 1, to: .claimed(.slow))
+            board.setCell(x: x, y: corridorRow + 1, to: .claimed(.slow))
+        }
+        let start = Vec2(x: corridorStartX, y: Float(corridorRow) + 0.5)
+        let end = start + Vec2(x: Tuning.qixLength, y: 0)
+        var qix = Qix(a: start, b: end, vel: acrossCorridor, spin: 0)
+        var rng = Rng(seed: seed)
+
+        qix.tick(board, &rng)
+
+        XCTAssertEqual(qix.a, start, "\(qix)")
+        XCTAssertEqual(qix.b, end, "\(qix)")
+        XCTAssertLessThan(qix.vel.x, 0, "\(qix)")
+        XCTAssertLessThan(qix.vel.y, 0, "\(qix)")
     }
 
     func testSpawnsCentredOnTheBoardWithinTheSpeedBounds() {

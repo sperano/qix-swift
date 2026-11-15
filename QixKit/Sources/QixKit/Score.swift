@@ -13,7 +13,8 @@ public func scoreForClaim(_ result: ClaimResult, _ levelMultiplier: UInt32) -> U
 }
 
 /// The extra lives a player with `lives` earns when the score goes from `before` to `after`: one
-/// for every multiple of `Tuning.extraLifeEvery` crossed, as many as fit below `Tuning.maxLives`.
+/// for every multiple of `Tuning.extraLifeEvery` crossed, as many as fit up to `Tuning.maxLives`,
+/// which counts the life being played.
 public func extraLives(_ before: Score, _ after: Score, _ lives: UInt32) -> UInt32 {
     let steps = saturatingSubtract(after.points / Tuning.extraLifeEvery, before.points / Tuning.extraLifeEvery)
     return min(steps, saturatingSubtract(Tuning.maxLives, lives))

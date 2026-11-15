@@ -46,6 +46,12 @@ final class ScoreTests: XCTestCase {
         XCTAssertEqual(points, .max)
     }
 
+    func testAClaimOneCellPastWhatACountHoldsSaturatesRatherThanWrapping() {
+        let points = scoreForClaim(claim(Int(UInt32.max) + 1, .fast), 1)
+
+        XCTAssertEqual(points, .max)
+    }
+
     func testANewScoreIsZero() {
         XCTAssertEqual(Score().points, 0)
     }

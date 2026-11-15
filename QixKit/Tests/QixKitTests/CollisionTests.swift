@@ -67,6 +67,17 @@ final class CollisionTests: XCTestCase {
         XCTAssert(qixHitsMarker(qix((4.4, 2.0), (4.4, 6.0)), marker))
     }
 
+    func testAQixEnteringTheMarkerSquareThroughOneSideHitsTheMarker() {
+        let marker = Point(x: 4, y: 4)
+        let throughLeft = qix((3.0, 4.0), (3.8, 4.0))
+        let throughRight = qix((5.5, 4.0), (4.2, 4.0))
+        let throughTop = qix((4.0, 2.5), (4.0, 3.8))
+        let throughBottom = qix((4.0, 5.5), (4.0, 4.2))
+        for entering in [throughLeft, throughRight, throughTop, throughBottom] {
+            XCTAssert(qixHitsMarker(entering, marker), "\(entering)")
+        }
+    }
+
     func testAQixInsideTheMarkerSquareHitsTheMarker() {
         XCTAssert(qixHitsMarker(qix((3.9, 4.0), (4.1, 4.0)), Point(x: 4, y: 4)))
     }

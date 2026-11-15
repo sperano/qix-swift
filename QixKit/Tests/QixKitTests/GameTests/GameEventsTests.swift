@@ -6,8 +6,8 @@ import XCTest
 private let penColumn: UInt16 = 1
 
 /// Steps of the first segment of the stix
-/// `testTheClosingStepRaisesItsDrawThenTheClaimThenItsExtraLives` draws with another kind than the
-/// rest.
+/// `testTheClosingStepRaisesItsDrawThenTheClaimThenItsExtraLives` draws, in the cases that draw
+/// one, before the segment that closes it.
 private let firstSegmentSteps: UInt32 = 3
 
 /// A full-size game with no Sparx and its Qix penned in `penColumn`.

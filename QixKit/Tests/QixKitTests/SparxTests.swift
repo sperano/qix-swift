@@ -1,3 +1,4 @@
+import Testing
 import XCTest
 @testable import QixKit
 
@@ -226,6 +227,17 @@ final class SparxTests: XCTestCase {
         XCTAssertNil(nearestBorderPoint(board, Point(x: 0, y: 0)))
     }
 
+    func testASparxWithNoBorderEdgeStaysPut() {
+        var board = Board(width: 1, height: 1)
+        board.setCell(x: 0, y: 0, to: claimed)
+        var sparx = normalSparx(Point(x: 0, y: 0), .left)
+        var rng = Rng(seed: seed)
+
+        sparx.step(board, &rng)
+
+        XCTAssertEqual(Heading(sparx), Heading(Point(x: 0, y: 0), .left))
+    }
+
     func testASparxSteppingOntoTheMarkerHitsIt() {
         let marker = Point(x: 2, y: 0)
         let sparx = normalSparx(marker, .left)
@@ -353,5 +365,23 @@ final class SparxTests: XCTestCase {
 
     func testNoLevelSparxSpawnNone() {
         XCTAssert(Sparx.spawnLevel(Board(width: width, height: height), 0).isEmpty)
+    }
+}
+
+/// The negative counts `Sparx.spawnAtTop` and `Sparx.spawnLevel` trap on, where Rust's `usize`
+/// rules them out, as exit tests (TrapExpectation.swift).
+struct SparxTrapTests {
+    @Test func aNegativeTopCountTraps() async {
+        let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
+            _ = Sparx.spawnAtTop(Board(width: width, height: height), -1)
+        }
+        expectMessage(result, "negative Sparx count -1")
+    }
+
+    @Test func aNegativeLevelCountTraps() async {
+        let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
+            _ = Sparx.spawnLevel(Board(width: width, height: height), -1)
+        }
+        expectMessage(result, "negative Sparx count -1")
     }
 }

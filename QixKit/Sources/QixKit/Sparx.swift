@@ -35,7 +35,10 @@ public struct Sparx: Hashable, Sendable {
 
     /// `count` `SparxKind.normal` Sparx on the border point nearest the centre of `board`'s top
     /// edge, like `spawnPair`: heading left and right in turn, the first left.
+    ///
+    /// Traps on a negative `count`, which Rust's `usize` rules out.
     public static func spawnAtTop(_ board: Board, _ count: Int) -> [Self] {
+        precondition(count >= 0, "negative Sparx count \(count)")
         let pos = topCentre(board)
         return (0 ..< count).map { Self(pos: pos, dir: pair[$0 % pair.count], kind: .normal) }
     }
@@ -44,7 +47,10 @@ public struct Sparx: Hashable, Sendable {
     /// `board`'s top edge (each on the border point nearest its spot), the first of each pair
     /// heading left and the second right; an odd count leaves the last pair one short. Two Sparx
     /// are the `spawnPair`.
+    ///
+    /// Traps on a negative `count`, which Rust's `usize` rules out.
     public static func spawnLevel(_ board: Board, _ count: Int) -> [Self] {
+        precondition(count >= 0, "negative Sparx count \(count)")
         let pairs = (count + pair.count - 1) / pair.count
         return (0 ..< count).map { index in
             let pos = topPoint(board, spread(board.width, index / pair.count, pairs))
