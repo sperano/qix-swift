@@ -95,6 +95,12 @@ private func insideL(_ board: Board) -> [Spot] {
     cells(board).filter { $0.x >= 2 && $0.y >= 2 }
 }
 
+/// A fast stix from the top edge at `cutX` straight down to the bottom: `straightCut` drawn the
+/// other way.
+private func straightCutFromTop() -> Stix {
+    drawnWith(Point(x: cutX, y: 0), straightRun(.down, height), .fast)
+}
+
 final class ClaimTests: XCTestCase {
     func testAStraightCutStopsTheFill() {
         let board = Board(width: width, height: height)
@@ -218,6 +224,40 @@ final class ClaimTests: XCTestCase {
         XCTAssertEqual(set.count(), Int(Tuning.boardW) * Int(Tuning.boardH))
     }
 
+    func testClosingACutReportsItsCellsTheClaimedFractionAndKind() {
+        var board = Board(width: width, height: height)
+        let stix = drawnWith(Point(x: cutX, y: height), straightRun(.up, height), .slow)
+
+        let result = board.closeStix(stix, [qixAt((0, 0))]).claim
+
+        let cells = Int((width - cutX) * height)
+        let expected = ClaimResult(cells: cells, fraction: board.claimedFraction(), kind: .slow)
+        XCTAssertEqual(result, expected)
+        XCTAssertEqual(expected.fraction, Float(cells) / Float(width * height))
+    }
+
+    func testClosingAStixThatEnclosesNothingReportsNone() {
+        var board = Board(width: width, height: height)
+        let stix = drawnWith(Point(x: cutX, y: height), straightRun(.up, height - 1), .fast)
+
+        let result = board.closeStix(stix, [qixAt((0, height - 1))])
+
+        XCTAssertNil(result.claim)
+        XCTAssertEqual(board, Board(width: width, height: height))
+    }
+
+    func testTheSideHoldingTheQixStaysFreeWhicheverEndTheStixStarts() {
+        for cut in [straightCut(), straightCutFromTop()] {
+            for (qix, left) in [((UInt16(0), UInt16(2)), true), ((width - 1, 2), false)] {
+                var board = Board(width: width, height: height)
+
+                board.closeStix(cut, [qixAt(qix)])
+
+                XCTAssertEqual(freeCells(board), sideOfCut(board, left), "\(qix)")
+            }
+        }
+    }
+
     func testSeedsInOneAreaGetEqualRegions() {
         let board = Board(width: width, height: height)
 
@@ -243,6 +283,39 @@ final class ClaimTests: XCTestCase {
         let sets = Claim.regions(board, straightCut(), [(0, 0), (width - 1, 0)])
 
         XCTAssertEqual(sets[1].count(), 0)
+    }
+
+    func testTwoQixOnOneSideKeepOnlyThatSide() {
+        var board = Board(width: width, height: height)
+        let qix = [qixAt((0, 0)), qixAt((1, height - 1))]
+
+        let result = board.closeStix(straightCut(), qix)
+
+        XCTAssertEqual(freeCells(board), sideOfCut(board, true))
+        XCTAssertEqual(result.regions[0], result.regions[1])
+        XCTAssertEqual(result.claim?.cells, Int((width - cutX) * height))
+    }
+
+    func testAQixEitherSideOfACutKeepsBothSidesInSeparateRegions() {
+        var board = Board(width: width, height: height)
+        let qix = [qixAt((0, 0)), qixAt((width - 1, 0))]
+
+        let result = board.closeStix(straightCut(), qix)
+
+        XCTAssertNil(result.claim)
+        XCTAssertEqual(board, Board(width: width, height: height))
+        XCTAssertEqual(reached(board, result.regions[0]), sideOfCut(board, true))
+        XCTAssertEqual(reached(board, result.regions[1]), sideOfCut(board, false))
+    }
+
+    func testClosingWithoutAQixClaimsEveryFreeCell() {
+        var board = Board(width: width, height: height)
+
+        let result = board.closeStix(straightCut(), [])
+
+        XCTAssertEqual(result.regions, [])
+        XCTAssertEqual(freeCells(board), [])
+        XCTAssertEqual(result.claim?.fraction, 1.0)
     }
 
     func testEveryKeptRegionStaysFree() {

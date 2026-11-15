@@ -32,6 +32,21 @@ public struct CloseResult: Equatable, Sendable {
     }
 }
 
+public extension Board {
+    /// Closes `stix`: `Claim.claim`s every free cell outside the areas holding a Qix of `qix`,
+    /// each found from its `Qix.cell`. With no Qix, every free cell is claimed.
+    ///
+    /// The border follows by itself, since `Board.isBorder` reads the cells: the stix's points now
+    /// lie between the claimed cells and the free areas kept.
+    @discardableResult
+    mutating func closeStix(_ stix: Stix, _ qix: [Qix]) -> CloseResult {
+        let regions = Claim.regions(self, stix, qix.map(\.cell))
+        let cells = Claim.claim(&self, regions, stix.claimKind())
+        let claim = cells > 0 ? ClaimResult(cells: cells, fraction: claimedFraction(), kind: stix.claimKind()) : nil
+        return CloseResult(claim: claim, regions: regions)
+    }
+}
+
 /// The functions of qix-core's `claim` module.
 public enum Claim {
     /// The free cells reachable from the cell `seed` by steps between 4-adjacent free cells that

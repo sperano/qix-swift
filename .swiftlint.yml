@@ -76,6 +76,7 @@ trailing_comma:
 large_tuple:
   warning: 3
   error: 4
+# `a` and `b` are the ends of the Qix's segment, named as in qix-rs (`Qix::a`, `Qix::b`).
 identifier_name:
   min_length: 2
-  excluded: [i, j, n, x, y, id, dx, dy, to, at, by]
+  excluded: [i, j, n, x, y, a, b, id, dx, dy, to, at, by]

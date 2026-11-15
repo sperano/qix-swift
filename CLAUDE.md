@@ -65,7 +65,10 @@ view.
     (`game/`) becomes a directory of the same name in UpperCamelCase.
   - Tests in a sibling `*Tests.swift` named after the module
     (`sparx_meter_test.rs` → `SparxMeterTests.swift`, `tests/playthrough.rs`
-    → `PlaythroughTests.swift`), never inline. Port each Rust test as one
+    → `PlaythroughTests.swift`), never inline. A test module directory keeps its
+    parent's name as a prefix (`game_test/claims.rs` →
+    `GameTests/GameClaimsTests.swift`): one target cannot hold two files of the same
+    name. Port each Rust test as one
     XCTest method, except a `#[should_panic]` test (or one of a
     `debug_assert!`): XCTest cannot catch a trap, so it becomes a Swift Testing
     exit test in the same file (`#expect(processExitsWith: .failure)`, then
