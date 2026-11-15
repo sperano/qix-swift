@@ -1,10 +1,10 @@
 /// The size of the board in cells; the playfield is one unit per cell.
 ///
-/// A placeholder until qix-core's `tuning` module is ported: its `BOARD_W` and `BOARD_H` then
-/// replace this type, and the app takes the playfield's aspect ratio from them.
+/// A placeholder for the app until it reads `Tuning.boardW` and `Tuning.boardH` itself: the app
+/// takes the playfield's aspect ratio from `standard`.
 public struct BoardSize: Sendable, Hashable {
-    /// The arcade board, qix-core's `BOARD_W` by `BOARD_H`.
-    public static let standard = Self(width: 160, height: 120)
+    /// The arcade board, `Tuning.boardW` by `Tuning.boardH`.
+    public static let standard = Self(width: Tuning.boardW, height: Tuning.boardH)
 
     /// Board width in cells.
     public let width: UInt16

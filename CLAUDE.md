@@ -66,21 +66,34 @@ view.
   - Tests in a sibling `*Tests.swift` named after the module
     (`sparx_meter_test.rs` → `SparxMeterTests.swift`, `tests/playthrough.rs`
     → `PlaythroughTests.swift`), never inline. Port each Rust test as one
-    XCTest method.
+    XCTest method, except a `#[should_panic]` test (or one of a
+    `debug_assert!`): XCTest cannot catch a trap, so it becomes a Swift Testing
+    exit test in the same file (`#expect(processExitsWith: .failure)`, then
+    `expectMessage` from `TrapExpectation.swift` for the message).
   - Same names where Swift allows: types keep theirs (`Game`, `Session`,
     `InputState`); functions, fields and enum cases go from snake_case to
     lowerCamelCase (`claimed_fraction` → `claimedFraction`); a module's
     constants become static members of a caseless enum named after the module
-    (`tuning::BOARD_W` → `Tuning.boardW`).
+    (`tuning::BOARD_W` → `Tuning.boardW`), or of the module's type of that
+    name (`board::OUTSIDE` → `Board.outside`). A module's free functions stay
+    free functions (`segments_intersect`, `legal_step`) unless the name alone
+    is too generic, then they join that enum (`claim::regions` →
+    `Claim.regions`, `segment::cells` → `Segment.cells`). A Rust method
+    without arguments becomes a property when it reads a field or runs in
+    constant time (`width()` → `width`, `head()` → `head`) and stays a method
+    when it walks a collection (`claimed_fraction()`, `count()`).
   - Same doc comments, adapted only where the Swift differs (a Rust link
     becomes the Swift name).
   - Same types: Rust `f32` is `Float`, integer widths are kept (`u16` is
-    `UInt16`). Rust's wrapping or saturating arithmetic needs the explicit
-    Swift operator (`&+`) or a clamp, since Swift traps on overflow.
+    `UInt16`), `usize` is `Int`. Rust's wrapping or saturating arithmetic,
+    and its saturating `as` casts from `f32`, need the explicit Swift operator
+    (`&+`) or a clamp, since Swift traps on overflow. The trigonometry calls
+    libm by name (`sinf`, `cosf`, `hypotf`), the functions Rust's `f32` uses.
   - Same tuning values and the same SplitMix64 `Rng`, so a seed plays the same
     game as in qix-rs.
-  - `BoardSize` is a placeholder until `tuning` is ported; `BOARD_W` and
-    `BOARD_H` then replace it, in the app too.
+  - `BoardSize` is a placeholder the app reads its aspect ratio from; its
+    `standard` is `Tuning.boardW` by `Tuning.boardH`. The app shell replaces
+    it with `Tuning` and removes it.
 - Engine first: a rule change goes in `QixKit` with its test, then the UI.
 - Named constants for every size, ratio, count, colour and duration
   (`PlayfieldLayout`, `Palette`); no magic numbers in views or tests either.
