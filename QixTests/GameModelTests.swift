@@ -131,8 +131,8 @@ final class GameModelTests: XCTestCase {
 
     /// Lands the thumb on the stick and drags it `dx`, `dy` points.
     private func steer(_ dx: CGFloat, _ dy: CGFloat) {
-        model.touch(.began(thumb, .stick, stickCentre))
-        model.touch(.moved(thumb, CGPoint(x: stickCentre.x + dx, y: stickCentre.y + dy)))
+        model.touch(.began(touch: thumb, on: .stick, at: stickCentre))
+        model.touch(.moved(touch: thumb, to: CGPoint(x: stickCentre.x + dx, y: stickCentre.y + dy)))
     }
 
     func testADragOnTheStickMovesTheMarkerUntilTheThumbLifts() {
@@ -144,7 +144,7 @@ final class GameModelTests: XCTestCase {
         let moved = Point(x: start.x - 1, y: start.y)
         XCTAssertEqual(model.session.game.marker.pos, moved)
 
-        model.touch(.ended(thumb))
+        model.touch(.ended(touch: thumb))
         frames(2 * Tuning.markerStepTicks)
         XCTAssertEqual(model.session.game.marker.pos, moved)
     }
@@ -161,7 +161,7 @@ final class GameModelTests: XCTestCase {
     func testTheSlowButtonHeldDrawsASlowStix() {
         start()
 
-        model.touch(.began(slowThumb, .slow, slowPoint))
+        model.touch(.began(touch: slowThumb, on: .slow, at: slowPoint))
         steer(0, -drag)
         frames(Tuning.slowStepTicks)
 
@@ -170,7 +170,7 @@ final class GameModelTests: XCTestCase {
 
     func testTheSceneShowsTheTouchControls() {
         steer(-drag, 0)
-        model.touch(.began(slowThumb, .slow, slowPoint))
+        model.touch(.began(touch: slowThumb, on: .slow, at: slowPoint))
 
         let scene = model.scene
 
@@ -182,7 +182,7 @@ final class GameModelTests: XCTestCase {
     func testSuspendingReleasesTheTouches() {
         start()
         steer(-drag, 0)
-        model.touch(.began(slowThumb, .slow, slowPoint))
+        model.touch(.began(touch: slowThumb, on: .slow, at: slowPoint))
 
         model.suspend()
 

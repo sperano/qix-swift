@@ -5,10 +5,10 @@ import UIKit
 /// A touch on a control's zone, by the identity of its `UITouch`, at a point in the playfield's
 /// coordinates.
 enum TouchEvent: Equatable {
-    case began(ObjectIdentifier, TouchControl, CGPoint)
-    case moved(ObjectIdentifier, CGPoint)
+    case began(touch: ObjectIdentifier, on: TouchControl, at: CGPoint)
+    case moved(touch: ObjectIdentifier, to: CGPoint)
     /// The touch lifted or was cancelled.
-    case ended(ObjectIdentifier)
+    case ended(touch: ObjectIdentifier)
 }
 
 /// The zone of a touch control: a clear view over `zone` that hands each of its touches to
@@ -72,13 +72,13 @@ final class TouchZoneView: UIView {
 
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         for touch in touches {
-            onTouch(.began(ObjectIdentifier(touch), control, position(touch)))
+            onTouch(.began(touch: ObjectIdentifier(touch), on: control, at: position(touch)))
         }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with _: UIEvent?) {
         for touch in touches {
-            onTouch(.moved(ObjectIdentifier(touch), position(touch)))
+            onTouch(.moved(touch: ObjectIdentifier(touch), to: position(touch)))
         }
     }
 
@@ -92,7 +92,7 @@ final class TouchZoneView: UIView {
 
     private func end(_ touches: Set<UITouch>) {
         for touch in touches {
-            onTouch(.ended(ObjectIdentifier(touch)))
+            onTouch(.ended(touch: ObjectIdentifier(touch)))
         }
     }
 

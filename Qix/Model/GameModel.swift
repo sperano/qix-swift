@@ -72,8 +72,8 @@ final class GameModel {
     /// be sampled on the next frame.
     func touch(_ event: TouchEvent) {
         switch event {
-        case let .began(touch, control, point): touches.began(touch, on: control, at: Vec2(point))
-        case let .moved(touch, point): touches.moved(touch, to: Vec2(point))
+        case let .began(touch, on: control, at: point): touches.began(touch, on: control, at: Vec2(point))
+        case let .moved(touch, to: point): touches.moved(touch, to: Vec2(point))
         case let .ended(touch): touches.ended(touch)
         }
         loop.controls.setTouch(touches.held)
