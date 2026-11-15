@@ -14,10 +14,11 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   types. Its tests are in `QixKit/Tests/QixKitTests`. `FrontEnd/` holds what
   the app takes from qix-rs's front end (`crates/qix`) that needs no Apple
   framework, so it is tested on Linux too: the fixed timestep, the input latch,
-  the keyboard, game pad and touch controls (the floating stick's maths and
-  each touch's control), the game loop, the palette, the HUD's and the
-  screens' text, and what the board draws (border, stix runs, trail colours,
-  the claimed cells' pixels).
+  the keyboard and game pad controls, the game loop, the palette, the HUD's
+  and the screens' text, and what the board draws (border, stix runs, trail
+  colours, the claimed cells' pixels). It also holds the touch controls (the
+  floating stick's maths and each touch's control), which are the iPhone front
+  end's own: qix-rs has none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
   the entry point, `Model/` the `@MainActor @Observable` `GameModel` (the only

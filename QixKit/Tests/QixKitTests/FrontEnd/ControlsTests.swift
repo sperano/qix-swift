@@ -171,6 +171,30 @@ final class ControlsTests: XCTestCase {
         XCTAssertFalse(controls.sample().confirm)
     }
 
+    func testATouchOnAControlThePadHoldsIsNoPress() {
+        var controls = Controls()
+        controls.setPad([.confirm])
+        _ = controls.sample()
+
+        controls.setTouch([.confirm])
+
+        XCTAssertFalse(controls.sample().confirm)
+        controls.setTouch([])
+        XCTAssertEqual(controls.held, [.confirm])
+    }
+
+    func testThePadOnAControlATouchHoldsIsNoPress() {
+        var controls = Controls()
+        controls.setTouch([.confirm])
+        _ = controls.sample()
+
+        controls.setPad([.confirm])
+
+        XCTAssertFalse(controls.sample().confirm)
+        controls.setPad([])
+        XCTAssertEqual(controls.held, [.confirm])
+    }
+
     func testReleasingTheKeysLeavesTheTouchControlsHeld() {
         var controls = keysDown([.up])
         controls.setTouch([.slow])

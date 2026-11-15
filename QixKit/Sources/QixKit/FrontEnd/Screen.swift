@@ -11,7 +11,7 @@ public struct Screen: Hashable, Sendable {
     /// Converts a fraction to a percentage.
     static let percent: Float = 100
 
-    /// What the confirm press is named on screen: a tap anywhere, or the key.
+    /// What the confirm press is named on screen: a tap anywhere but on a touch control, or the key.
     static let confirmName = "Tap or press Return"
 
     /// What the pause press is named on screen: the key, or the HUD's button.
