@@ -480,7 +480,7 @@
 		527ABE8DC7ECF56828BEAB8E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = SGHB6DGT2T;
 				INFOPLIST_FILE = Qix/Resources/Info.plist;
@@ -497,7 +497,7 @@
 		6DA83243F19BCA43030263F3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = SGHB6DGT2T;
 				INFOPLIST_FILE = Qix/Resources/Info.plist;

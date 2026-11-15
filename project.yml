@@ -53,6 +53,8 @@ targets:
         DEVELOPMENT_TEAM: SGHB6DGT2T
         # iPhone only.
         TARGETED_DEVICE_FAMILY: "1"
+        # No icon yet: xcodegen names an AppIcon set the asset catalog does not have.
+        ASSETCATALOG_COMPILER_APPICON_NAME: ""
   QixTests:
     type: bundle.unit-test
     platform: iOS
