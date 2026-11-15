@@ -19,9 +19,11 @@ test_file=/work/QixKit/Tests/QixKitTests/BoardSizeTests.swift
 lines=10
 at_minimum=9
 below_minimum=8
-# Two sources whose lines total 100/110 (90.91 %) though their mean percentage is 50 %.
+# Two sources whose lines total 105/110 (95.45 %) though their mean percentage is 75 %: only a sum
+# of both files' covered lines and of their counts gives that total.
 large_lines=100
 small_lines=10
+small_covered=5
 
 # export_json <path> <file>:<covered>[:<count>] ...: writes an llvm-cov export holding those files,
 # each of `lines` lines unless <count> says otherwise.
@@ -64,8 +66,8 @@ expect "at the minimum, total" 0 "| **Total** | **9/10** | **90.00%** |" "$work/
 export_json "$work/below.json" "$source_file:$below_minimum"
 expect "below the minimum" 1 "**Below the 90% minimum.**" "$work/below.json"
 
-export_json "$work/sources.json" "$source_file:$large_lines:$large_lines" "$other_source_file:0:$small_lines"
-expect "several sources" 0 "| **Total** | **100/110** | **90.91%** |" "$work/sources.json"
+export_json "$work/sources.json" "$source_file:$large_lines:$large_lines" "$other_source_file:$small_covered:$small_lines"
+expect "several sources" 0 "| **Total** | **105/110** | **95.45%** |" "$work/sources.json"
 
 export_json "$work/tests.json" "$source_file:$at_minimum" "$test_file:0"
 expect "tests do not count" 0 "| **Total** | **9/10** | **90.00%** |" "$work/tests.json"
