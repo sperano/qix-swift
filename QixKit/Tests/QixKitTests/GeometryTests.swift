@@ -81,6 +81,7 @@ final class GeometryTests: XCTestCase {
     /// Each end of either segment lying on the other, one case per end.
     func testASegmentWithAnyEndOnTheOtherIntersects() {
         XCTAssert(segmentsIntersect(v(1, 2), v(1, 4), v(0, 2), v(3, 2)))
+        XCTAssert(segmentsIntersect(v(1, 4), v(1, 2), v(0, 2), v(3, 2)))
         XCTAssert(segmentsIntersect(v(0, 2), v(3, 2), v(1, 2), v(1, 4)))
         XCTAssert(segmentsIntersect(v(0, 2), v(3, 2), v(1, 4), v(1, 2)))
     }

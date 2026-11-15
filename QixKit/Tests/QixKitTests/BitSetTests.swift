@@ -60,7 +60,8 @@ final class BitSetTests: XCTestCase {
     }
 }
 
-/// Rust's `#[should_panic]` tests, as exit tests (TrapExpectation.swift).
+/// Rust's `#[should_panic]` test and the Swift-only negative index and capacity traps, as exit tests
+/// (TrapExpectation.swift).
 struct BitSetTrapTests {
     @Test func insertingPastTheCapacityTraps() async {
         let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
@@ -70,6 +71,7 @@ struct BitSetTrapTests {
         expectMessage(result, "past the capacity")
     }
 
+    /// Swift's `Int` index can be negative, unlike Rust's `usize`.
     @Test func insertingANegativeIndexTraps() async {
         let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
             var set = BitSet(capacity: 130)
