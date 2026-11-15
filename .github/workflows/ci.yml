@@ -43,6 +43,9 @@ jobs:
       - name: Tests and coverage
         # Fails when the package's own tests cover less than the minimum in Scripts/coverage.sh.
         run: make coverage
+      - name: Coverage gate tests
+        # The gate's failure path, which a well-covered package never takes.
+        run: make test-scripts
 
   app:
     name: App build, unit, snapshot and UI tests

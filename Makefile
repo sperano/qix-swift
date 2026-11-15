@@ -1,13 +1,18 @@
 # The checks, as CI runs them: lint and the package tests (brew install swiftlint swiftformat), and
 # the app's build, unit, snapshot and UI tests on the simulator. The app targets need Xcode; they
 # are named targets so CI and mactest run the same steps.
-.PHONY: lint format coverage check-project build unit snapshot record-snapshots ui
+.PHONY: lint format coverage test-scripts check-project build unit snapshot record-snapshots ui
 
-# Recipes use pipefail so a test failure is not lost in the pipe to the formatter.
+# Every recipe line runs with pipefail, so a test failure is not lost in the pipe to the formatter.
 SHELL := /bin/bash
+.SHELLFLAGS := -o pipefail -c
+
+# What xcodegen writes from project.yml, committed: the project and the app's Info.plist.
+GENERATED = Qix.xcodeproj Qix/Resources/Info.plist
 
 # The destinations, overridable from the environment or the command line (CI passes its iPhone by
-# id). The snapshot images are recorded on SNAPSHOT_SIMULATOR; the snapshot tests skip on any other.
+# id). The snapshot images are recorded on SNAPSHOT_SIMULATOR; the snapshot tests skip on any other
+# device (they check its name, not its iOS version).
 SIMULATOR ?= platform=iOS Simulator,name=iPhone 17
 SNAPSHOT_SIMULATOR ?= platform=iOS Simulator,name=iPhone 17,OS=27.2
 
@@ -26,7 +31,7 @@ XCODEBUILD = xcodebuild -project Qix.xcodeproj -scheme Qix -derivedDataPath $(DE
 	CODE_SIGNING_ALLOWED=NO
 # $(call xcodebuild,<action>,<result bundle name>,<destination>,<options>): runs xcodebuild with a
 # fresh result bundle at $(RESULTS)/<name>.xcresult (xcodebuild refuses to overwrite one).
-xcodebuild = mkdir -p $(RESULTS) && rm -rf $(RESULTS)/$(2).xcresult && set -o pipefail && \
+xcodebuild = mkdir -p $(RESULTS) && rm -rf $(RESULTS)/$(2).xcresult && \
 	$(XCODEBUILD) $(1) -destination '$(3)' $(4) -resultBundlePath $(RESULTS)/$(2).xcresult | $(XCBEAUTIFY)
 
 # Checks only; fails on any finding. Both tools read their configuration from the repository root.
@@ -44,12 +49,17 @@ coverage:
 	cd QixKit && swift test --parallel --enable-code-coverage
 	Scripts/coverage.sh "$$(cd QixKit && swift test --show-codecov-path)"
 
-# Fails when the committed Qix.xcodeproj is not what xcodegen generates from project.yml.
+# Tests of the coverage gate itself (Scripts/coverage_test.sh), on fixture coverage exports.
+test-scripts:
+	Scripts/coverage_test.sh
+
+# Fails when the committed Qix.xcodeproj or app Info.plist is not what xcodegen generates from
+# project.yml.
 check-project:
 	xcodegen generate
-	@changes=$$(git status --porcelain --untracked-files=all -- Qix.xcodeproj); \
+	@changes=$$(git status --porcelain --untracked-files=all -- $(GENERATED)); \
 	if [ -n "$$changes" ]; then \
-		echo "Qix.xcodeproj is out of date; run xcodegen generate and commit:"; \
+		echo "Out of date; run xcodegen generate and commit:"; \
 		echo "$$changes"; \
 		exit 1; \
 	fi

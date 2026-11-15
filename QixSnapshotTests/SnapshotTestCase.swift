@@ -5,8 +5,8 @@ import XCTest
 
 /// Renders a view as the snapshot simulator shows it and compares the image with the one recorded
 /// in `__Snapshots__` next to the test file. Re-record after a deliberate change to a view
-/// (`make record-snapshots`). The references are recorded on `deviceName`; on any other simulator
-/// the tests skip, since the screen size would not match.
+/// (`make record-snapshots`). The references are recorded on `deviceName`; on any other device the
+/// tests skip, since the screen size would not match. The iOS version is not checked.
 @MainActor
 class SnapshotTestCase: XCTestCase {
     /// The simulator the references are recorded on, and the one CI runs these tests on.

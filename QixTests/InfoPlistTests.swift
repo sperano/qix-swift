@@ -1,9 +1,14 @@
+import UIKit
 import XCTest
 
 /// The app's Info.plist as built: the device, orientation and screen choices `project.yml` makes.
 final class InfoPlistTests: XCTestCase {
     /// `UIDeviceFamily`'s value for iPhone, which `TARGETED_DEVICE_FAMILY: 1` writes.
     private static let iPhoneFamily = 1
+    /// The colour set the launch screen names, in the app's asset catalog.
+    private static let backdropName = "Backdrop"
+    /// Backdrop.colorset's sRGB components: opaque black.
+    private static let backdropComponents: [CGFloat] = [0, 0, 0, 1]
 
     private func value(_ key: String) -> Any? {
         Bundle.main.object(forInfoDictionaryKey: key)
@@ -30,6 +35,16 @@ final class InfoPlistTests: XCTestCase {
 
     func testTheLaunchScreenIsTheBackdrop() {
         let launchScreen = value("UILaunchScreen") as? [String: Any]
-        XCTAssertEqual(launchScreen?["UIColorName"] as? String, "Backdrop")
+        XCTAssertEqual(launchScreen?["UIColorName"] as? String, Self.backdropName)
+    }
+
+    func testTheBackdropIsOpaqueBlack() throws {
+        let colour = try XCTUnwrap(
+            UIColor(named: Self.backdropName, in: .main, compatibleWith: nil),
+            "the asset catalog has no \(Self.backdropName) colour"
+        )
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        XCTAssertTrue(colour.getRed(&red, green: &green, blue: &blue, alpha: &alpha))
+        XCTAssertEqual([red, green, blue, alpha], Self.backdropComponents)
     }
 }

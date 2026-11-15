@@ -24,8 +24,9 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 - `project.yml`: the XcodeGen definition. The generated `Qix.xcodeproj` is
   committed and CI fails when it differs from what `xcodegen generate` writes.
   Edit `project.yml`, regenerate, commit both; never hand-edit the project.
-- `Scripts/`: `coverage.sh` (the package's coverage gate), `select-xcode.sh`
-  and `ci-simulators.sh` (CI's Xcode and simulator).
+- `Scripts/`: `coverage.sh` (the package's coverage gate, tested by
+  `coverage_test.sh`), `select-xcode.sh` and `ci-simulators.sh` (CI's Xcode
+  and simulator).
 
 ## Commands
 
@@ -34,7 +35,8 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 | `make lint` | SwiftFormat in check mode, then SwiftLint `--strict` | Linux, macOS |
 | `make format` | SwiftFormat rewrites, then SwiftLint reports | Linux, macOS |
 | `make coverage` | `swift test` in `QixKit` with coverage; fails below 90 % of `QixKit/Sources` | Linux, macOS |
-| `make check-project` | `xcodegen generate`, fails when `Qix.xcodeproj` changed | Linux, macOS |
+| `make test-scripts` | `Scripts/coverage_test.sh`: the coverage gate on fixture exports | Linux, macOS |
+| `make check-project` | `xcodegen generate`, fails when `Qix.xcodeproj` or `Qix/Resources/Info.plist` changed | Linux, macOS |
 | `make build` | builds the app and every test bundle | macOS (Xcode) |
 | `make unit` | `QixTests` on `SIMULATOR` | macOS (Xcode) |
 | `make snapshot` | `QixSnapshotTests` on `SNAPSHOT_SIMULATOR` | macOS (Xcode) |
@@ -44,8 +46,8 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 CI (`.github/workflows/ci.yml`) runs the same targets: a lint job, a Linux
 job for the package, and a macOS job for the project check, the package on
 macOS and the app's build, unit, snapshot and UI tests. Before a pull request,
-run `make lint`, `make coverage` and `make check-project`; the app targets
-need Xcode.
+run `make lint`, `make coverage`, `make test-scripts` and `make check-project`;
+the app targets need Xcode.
 
 Snapshots are recorded on the iPhone 17 simulator, iOS 27.2 (Xcode 27.2), and
 skip on any other device. The app is landscape only, so the host window is a
