@@ -8,19 +8,43 @@
 
 /* Begin PBXBuildFile section */
 		053D4B7BFDC2A945B06937D7 /* LaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */; };
-		20D1CE5C1FD38DA7AF98C7A9 /* PlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AFC2188EF323FF6267C5F0E /* PlaceholderView.swift */; };
+		1144B39393E6E8B0AD422B78 /* HardwareKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9EB7EB28F077758083BEECC /* HardwareKeyboard.swift */; };
+		12217AE652F8C4F8F9F8250D /* DisplayLinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8587D2B62917CD9A6E872F0E /* DisplayLinkTests.swift */; };
+		14A1342B4E34C18764214E17 /* HudPainter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9FAB3DA5EAC054AAEF2010 /* HudPainter.swift */; };
+		17F8E6AE9182448EF756899C /* PlayfieldScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74A3F9316E2DCA8BA005D6F0 /* PlayfieldScene.swift */; };
+		18F46151E019526CDABD0265 /* GamePadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5D3B04BFAB9A390F6C97008 /* GamePadTests.swift */; };
+		216D3A29667A1D04B078B7F7 /* PaletteColours.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ADA0E2E22B15D97CC13F1A1 /* PaletteColours.swift */; };
 		23C54EDF315144F95191B66F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C1D64DE8964BC14FEF29F78A /* Assets.xcassets */; };
 		24A6227DE16B5E076F76C2E3 /* QixKit in Frameworks */ = {isa = PBXBuildFile; productRef = B11AB7B5A3E510742772DE15 /* QixKit */; };
-		341359190743B31E67A57A8E /* Palette.swift in Sources */ = {isa = PBXBuildFile; fileRef = 104A412318E9D33508849B48 /* Palette.swift */; };
-		5C375D070C0BE3CF8F32F0CC /* PlaceholderViewSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121862227C615E62042F18A0 /* PlaceholderViewSnapshotTests.swift */; };
+		4B19AECB61B553EAD349A6B7 /* ScreenLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76944C9178B1FA6775676351 /* ScreenLayout.swift */; };
+		50502A3C14EC2FC9E26B9014 /* PlayfieldFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6975B52A1F1A875D1EE08195 /* PlayfieldFixtures.swift */; };
+		556E41A9FB85D20776FB01AB /* ScreenLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */; };
+		5A2BD3B15D881E00B7B347EA /* PauseButtonRoleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAFF56FDC5ACF451D908C4F /* PauseButtonRoleTests.swift */; };
+		672B43B6D255FA896B775EDF /* PauseButtonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E42614548EFB065EA4ECF012 /* PauseButtonTests.swift */; };
 		70DBC6CECE59382DA32EAF0E /* PlayfieldLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3830FD38DCA5A086873C474F /* PlayfieldLayoutTests.swift */; };
 		7ABA51B9E35714D6FE7D4A3F /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = D696AA78DDB9D25FBCE9E507 /* SnapshotTesting */; };
 		84856846E8C9FB5A9D12765C /* QixKit in Frameworks */ = {isa = PBXBuildFile; productRef = 76FFF449E2070748B8D9A33A /* QixKit */; };
+		8775ABE97A93EC54B2C4E657 /* GamePad.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19108BF37F7465FDDB84E78 /* GamePad.swift */; };
+		8AE6C69F50D89FE0606C984D /* HudLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF11EA286663BF55FED6CA7B /* HudLayoutTests.swift */; };
+		93820036A2AB22D130243315 /* ScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8806DB991C8CC65875BB4F01 /* ScreenView.swift */; };
+		97F04CD13E962F4C4E8B711D /* GameModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 395803128ED1BB6C1A938765 /* GameModelTests.swift */; };
+		9D955E6290F5345671560EE9 /* KeyMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8378182DB590136FEEF48D42 /* KeyMapTests.swift */; };
+		9F5A93229BBB9730CD88D5D1 /* BoardPainter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904C99103F9B07ECCA5439C /* BoardPainter.swift */; };
 		9FFF71432D4684D71F4E67C0 /* QixKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4A83BE8AAF7589ED69C1426 /* QixKit */; };
+		A2116F5024360C2BC4C50BC3 /* DisplayLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94BFCA3ED2C644899FCC7AE /* DisplayLink.swift */; };
+		AD460C934EA3CF6A5755692D /* PlayfieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA8E5B4E700944791713BEA /* PlayfieldView.swift */; };
 		B037021ECD2AE7C46DC37B78 /* SnapshotTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87184851F7C012D05670177B /* SnapshotTestCase.swift */; };
+		B0654D729750AE57D95B9831 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */; };
+		B1613A67DE901E543F0E277C /* PauseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FAC73F1F9EF5F153C3F2FF /* PauseButton.swift */; };
 		B210378D7567A37F72997811 /* InfoPlistTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748EF8D16B797F67B5E74167 /* InfoPlistTests.swift */; };
+		BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970969D3E728AF18724145CE /* HudLayout.swift */; };
 		C0CD96F79D61CE30B2558C9F /* QixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F82F7C3BFD2F9B144A417 /* QixApp.swift */; };
+		C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF306261B821BB6452B7994 /* GameView.swift */; };
+		DF018C588125DD90A3CF3B2A /* BoardImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4ED1EC58F0FC6FAAEC82AF /* BoardImageTests.swift */; };
+		E04C7DEB2A0E3A9978E2290E /* PlayfieldSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D8772754A7D646D94684732 /* PlayfieldSnapshotTests.swift */; };
 		EA1366ED55A171D84B5477D0 /* PlayfieldLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7978FF1DF1EBF0E296B9A6A /* PlayfieldLayout.swift */; };
+		F1B993A7BE6FB499087CB279 /* GameUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DEA0C82F7BA63EBE779BCEA /* GameUITests.swift */; };
+		FDE9B9DE24B4402C88268CF6 /* KeyMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C3306FDE8FA024B57CD48BD /* KeyMap.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,22 +72,46 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		104A412318E9D33508849B48 /* Palette.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Palette.swift; sourceTree = "<group>"; };
-		121862227C615E62042F18A0 /* PlaceholderViewSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderViewSnapshotTests.swift; sourceTree = "<group>"; };
 		126C34514E33A5F4F618389C /* QixSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QixSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		160DB06177DA2CD5EE7DC894 /* QixUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QixUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1ADA0E2E22B15D97CC13F1A1 /* PaletteColours.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteColours.swift; sourceTree = "<group>"; };
+		1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		2421F3A3636D246F9AA07658 /* QixKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QixKit; path = QixKit; sourceTree = SOURCE_ROOT; };
 		26EEF4C324013F6BE2157A6D /* Qix.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Qix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3830FD38DCA5A086873C474F /* PlayfieldLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldLayoutTests.swift; sourceTree = "<group>"; };
+		395803128ED1BB6C1A938765 /* GameModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelTests.swift; sourceTree = "<group>"; };
 		540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchUITests.swift; sourceTree = "<group>"; };
 		620A748B7CFD49003D533469 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6975B52A1F1A875D1EE08195 /* PlayfieldFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldFixtures.swift; sourceTree = "<group>"; };
+		6A9FAB3DA5EAC054AAEF2010 /* HudPainter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudPainter.swift; sourceTree = "<group>"; };
+		6D8772754A7D646D94684732 /* PlayfieldSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldSnapshotTests.swift; sourceTree = "<group>"; };
 		748EF8D16B797F67B5E74167 /* InfoPlistTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoPlistTests.swift; sourceTree = "<group>"; };
-		7AFC2188EF323FF6267C5F0E /* PlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderView.swift; sourceTree = "<group>"; };
+		74A3F9316E2DCA8BA005D6F0 /* PlayfieldScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldScene.swift; sourceTree = "<group>"; };
+		76944C9178B1FA6775676351 /* ScreenLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenLayout.swift; sourceTree = "<group>"; };
+		7C3306FDE8FA024B57CD48BD /* KeyMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMap.swift; sourceTree = "<group>"; };
+		7DEA0C82F7BA63EBE779BCEA /* GameUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameUITests.swift; sourceTree = "<group>"; };
+		8378182DB590136FEEF48D42 /* KeyMapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyMapTests.swift; sourceTree = "<group>"; };
+		8587D2B62917CD9A6E872F0E /* DisplayLinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayLinkTests.swift; sourceTree = "<group>"; };
 		87184851F7C012D05670177B /* SnapshotTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotTestCase.swift; sourceTree = "<group>"; };
+		8806DB991C8CC65875BB4F01 /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
+		970969D3E728AF18724145CE /* HudLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudLayout.swift; sourceTree = "<group>"; };
+		9AAFF56FDC5ACF451D908C4F /* PauseButtonRoleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseButtonRoleTests.swift; sourceTree = "<group>"; };
+		AEA8E5B4E700944791713BEA /* PlayfieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldView.swift; sourceTree = "<group>"; };
 		C02F82F7C3BFD2F9B144A417 /* QixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QixApp.swift; sourceTree = "<group>"; };
 		C1D64DE8964BC14FEF29F78A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C2FAC73F1F9EF5F153C3F2FF /* PauseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseButton.swift; sourceTree = "<group>"; };
+		C9EB7EB28F077758083BEECC /* HardwareKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareKeyboard.swift; sourceTree = "<group>"; };
+		CB4ED1EC58F0FC6FAAEC82AF /* BoardImageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardImageTests.swift; sourceTree = "<group>"; };
 		CB7A46114F5A14669857A51B /* QixTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QixTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF11EA286663BF55FED6CA7B /* HudLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudLayoutTests.swift; sourceTree = "<group>"; };
+		E42614548EFB065EA4ECF012 /* PauseButtonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PauseButtonTests.swift; sourceTree = "<group>"; };
+		E94BFCA3ED2C644899FCC7AE /* DisplayLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayLink.swift; sourceTree = "<group>"; };
+		EFF306261B821BB6452B7994 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
+		F19108BF37F7465FDDB84E78 /* GamePad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePad.swift; sourceTree = "<group>"; };
+		F5D3B04BFAB9A390F6C97008 /* GamePadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePadTests.swift; sourceTree = "<group>"; };
+		F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenLayoutTests.swift; sourceTree = "<group>"; };
 		F7978FF1DF1EBF0E296B9A6A /* PlayfieldLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldLayout.swift; sourceTree = "<group>"; };
+		F904C99103F9B07ECCA5439C /* BoardPainter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardPainter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,8 +146,17 @@
 		0320B132461B0471E111C63E /* QixTests */ = {
 			isa = PBXGroup;
 			children = (
+				CB4ED1EC58F0FC6FAAEC82AF /* BoardImageTests.swift */,
+				8587D2B62917CD9A6E872F0E /* DisplayLinkTests.swift */,
+				395803128ED1BB6C1A938765 /* GameModelTests.swift */,
+				F5D3B04BFAB9A390F6C97008 /* GamePadTests.swift */,
+				DF11EA286663BF55FED6CA7B /* HudLayoutTests.swift */,
 				748EF8D16B797F67B5E74167 /* InfoPlistTests.swift */,
+				8378182DB590136FEEF48D42 /* KeyMapTests.swift */,
+				9AAFF56FDC5ACF451D908C4F /* PauseButtonRoleTests.swift */,
+				E42614548EFB065EA4ECF012 /* PauseButtonTests.swift */,
 				3830FD38DCA5A086873C474F /* PlayfieldLayoutTests.swift */,
+				F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */,
 			);
 			path = QixTests;
 			sourceTree = "<group>";
@@ -107,7 +164,8 @@
 		0FEEDFAAA55F00CDE7348AA4 /* QixSnapshotTests */ = {
 			isa = PBXGroup;
 			children = (
-				121862227C615E62042F18A0 /* PlaceholderViewSnapshotTests.swift */,
+				6975B52A1F1A875D1EE08195 /* PlayfieldFixtures.swift */,
+				6D8772754A7D646D94684732 /* PlayfieldSnapshotTests.swift */,
 				87184851F7C012D05670177B /* SnapshotTestCase.swift */,
 			);
 			path = QixSnapshotTests;
@@ -130,10 +188,20 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		5904F3643B9F3DA887C2A513 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		667250C0935413FF003F7499 /* Qix */ = {
 			isa = PBXGroup;
 			children = (
 				1D01F90AE81C56CA8C400695 /* App */,
+				D23E2D3C78CF1A295D7C7421 /* Input */,
+				5904F3643B9F3DA887C2A513 /* Model */,
 				2FEA00345B50C1FE188A7F0D /* Resources */,
 				C6B7E8B3ED0F368D801CD00D /* Views */,
 			);
@@ -163,9 +231,17 @@
 		C6B7E8B3ED0F368D801CD00D /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				104A412318E9D33508849B48 /* Palette.swift */,
-				7AFC2188EF323FF6267C5F0E /* PlaceholderView.swift */,
+				F904C99103F9B07ECCA5439C /* BoardPainter.swift */,
+				EFF306261B821BB6452B7994 /* GameView.swift */,
+				970969D3E728AF18724145CE /* HudLayout.swift */,
+				6A9FAB3DA5EAC054AAEF2010 /* HudPainter.swift */,
+				1ADA0E2E22B15D97CC13F1A1 /* PaletteColours.swift */,
+				C2FAC73F1F9EF5F153C3F2FF /* PauseButton.swift */,
 				F7978FF1DF1EBF0E296B9A6A /* PlayfieldLayout.swift */,
+				74A3F9316E2DCA8BA005D6F0 /* PlayfieldScene.swift */,
+				AEA8E5B4E700944791713BEA /* PlayfieldView.swift */,
+				76944C9178B1FA6775676351 /* ScreenLayout.swift */,
+				8806DB991C8CC65875BB4F01 /* ScreenView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -173,9 +249,21 @@
 		C9D87CDB477DEC652204B30B /* QixUITests */ = {
 			isa = PBXGroup;
 			children = (
+				7DEA0C82F7BA63EBE779BCEA /* GameUITests.swift */,
 				540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */,
 			);
 			path = QixUITests;
+			sourceTree = "<group>";
+		};
+		D23E2D3C78CF1A295D7C7421 /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				E94BFCA3ED2C644899FCC7AE /* DisplayLink.swift */,
+				F19108BF37F7465FDDB84E78 /* GamePad.swift */,
+				C9EB7EB28F077758083BEECC /* HardwareKeyboard.swift */,
+				7C3306FDE8FA024B57CD48BD /* KeyMap.swift */,
+			);
+			path = Input;
 			sourceTree = "<group>";
 		};
 		EA2ED8FCD594CFB43F59BD0F /* Products */ = {
@@ -338,10 +426,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				341359190743B31E67A57A8E /* Palette.swift in Sources */,
-				20D1CE5C1FD38DA7AF98C7A9 /* PlaceholderView.swift in Sources */,
+				9F5A93229BBB9730CD88D5D1 /* BoardPainter.swift in Sources */,
+				A2116F5024360C2BC4C50BC3 /* DisplayLink.swift in Sources */,
+				B0654D729750AE57D95B9831 /* GameModel.swift in Sources */,
+				8775ABE97A93EC54B2C4E657 /* GamePad.swift in Sources */,
+				C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */,
+				1144B39393E6E8B0AD422B78 /* HardwareKeyboard.swift in Sources */,
+				BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */,
+				14A1342B4E34C18764214E17 /* HudPainter.swift in Sources */,
+				FDE9B9DE24B4402C88268CF6 /* KeyMap.swift in Sources */,
+				216D3A29667A1D04B078B7F7 /* PaletteColours.swift in Sources */,
+				B1613A67DE901E543F0E277C /* PauseButton.swift in Sources */,
 				EA1366ED55A171D84B5477D0 /* PlayfieldLayout.swift in Sources */,
+				17F8E6AE9182448EF756899C /* PlayfieldScene.swift in Sources */,
+				AD460C934EA3CF6A5755692D /* PlayfieldView.swift in Sources */,
 				C0CD96F79D61CE30B2558C9F /* QixApp.swift in Sources */,
+				4B19AECB61B553EAD349A6B7 /* ScreenLayout.swift in Sources */,
+				93820036A2AB22D130243315 /* ScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,6 +450,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F1B993A7BE6FB499087CB279 /* GameUITests.swift in Sources */,
 				053D4B7BFDC2A945B06937D7 /* LaunchUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -357,7 +459,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5C375D070C0BE3CF8F32F0CC /* PlaceholderViewSnapshotTests.swift in Sources */,
+				50502A3C14EC2FC9E26B9014 /* PlayfieldFixtures.swift in Sources */,
+				E04C7DEB2A0E3A9978E2290E /* PlayfieldSnapshotTests.swift in Sources */,
 				B037021ECD2AE7C46DC37B78 /* SnapshotTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -366,8 +469,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF018C588125DD90A3CF3B2A /* BoardImageTests.swift in Sources */,
+				12217AE652F8C4F8F9F8250D /* DisplayLinkTests.swift in Sources */,
+				97F04CD13E962F4C4E8B711D /* GameModelTests.swift in Sources */,
+				18F46151E019526CDABD0265 /* GamePadTests.swift in Sources */,
+				8AE6C69F50D89FE0606C984D /* HudLayoutTests.swift in Sources */,
 				B210378D7567A37F72997811 /* InfoPlistTests.swift in Sources */,
+				9D955E6290F5345671560EE9 /* KeyMapTests.swift in Sources */,
+				5A2BD3B15D881E00B7B347EA /* PauseButtonRoleTests.swift in Sources */,
+				672B43B6D255FA896B775EDF /* PauseButtonTests.swift in Sources */,
 				70DBC6CECE59382DA32EAF0E /* PlayfieldLayoutTests.swift in Sources */,
+				556E41A9FB85D20776FB01AB /* ScreenLayoutTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

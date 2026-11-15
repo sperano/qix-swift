@@ -11,15 +11,25 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 - `QixKit/`: Swift package, the whole game. Swift 6 language mode, iOS 17 and
   macOS 14, Foundation only (no UIKit, SwiftUI or other Apple-only framework),
   so `swift test` runs on Linux and macOS. Public types are `Sendable` value
-  types. Its tests are in `QixKit/Tests/QixKitTests`.
+  types. Its tests are in `QixKit/Tests/QixKitTests`. `FrontEnd/` holds what
+  the app takes from qix-rs's front end (`crates/qix`) that needs no Apple
+  framework, so it is tested on Linux too: the fixed timestep, the input latch,
+  the keyboard and game pad controls, the game loop, the palette, the HUD's
+  and the screens' text, and what the board draws (border, stix runs, trail
+  colours, the claimed cells' pixels).
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
-  the entry point, `Views/` the views and their layout maths, `Resources/` the
-  asset catalog and the Info.plist xcodegen writes.
-- `QixTests/`: the app's unit tests (layout maths, Info.plist choices).
+  the entry point, `Model/` the `@MainActor @Observable` `GameModel` (the only
+  thing views read), `Input/` the display link, the hardware keyboard and the
+  game pad, `Views/` the views, their painters (SwiftUI `Canvas`) and their
+  layout maths, `Resources/` the asset catalog and the Info.plist xcodegen
+  writes.
+- `QixTests/`: the app's unit tests (the model, layout maths, key map,
+  Info.plist choices).
 - `QixSnapshotTests/`: image comparisons with swift-snapshot-testing (pinned
   in `project.yml`); the references are in `__Snapshots__/<TestFile>/`, which
-  `project.yml` excludes from the target's sources.
+  `project.yml` excludes from the target's sources. `PlayfieldFixtures.swift`
+  plays the sessions they draw from fixed seeds and scripts, with QixKit only.
 - `QixUITests/`: XCUITests of the launched app.
 - `project.yml`: the XcodeGen definition. The generated `Qix.xcodeproj` and
   `Qix/Resources/Info.plist` are committed and CI fails when either differs
@@ -52,7 +62,9 @@ the app targets need Xcode.
 
 Snapshots are recorded on the iPhone 17 simulator, iOS 27.2 (Xcode 27.2), and
 skip on any other device. The app is landscape only, so the host window is a
-landscape one. When a CI run finds no reference, swift-snapshot-testing
+landscape one; the playfield tests also draw the iPhone SE's 667 × 375
+landscape screen inside it (`SnapshotTestCase.smallPhone`, references named
+`small`). When a CI run finds no reference, swift-snapshot-testing
 records one and fails; the run's `snapshot-failures` artifact holds it. Never
 re-record a snapshot to make it pass unless the change meant to alter that
 view.
@@ -94,9 +106,10 @@ view.
     libm by name (`sinf`, `cosf`, `hypotf`), the functions Rust's `f32` uses.
   - Same tuning values and the same SplitMix64 `Rng`, so a seed plays the same
     game as in qix-rs.
-  - `BoardSize` is a placeholder the app reads its aspect ratio from; its
-    `standard` is `Tuning.boardW` by `Tuning.boardH`. The app shell replaces
-    it with `Tuning` and removes it.
+  - `FrontEnd/` follows the same rules for the `crates/qix` modules it ports
+    (`timestep.rs` → `Timestep.swift`); a file whose name a core module
+    already has takes its type's name (`InputLatch.swift`), since one target
+    cannot hold two files of the same name.
 - Engine first: a rule change goes in `QixKit` with its test, then the UI.
 - Named constants for every size, ratio, count, colour and duration
   (`PlayfieldLayout`, `Palette`); no magic numbers in views or tests either.

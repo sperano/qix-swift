@@ -9,7 +9,17 @@ Claim enough of the playfield to clear the level.
 It is a port of [qix-rs](https://github.com/sperano/qix-rs), a Rust clone of
 the 1981 arcade game, brought to a touch screen. iPhone only, landscape only.
 
-Status: repository skeleton; the app shows an empty playfield.
+Status: the whole game plays with a hardware keyboard or a game controller;
+the touch controls are next. Tap to start or continue, and pause with the
+button in the HUD.
+
+| Key | Game controller | |
+| --- | --- | --- |
+| Arrows | Left stick or D-pad | move |
+| Z (held) | A (held) | draw fast |
+| X (held) | B (held) | draw slow, double points |
+| Return | A | start, continue |
+| Escape | Menu | pause, resume |
 
 ## Planned touch controls
 
@@ -27,7 +37,7 @@ side for a thumb, so the controls never cover the board.
 - **Follow the finger**, as a setting: touch the playfield and the marker
   heads for the point under the finger.
 
-A hardware keyboard and game controllers will work too.
+A hardware keyboard and game controllers work too.
 
 ## Building
 
