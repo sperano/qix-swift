@@ -1,7 +1,7 @@
 // The game state and its fixed-step update.
 
 /// The whole game, advanced one fixed step at a time.
-public struct Game: Sendable {
+public struct Game: Equatable, Sendable {
     /// The number of steps run so far.
     public internal(set) var ticks: UInt64
     /// The level being played, from `Tuning.firstLevel` on.

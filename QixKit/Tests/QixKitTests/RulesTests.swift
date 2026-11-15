@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 @testable import QixKit
 
@@ -43,5 +44,29 @@ final class RulesTests: XCTestCase {
 
         XCTAssertEqual(rules.threshold, ClaimThreshold())
         XCTAssertEqual(rules.startingLives.get, Tuning.startingLives)
+    }
+
+    // Rust's serde derive, tested in qix-rs through the settings storage
+    // (`crates/qix/src/settings_test.rs`): the lives code as their number, clamped on the way in.
+
+    func testStartingLivesEncodeAsTheirNumber() throws {
+        let data = try JSONEncoder().encode([StartingLives(Tuning.startingLives)])
+
+        XCTAssertEqual(String(bytes: data, encoding: .utf8), "[\(Tuning.startingLives)]")
+    }
+
+    func testStoredStartingLivesAreClampedIntoTheRange() throws {
+        let (fewest, most) = (Tuning.startingLivesRange.lowerBound, Tuning.startingLivesRange.upperBound)
+        let stored = "[\(Tuning.startingLives), 0, 99, -1, 4294967296]"
+
+        let lives = try JSONDecoder().decode([StartingLives].self, from: Data(stored.utf8))
+
+        XCTAssertEqual(lives.map(\.get), [Tuning.startingLives, fewest, most, fewest, most])
+    }
+
+    func testStartingLivesThatAreNotAWholeNumberFailToDecode() {
+        for stored in ["[2.5]", #"["three"]"#, "[null]"] {
+            XCTAssertThrowsError(try JSONDecoder().decode([StartingLives].self, from: Data(stored.utf8)), stored)
+        }
     }
 }
