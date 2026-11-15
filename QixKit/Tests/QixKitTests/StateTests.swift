@@ -1,8 +1,8 @@
 import XCTest
 @testable import QixKit
 
-// The helpers the `StateTests/` files share are internal, with names no other test file uses: one
-// target holds them all.
+// The helpers the `StateTests/` files share are internal, with names no other test file uses, except
+// `hold`, which overloads GameTests' `hold(_:_:_:)` for a `Session`: one target holds them all.
 
 /// Seed of every game the tests play.
 let sessionSeed: UInt64 = 1_206

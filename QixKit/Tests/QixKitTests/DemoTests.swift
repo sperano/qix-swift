@@ -34,7 +34,7 @@ private let shortScript: [DemoStep] = [
 /// A script of one idle step.
 private let idleScript: [DemoStep] = [.idle(idleTicks)]
 
-/// A script of an empty step between two idle ones.
+/// A script of an idle step between two empty ones.
 private let emptyStepScript: [DemoStep] = [.idle(0), .idle(idleTicks), .idle(0)]
 
 /// A script of idle ticks, longer than the game the Sparx of `sparxGame` needs to take every life.
@@ -180,12 +180,12 @@ final class DemoTests: XCTestCase {
     func testAFinishedDemoDoesNotTick() {
         var demo = Demo(game: shortGame(), script: shortScript)
         runToEnd(&demo)
-        let ticks = demo.game.ticks
+        let finished = demo.game
 
         demo.tick()
 
         XCTAssertTrue(demo.isFinished)
-        XCTAssertEqual(demo.game.ticks, ticks)
+        XCTAssertEqual(demo.game, finished)
     }
 
     func testADemoTicksOneStepOfItsScriptPerTick() {
