@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # The macOS jobs run on this Xcode, the one the mactest Mac has (Scripts/select-xcode.sh).
+  XCODE_VERSION: "27.2"
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select Xcode
+        run: Scripts/select-xcode.sh "$XCODE_VERSION"
+      - name: Install SwiftLint and SwiftFormat
+        run: brew install swiftlint swiftformat
+      - name: Show versions
+        run: swiftlint version && swiftformat --version
+      - name: SwiftFormat
+        run: swiftformat --lint --reporter github-actions-log .
+      - name: SwiftLint
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+  package:
+    name: QixKit tests (Linux)
+    # Linux, as the agents run the package: QixKit is Foundation only. The app job runs it on macOS.
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install make and Python
+        # The Swift image has neither; Scripts/coverage.sh reads the coverage export with Python.
+        run: apt-get update && apt-get install -y --no-install-recommends make python3
+      - name: Tests and coverage
+        # Fails when the package's own tests cover less than the minimum in Scripts/coverage.sh.
+        run: make coverage
+
+  app:
+    name: App build, unit, snapshot and UI tests
+    # Unlike solitaire's, this job also runs on pull requests: the app is small enough for now, and
+    # it is the only place a pull request's app code is built on a Mac.
+    runs-on: xcode-27
+    env:
+      # The steps run the Makefile's targets; its result bundles and failed snapshots are in build/.
+      XCBEAUTIFY: xcbeautify --renderer github-actions
+      # The simulator's iOS version: the one SNAPSHOT_SIMULATOR in the Makefile names.
+      SIMULATOR_OS: "27.2"
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select Xcode
+        run: Scripts/select-xcode.sh "$XCODE_VERSION"
+      - name: Check the generated project is up to date
+        run: |
+          brew install xcodegen
+          make check-project
+      - name: QixKit tests on macOS
+        # Apple's libm may differ from glibc's in the last bit, which a seeded replay would show.
+        run: make coverage
+      - name: Set up the simulator
+        # Downloads the iOS runtime when the image lacks it; sets SIMULATOR.
+        run: Scripts/ci-simulators.sh "$SIMULATOR_OS" "iPhone 17"
+      - name: Build
+        run: make build
+      - name: Unit tests
+        run: make unit
+      - name: Snapshot tests
+        id: snapshots
+        run: make snapshot
+      - name: Upload the failed snapshots, their diffs and any reference recorded for lack of one
+        if: failure() && steps.snapshots.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-failures
+          path: |
+            build/snapshot-failures
+            QixSnapshotTests/__Snapshots__
+          if-no-files-found: ignore
+      - name: UI tests
+        run: make ui
