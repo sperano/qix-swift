@@ -170,6 +170,7 @@ final class StixTests: XCTestCase {
         let stix = drawnWith(Point(x: 1, y: height), [.up, .up, .up], .fast)
 
         XCTAssertEqual(step(stix, board, .up), Point(x: 1, y: 1))
+        XCTAssert(board.isBorder(Point(x: 1, y: 1)))
     }
 
     func testClosingOnTheStartOverANewEdgeIsAccepted() {

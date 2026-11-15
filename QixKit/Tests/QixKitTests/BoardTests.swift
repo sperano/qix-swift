@@ -132,4 +132,11 @@ struct BoardTrapTests {
         }
         expectMessage(result, "empty board 0x3")
     }
+
+    @Test func aBoardWithoutRowsTraps() async {
+        let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
+            _ = Board(width: 4, height: 0)
+        }
+        expectMessage(result, "empty board 4x0")
+    }
 }

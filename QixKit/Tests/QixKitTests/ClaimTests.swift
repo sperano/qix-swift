@@ -78,6 +78,18 @@ private func lCut() -> Stix {
     drawnWith(Point(x: 2, y: height), straightRun(.up, 3) + straightRun(.right, width - 2), .fast)
 }
 
+/// The columns of the U-shaped cut's two sides: it splits the board into the cells left of the
+/// first, between the two, and right of the second.
+private let uLeftX: UInt16 = 2
+private let uRightX: UInt16 = 4
+
+/// The U-shaped cut: up from the bottom edge at `uLeftX`, right along the top edge to `uRightX`,
+/// then down to the bottom edge, which cuts the board into three areas.
+private func uCut() -> Stix {
+    let path = straightRun(.up, height) + straightRun(.right, uRightX - uLeftX) + straightRun(.down, height)
+    return drawnWith(Point(x: uLeftX, y: height), path, .fast)
+}
+
 /// The cells the L-shaped cut closes off.
 private func insideL(_ board: Board) -> [Spot] {
     cells(board).filter { $0.x >= 2 && $0.y >= 2 }
@@ -231,6 +243,49 @@ final class ClaimTests: XCTestCase {
         let sets = Claim.regions(board, straightCut(), [(0, 0), (width - 1, 0)])
 
         XCTAssertEqual(sets[1].count(), 0)
+    }
+
+    func testEveryKeptRegionStaysFree() {
+        var board = Board(width: width, height: height)
+        let stix = uCut()
+        let kept = Claim.regions(board, stix, [(0, 0), (width - 1, 0)])
+
+        let count = Claim.claim(&board, kept, .fast)
+
+        let between = cells(board).filter { $0.x >= uLeftX && $0.x < uRightX }
+        XCTAssertEqual(count, between.count)
+        XCTAssertEqual(freeCells(board), cells(board).filter { !between.contains($0) })
+    }
+
+    func testWithNothingKeptEveryFreeCellIsClaimed() {
+        var board = Board(width: width, height: height)
+        board.setCell(x: 0, y: 0, to: .claimed(.fast))
+
+        let count = Claim.claim(&board, [], .slow)
+
+        XCTAssertEqual(count, Int(width * height) - 1)
+        XCTAssertEqual(board.cell(x: 0, y: 0), .claimed(.fast))
+        XCTAssertEqual(cells(board).dropFirst().filter { cellAt(board, $0) != .claimed(.slow) }, [])
+    }
+
+    func testADownwardCutStopsTheFillLikeAnUpwardOne() {
+        var board = Board(width: width, height: height)
+        let stix = drawnWith(Point(x: cutX, y: 0), straightRun(.down, height), .fast)
+
+        claimFrom(&board, stix, (0, 2))
+
+        XCTAssertEqual(freeCells(board), sideOfCut(board, true))
+    }
+
+    func testALeftwardCutClaimsTheRowsBelowIt() {
+        var board = Board(width: width, height: height)
+        let stix = drawnWith(Point(x: width, y: cutY), straightRun(.left, width), .fast)
+
+        let count = claimFrom(&board, stix, (0, 0))
+
+        let below = cells(board).filter { $0.y >= cutY }
+        XCTAssertEqual(count, below.count)
+        XCTAssertEqual(freeCells(board), cells(board).filter { $0.y < cutY })
     }
 
     /// The walls of a stix off the board's lattice, which qix-rs skips rather than indexes.

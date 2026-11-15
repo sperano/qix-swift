@@ -10,7 +10,10 @@ public struct BitSet: Equatable, Sendable {
     private var words: [UInt64]
 
     /// An empty set that can hold the indices `0..<capacity`.
+    ///
+    /// - Precondition: `capacity` is not negative.
     public init(capacity: Int) {
+        precondition(capacity >= 0, "negative capacity \(capacity)")
         self.capacity = capacity
         let (whole, rest) = capacity.quotientAndRemainder(dividingBy: Self.wordBits)
         words = Array(repeating: 0, count: rest > 0 ? whole + 1 : whole)

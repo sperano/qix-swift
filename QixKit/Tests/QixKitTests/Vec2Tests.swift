@@ -38,6 +38,11 @@ final class Vec2Tests: XCTestCase {
         assertNear(Vec2(x: 2, y: 0).rotated(.pi / 2), Vec2(x: 0, y: 2))
     }
 
+    func testAQuarterTurnTakesYOntoMinusX() {
+        assertNear(Vec2(x: 0, y: 1).rotated(.pi / 2), Vec2(x: -1, y: 0))
+        assertNear(Vec2(x: 1, y: 1).rotated(.pi / 2), Vec2(x: -1, y: 1))
+    }
+
     func testFromAngleIsTheTurnedUnitVector() {
         assertNear(Vec2.fromAngle(.pi / 2), Vec2(x: 0, y: 1))
         assertNear(Vec2.fromAngle(0), Vec2(x: 1, y: 0))

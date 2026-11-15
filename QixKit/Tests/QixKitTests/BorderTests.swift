@@ -8,6 +8,9 @@ private let height: UInt16 = 3
 /// The smallest number of border neighbours a border point can have: the border never dead-ends.
 private let minBorderNeighbours = 2
 
+/// The border neighbours of every border point of a fresh board: the two along its side.
+private let sideNeighbours = 2
+
 private let fast = Cell.claimed(.fast)
 private let slow = Cell.claimed(.slow)
 
@@ -79,8 +82,11 @@ final class BorderTests: XCTestCase {
     }
 
     func testEveryBorderPointOfAFreshBoardHasTwoBorderNeighbours() {
-        assertNoDeadEnds(board())
-        assertNoDeadEnds(Board(width: Tuning.boardW, height: Tuning.boardH))
+        for fresh in [board(), Board(width: Tuning.boardW, height: Tuning.boardH)] {
+            for point in lattice(fresh) where fresh.isBorder(point) {
+                XCTAssertEqual(fresh.borderNeighbours(point).count, sideNeighbours, "\(point)")
+            }
+        }
     }
 
     func testACornerOfTheBoardLeadsAlongBothSides() {
@@ -203,13 +209,16 @@ final class BorderTests: XCTestCase {
 
         XCTAssertFalse(board.isFreeEdge(Point(x: 1, y: 1), .left))
         XCTAssert(board.isFreeEdge(Point(x: 1, y: 1), .right))
+        XCTAssertFalse(board.isBorderEdge(Point(x: 1, y: 1), .left))
+        XCTAssertFalse(neighbours(board, Point(x: 1, y: 1)).contains { $0.dir == .left })
     }
 
     func testIsBorderEdgeAgreesWithTheBorderNeighbours() {
         var board = board()
         board.setCell(x: 0, y: 0, to: fast)
         board.setCell(x: 2, y: 1, to: slow)
-        // One row beyond the lattice on each side, to cover edges leaving it.
+        // One row and column beyond the bottom and right of the lattice, to cover edges leaving
+        // it there; the coordinates are unsigned, so the top and left have no beyond.
         for y in 0 ... height + 1 {
             for x in 0 ... width + 1 {
                 let point = Point(x: x, y: y)

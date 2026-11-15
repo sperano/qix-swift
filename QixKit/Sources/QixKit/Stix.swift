@@ -74,7 +74,7 @@ public struct Stix: Equatable, Sendable {
     }
 
     /// The segments, as their two ends, from the start to the head.
-    public func segments() -> Zip2Sequence<[Point], ArraySlice<Point>> {
+    public func segments() -> some Sequence<(Point, Point)> {
         zip(points, points.dropFirst())
     }
 }

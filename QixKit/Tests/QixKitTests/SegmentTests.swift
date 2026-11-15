@@ -55,6 +55,18 @@ final class SegmentTests: XCTestCase {
         XCTAssertEqual(walk((1e10, -1e10), (1e10, -1e10)), [[.max, .min]])
     }
 
+    /// Ends saturated at opposite bounds of `Int32`: the cells between them are counted in a
+    /// wider type, where an `Int32` subtraction would trap.
+    func testASegmentSpanningAllOfInt32StartsAtItsLowerBound() {
+        let cells = Segment.cells(Vec2(x: -1e10, y: 0), Vec2(x: 1e10, y: 0)).prefix(2).map { [$0.0, $0.1] }
+
+        XCTAssertEqual(cells, [[.min, 0], [.min + 1, 0]])
+    }
+
+    func testADiagonalThroughALatticePointEntersOneSideCell() {
+        XCTAssertEqual(walk((0, 0), (2, 2)), [[0, 0], [0, 1], [1, 1], [1, 2], [2, 2]])
+    }
+
     /// Rust's `as i32` reads NaN as zero where Swift's conversion would trap.
     func testANotANumberCoordinateIsCellZero() {
         XCTAssertEqual(walk((.nan, 0.5), (.nan, 0.5)), [[0, 0]])

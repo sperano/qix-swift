@@ -77,4 +77,12 @@ struct BitSetTrapTests {
         }
         expectMessage(result, "index -1 is negative")
     }
+
+    /// Swift's `Int` capacity can be negative, unlike Rust's `usize`.
+    @Test func aNegativeCapacityTraps() async {
+        let result = await #expect(processExitsWith: .failure, observing: [\.standardErrorContent]) {
+            _ = BitSet(capacity: -1)
+        }
+        expectMessage(result, "negative capacity -1")
+    }
 }
