@@ -1,3 +1,4 @@
+import Foundation
 import XCTest
 @testable import QixKit
 
@@ -223,5 +224,30 @@ final class LevelTests: XCTestCase {
             Tuning.sparxMeterTicks,
             Tuning.difficultyRampLevels * Tuning.sparxMeterTicksPerLevel
         )
+    }
+
+    // Rust's serde derive, tested in qix-rs through the settings storage
+    // (`crates/qix/src/settings_test.rs`): the threshold codes as its fraction, clamped on the way
+    // in.
+
+    func testAClaimThresholdEncodesAsItsFraction() throws {
+        let data = try JSONEncoder().encode([ClaimThreshold()])
+
+        XCTAssertEqual(String(bytes: data, encoding: .utf8), "[\(Tuning.claimThresholdDefault)]")
+    }
+
+    func testAStoredClaimThresholdIsClampedIntoTheRange() throws {
+        let range = Tuning.claimThresholdRange
+        let stored = "[\(Tuning.claimThresholdDefault), 0.1, 1.5]"
+
+        let thresholds = try JSONDecoder().decode([ClaimThreshold].self, from: Data(stored.utf8))
+
+        XCTAssertEqual(thresholds.map(\.fraction), [Tuning.claimThresholdDefault, range.lowerBound, range.upperBound])
+    }
+
+    func testAClaimThresholdThatIsNotANumberFailsToDecode() {
+        for stored in [#"["high"]"#, "[null]"] {
+            XCTAssertThrowsError(try JSONDecoder().decode([ClaimThreshold].self, from: Data(stored.utf8)), stored)
+        }
     }
 }

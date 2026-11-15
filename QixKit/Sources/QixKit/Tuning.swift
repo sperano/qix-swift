@@ -126,6 +126,12 @@ public enum Tuning {
     /// Sparx the Sparx meter releases at the top centre when it first runs out.
     public static let extraSparx = 2
 
+    /// Scores the high score table keeps, best first.
+    public static let highScoreCount = 10
+
+    /// Letters in the initials that name a high score.
+    public static let initialsLen = 3
+
     /// Ticks a direction is held while entering initials, or on a menu, before it repeats: a third
     /// of a second.
     public static let repeatDelayTicks: UInt32 = tickHz / 3
@@ -133,4 +139,10 @@ public enum Tuning {
     /// Ticks between two repeats of a direction held while entering initials, or on a menu: ten a
     /// second.
     public static let repeatTicks: UInt32 = tickHz / 10
+
+    /// Ticks the title screen sits idle before the attract-mode demo starts: ten seconds.
+    public static let attractDelayTicks: UInt32 = 10 * tickHz
+
+    /// Seed of the attract-mode demo's game: the one its script is tuned for.
+    public static let demoSeed: UInt64 = 1
 }

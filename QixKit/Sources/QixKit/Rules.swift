@@ -1,7 +1,8 @@
 // The rules every new game is set up with, as the settings choose them: the claim threshold and
 // the lives it starts with.
 
-/// The lives a game starts with, always in `Tuning.startingLivesRange`.
+/// The lives a game starts with, always in `Tuning.startingLivesRange`; coded as their number,
+/// clamped on the way in, a negative one or one past `UInt32` included.
 public struct StartingLives: Hashable, Sendable {
     /// The number of lives.
     public let get: UInt32
@@ -22,6 +23,19 @@ public struct StartingLives: Hashable, Sendable {
     /// `Tuning.startingLives`: Rust's `StartingLives::default()`.
     public init() {
         self.init(Tuning.startingLives)
+    }
+}
+
+extension StartingLives: Codable {
+    /// The stored number of lives, clamped as `init(clamping:)` clamps it.
+    public init(from decoder: any Decoder) throws {
+        try self.init(clamping: decoder.singleValueContainer().decode(Int64.self))
+    }
+
+    /// Stores the number of lives.
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(get)
     }
 }
 

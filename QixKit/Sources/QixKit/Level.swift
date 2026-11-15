@@ -53,7 +53,7 @@ public struct LevelConfig: Hashable, Sendable {
 }
 
 /// The claimed fraction of the board that completes a level, always in
-/// `Tuning.claimThresholdRange`.
+/// `Tuning.claimThresholdRange`; coded as the fraction, clamped on the way in.
 public struct ClaimThreshold: Hashable, Sendable {
     /// The threshold, as a fraction of the board from 0 to 1.
     public let fraction: Float
@@ -83,6 +83,19 @@ public struct ClaimThreshold: Hashable, Sendable {
         let above = (Double(fraction) - Double(self.fraction)) * percent
         let percent = saturatingUInt32((above + percentRoundingSlack).rounded(.down))
         return saturatingMultiply(percent, Tuning.bonusPerPercent)
+    }
+}
+
+extension ClaimThreshold: Codable {
+    /// The stored fraction, clamped as `init(_:)` clamps it.
+    public init(from decoder: any Decoder) throws {
+        try self.init(decoder.singleValueContainer().decode(Float.self))
+    }
+
+    /// Stores the fraction.
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(fraction)
     }
 }
 
