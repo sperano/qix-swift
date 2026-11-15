@@ -60,3 +60,14 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
+
+# Builds: the Makefile's DerivedData, result bundles and failed snapshots
+build/
+DerivedData/
+*.xcresult
+*.xcuserstate
+.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
