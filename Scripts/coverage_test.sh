@@ -1,7 +1,7 @@
 #!/bin/sh
 # Tests of Scripts/coverage.sh on llvm-cov exports written here: the gate passes at the minimum,
-# fails below it and without any QixKit source, ignores the package's tests, appends its report to
-# the job summary, and refuses a missing argument.
+# fails below it and without any QixKit source, totals the lines of several sources, ignores the
+# package's tests, appends its report to the job summary, and refuses a missing argument.
 #
 #   Scripts/coverage_test.sh
 set -u
@@ -13,24 +13,30 @@ failures=0
 
 # The source and test files of an export, as `swift test` names them.
 source_file=/work/QixKit/Sources/QixKit/BoardSize.swift
+other_source_file=/work/QixKit/Sources/QixKit/Rng.swift
 test_file=/work/QixKit/Tests/QixKitTests/BoardSizeTests.swift
 # Lines in each fixture file: the minimum (90 %) is 9 of them.
 lines=10
 at_minimum=9
 below_minimum=8
+# Two sources whose lines total 100/110 (90.91 %) though their mean percentage is 50 %.
+large_lines=100
+small_lines=10
 
-# export_json <path> <file>:<covered> ...: writes an llvm-cov export holding those files.
+# export_json <path> <file>:<covered>[:<count>] ...: writes an llvm-cov export holding those files,
+# each of `lines` lines unless <count> says otherwise.
 export_json() {
     path=$1
     shift
     python3 - "$path" "$lines" "$@" <<'PY'
 import json, sys
 
-path, count = sys.argv[1], int(sys.argv[2])
+path, default_count = sys.argv[1], int(sys.argv[2])
 files = []
 for spec in sys.argv[3:]:
-    name, covered = spec.rsplit(":", 1)
-    lines = {"covered": int(covered), "count": count, "percent": 100 * int(covered) / count}
+    name, covered, *rest = spec.split(":")
+    covered, count = int(covered), int(rest[0]) if rest else default_count
+    lines = {"covered": covered, "count": count, "percent": 100 * covered / count}
     files.append({"filename": name, "summary": {"lines": lines}})
 json.dump({"data": [{"files": files}]}, open(path, "w"))
 PY
@@ -57,6 +63,9 @@ expect "at the minimum, total" 0 "| **Total** | **9/10** | **90.00%** |" "$work/
 
 export_json "$work/below.json" "$source_file:$below_minimum"
 expect "below the minimum" 1 "**Below the 90% minimum.**" "$work/below.json"
+
+export_json "$work/sources.json" "$source_file:$large_lines:$large_lines" "$other_source_file:0:$small_lines"
+expect "several sources" 0 "| **Total** | **100/110** | **90.91%** |" "$work/sources.json"
 
 export_json "$work/tests.json" "$source_file:$at_minimum" "$test_file:0"
 expect "tests do not count" 0 "| **Total** | **9/10** | **90.00%** |" "$work/tests.json"

@@ -21,9 +21,10 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   in `project.yml`); the references are in `__Snapshots__/<TestFile>/`, which
   `project.yml` excludes from the target's sources.
 - `QixUITests/`: XCUITests of the launched app.
-- `project.yml`: the XcodeGen definition. The generated `Qix.xcodeproj` is
-  committed and CI fails when it differs from what `xcodegen generate` writes.
-  Edit `project.yml`, regenerate, commit both; never hand-edit the project.
+- `project.yml`: the XcodeGen definition. The generated `Qix.xcodeproj` and
+  `Qix/Resources/Info.plist` are committed and CI fails when either differs
+  from what `xcodegen generate` writes. Edit `project.yml`, regenerate, commit
+  them; never hand-edit the project or the Info.plist.
 - `Scripts/`: `coverage.sh` (the package's coverage gate, tested by
   `coverage_test.sh`), `select-xcode.sh` and `ci-simulators.sh` (CI's Xcode
   and simulator).
