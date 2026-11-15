@@ -363,6 +363,10 @@ final class SparxTests: XCTestCase {
         XCTAssert(spawned.allSatisfy { board.isBorder($0.pos) })
     }
 
+    func testNoTopSparxSpawnNone() {
+        XCTAssert(Sparx.spawnAtTop(Board(width: width, height: height), 0).isEmpty)
+    }
+
     func testNoLevelSparxSpawnNone() {
         XCTAssert(Sparx.spawnLevel(Board(width: width, height: height), 0).isEmpty)
     }

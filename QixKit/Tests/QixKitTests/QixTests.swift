@@ -247,7 +247,7 @@ final class QixTests: XCTestCase {
         }
         let start = Vec2(x: corridorStartX, y: Float(corridorRow) + 0.5)
         let end = start + Vec2(x: Tuning.qixLength, y: 0)
-        var qix = Qix(a: start, b: end, vel: acrossCorridor, spin: 0)
+        var qix = Qix(a: start, b: end, vel: acrossCorridor, spin: Tuning.qixMaxSpin)
         var rng = Rng(seed: seed)
 
         qix.tick(board, &rng)
@@ -256,6 +256,7 @@ final class QixTests: XCTestCase {
         XCTAssertEqual(qix.b, end, "\(qix)")
         XCTAssertLessThan(qix.vel.x, 0, "\(qix)")
         XCTAssertLessThan(qix.vel.y, 0, "\(qix)")
+        XCTAssertLessThan(qix.spin, 0, "\(qix)")
     }
 
     func testSpawnsCentredOnTheBoardWithinTheSpeedBounds() {
