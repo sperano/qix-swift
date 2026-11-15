@@ -138,6 +138,47 @@ final class ControlsTests: XCTestCase {
         XCTAssertFalse(controls.sample().confirm)
     }
 
+    func testTheTouchControlsHoldTheirControlsUntilSetAgain() {
+        var controls = Controls()
+        controls.setTouch([.left, .fast])
+
+        XCTAssertEqual(controls.sample(), InputState(dir: .left, fast: true))
+        XCTAssertEqual(controls.sample(), InputState(dir: .left, fast: true))
+        controls.setTouch([.slow])
+        XCTAssertEqual(controls.sample(), InputState(slow: true))
+        controls.setTouch([])
+        XCTAssertEqual(controls.sample(), InputState())
+    }
+
+    func testAControlHeldByTouchAndKeyIsHeldUntilBothRelease() {
+        var controls = keysDown([.up])
+        controls.setTouch([.up, .fast])
+
+        controls.keyUp(.up)
+        XCTAssertEqual(controls.held, [.up, .fast])
+        controls.setTouch([])
+        XCTAssertEqual(controls.held, [])
+    }
+
+    func testATouchControlNoDeviceHeldIsPressed() {
+        var controls = keysDown([.up])
+        _ = controls.sample()
+        // Touch holds no press control: hold one only to see the presses `setTouch` records.
+        controls.setTouch([.up, .confirm])
+
+        XCTAssertEqual(controls.sample(), InputState(dir: .up, confirm: true))
+        controls.setTouch([.up, .confirm])
+        XCTAssertFalse(controls.sample().confirm)
+    }
+
+    func testReleasingTheKeysLeavesTheTouchControlsHeld() {
+        var controls = keysDown([.up])
+        controls.setTouch([.slow])
+        controls.releaseKeys()
+
+        XCTAssertEqual(controls.held, [.slow])
+    }
+
     func testReleasingTheKeysLeavesThePadHeld() {
         var controls = keysDown([.up])
         controls.setPad([.fast])

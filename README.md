@@ -9,9 +9,9 @@ Claim enough of the playfield to clear the level.
 It is a port of [qix-rs](https://github.com/sperano/qix-rs), a Rust clone of
 the 1981 arcade game, brought to a touch screen. iPhone only, landscape only.
 
-Status: the whole game plays with a hardware keyboard or a game controller;
-the touch controls are next. Tap to start or continue, and pause with the
-button in the HUD.
+Status: the whole game plays with the touch controls below, a hardware
+keyboard or a game controller. Tap the board to start or continue, and pause
+with the button in the HUD.
 
 | Key | Game controller | |
 | --- | --- | --- |
@@ -21,21 +21,21 @@ button in the HUD.
 | Return | A | start, continue |
 | Escape | Menu | pause, resume |
 
-## Planned touch controls
+## Touch controls
 
 The 4:3 playfield fills the height of the screen and leaves a strip on each
 side for a thumb, so the controls never cover the board.
 
-- **Steering: a floating stick** under the left thumb (the right one with the
-  left-handed setting). Where the thumb lands is the stick's centre; dragging
-  picks one of four directions. Lifting the thumb stops the marker.
+- **Steering: a floating stick** under the left thumb. Where the thumb lands
+  is the stick's centre; dragging picks one of four directions. Lifting the
+  thumb stops the marker. A left-handed swap is planned.
 - **Drawing** starts by steering off the border: holding a direction draws
   fast. Hold the **Slow** button under the other thumb to draw slowly, for
   more points.
 - **Stopping** while drawing is lifting the thumb; after half a second the
   fuse lights and burns along the line toward the marker.
-- **Follow the finger**, as a setting: touch the playfield and the marker
-  heads for the point under the finger.
+- **Follow the finger** is planned as a setting: touch the playfield and the
+  marker heads for the point under the finger.
 
 A hardware keyboard and game controllers work too.
 

@@ -11,6 +11,22 @@ private let modelSeed: UInt64 = 1
 /// A stick pushed fully left.
 private let stickLeft = PadState(x: -1)
 
+/// A stand-in for a `UITouch`: only its identity counts.
+private final class Finger: Sendable {}
+
+private let thumbFinger = Finger()
+private let slowFinger = Finger()
+/// The touches of the tests: the left thumb on the stick, the right one on the Slow button.
+private let thumb = ObjectIdentifier(thumbFinger)
+private let slowThumb = ObjectIdentifier(slowFinger)
+
+/// Where the stick's thumb lands, and the Slow button's, in the playfield's coordinates.
+private let stickCentre = CGPoint(x: 60, y: 200)
+private let slowPoint = CGPoint(x: 800, y: 200)
+
+/// A drag on the stick well past its dead zone, in points.
+private let drag = CGFloat(3 * FloatingStick.deadZone)
+
 /// A game on a 4 x 2 board with a still Qix in its bottom-right cell and no Sparx: a fast stix up
 /// one step and left two from the marker's start claims the bottom row's left half.
 private func smallGame() -> Game {
@@ -111,6 +127,72 @@ final class GameModelTests: XCTestCase {
 
         frames(2 * Tuning.markerStepTicks, pad: nil)
         XCTAssertEqual(model.session.game.marker.pos, moved)
+    }
+
+    /// Lands the thumb on the stick and drags it `dx`, `dy` points.
+    private func steer(_ dx: CGFloat, _ dy: CGFloat) {
+        model.touch(.began(thumb, .stick, stickCentre))
+        model.touch(.moved(thumb, CGPoint(x: stickCentre.x + dx, y: stickCentre.y + dy)))
+    }
+
+    func testADragOnTheStickMovesTheMarkerUntilTheThumbLifts() {
+        start()
+        let start = model.session.game.marker.pos
+
+        steer(-drag, 0)
+        frames(Tuning.markerStepTicks)
+        let moved = Point(x: start.x - 1, y: start.y)
+        XCTAssertEqual(model.session.game.marker.pos, moved)
+
+        model.touch(.ended(thumb))
+        frames(2 * Tuning.markerStepTicks)
+        XCTAssertEqual(model.session.game.marker.pos, moved)
+    }
+
+    func testSteeringOffTheBorderDrawsAFastStixWithNoButton() {
+        start()
+
+        steer(0, -drag)
+        frames(Tuning.markerStepTicks)
+
+        XCTAssertEqual(model.session.game.stix?.kinds, [DrawKind.fast])
+    }
+
+    func testTheSlowButtonHeldDrawsASlowStix() {
+        start()
+
+        model.touch(.began(slowThumb, .slow, slowPoint))
+        steer(0, -drag)
+        frames(Tuning.slowStepTicks)
+
+        XCTAssertEqual(model.session.game.stix?.kinds, [DrawKind.slow])
+    }
+
+    func testTheSceneShowsTheTouchControls() {
+        steer(-drag, 0)
+        model.touch(.began(slowThumb, .slow, slowPoint))
+
+        let scene = model.scene
+
+        XCTAssertEqual(scene.stick.centre, Vec2(stickCentre))
+        XCTAssertEqual(scene.stick.dir, .left)
+        XCTAssertTrue(scene.slowHeld)
+    }
+
+    func testSuspendingReleasesTheTouches() {
+        start()
+        steer(-drag, 0)
+        model.touch(.began(slowThumb, .slow, slowPoint))
+
+        model.suspend()
+
+        XCTAssertEqual(model.touches, TouchControls())
+        XCTAssertEqual(model.loop.controls.held, [])
+    }
+
+    /// A new game's marker is at the centre of the board's bottom edge.
+    func testThePlayfieldReadsTheMarkersPosition() {
+        XCTAssertEqual(model.scene.markerValue, "Marker at 80, 120")
     }
 
     func testSuspendingPausesTheGameAtOnce() {

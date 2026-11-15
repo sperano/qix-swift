@@ -3,28 +3,43 @@ import Foundation
 import QixKit
 
 /// Everything one frame draws: the game, what is drawn of its board, the HUD, the screen over the
-/// board and the pause button.
+/// board, the pause button and the touch controls.
 struct PlayfieldScene {
     let game: Game
     let board: BoardImage
     let hud: Hud
     let screen: Screen?
     let pauseButton: PauseButtonRole?
+    let stick: FloatingStick
+    let slowHeld: Bool
 
-    /// The scene of `session`, whose board `board` was drawn from.
-    init(session: Session, board: BoardImage) {
+    /// The scene of `session`, whose board `board` was drawn from, with the touch controls as
+    /// `touches` hold them.
+    init(session: Session, board: BoardImage, touches: TouchControls<ObjectIdentifier> = TouchControls()) {
         self.init(
             game: session.game, board: board, hud: Hud(game: session.game, highScore: session.highScore),
-            screen: Screen(session: session), pauseButton: PauseButtonRole(session.state)
+            screen: Screen(session: session), pauseButton: PauseButtonRole(session.state), stick: touches.stick,
+            slowHeld: touches.slowHeld
         )
     }
 
-    init(game: Game, board: BoardImage, hud: Hud, screen: Screen?, pauseButton: PauseButtonRole?) {
+    init(
+        game: Game, board: BoardImage, hud: Hud, screen: Screen?, pauseButton: PauseButtonRole?,
+        stick: FloatingStick = FloatingStick(), slowHeld: Bool = false
+    ) {
         self.game = game
         self.board = board
         self.hud = hud
         self.screen = screen
         self.pauseButton = pauseButton
+        self.stick = stick
+        self.slowHeld = slowHeld
+    }
+
+    /// Where the marker is, as VoiceOver reads it and UI tests find it.
+    var markerValue: String {
+        let pos = game.marker.pos
+        return "Marker at \(pos.x), \(pos.y)"
     }
 }
 

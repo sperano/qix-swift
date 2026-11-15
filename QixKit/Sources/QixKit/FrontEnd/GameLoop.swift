@@ -7,7 +7,7 @@
 public struct GameLoop: Sendable {
     /// The session played.
     public private(set) var session: Session
-    /// The keyboard's and the game pad's controls, and the taps.
+    /// The keyboard's, the game pad's and the touch screen's controls, and the taps.
     public var controls = Controls()
     private var timestep = FixedTimestep()
     private var latch = InputLatch()
@@ -30,10 +30,11 @@ public struct GameLoop: Sendable {
     }
 
     /// The app leaves the foreground: a game in play pauses at once, without a tick of play, and
-    /// every key held and press not yet delivered is dropped, so nothing acts on the return. The
-    /// game pad is polled again on the next frame.
+    /// every key and touch control held and press not yet delivered is dropped, so nothing acts on
+    /// the return. The game pad is polled again on the next frame.
     public mutating func suspend() {
         controls.releaseKeys()
+        controls.setTouch([])
         controls.dropPresses()
         latch = InputLatch()
         if session.state == .playing {

@@ -14,6 +14,13 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
     private static let levelFraction: Float = 0.8125
     private static let levelBonus: UInt32 = 6_000
 
+    /// The touches of the controls' snapshot, and where the stick's lands and is dragged to: up
+    /// and right, beyond the base.
+    private static let stickTouch = 1
+    private static let slowTouch = 2
+    private static let stickCentre = Vec2(x: 64, y: 220)
+    private static let stickThumb = Vec2(x: 94, y: 150)
+
     /// Asserts `scene` on both phones.
     private func assertScene(_ scene: PlayfieldScene, testName: String = #function, line: UInt = #line) throws {
         try assertScreen(PlayfieldView(scene: scene), testName: testName, line: line)
@@ -34,6 +41,24 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
             game: session.game, board: BoardImage(session.game.board),
             hud: Hud(game: session.game, highScore: session.highScore), screen: screen, pauseButton: nil
         )
+    }
+
+    /// The stick held, its knob on the rim towards a thumb beyond the base, and the Slow button
+    /// held, over a board in play. The points are in the stick's zone on both phones.
+    func testTheTouchControlsHeld() throws {
+        let session = PlayfieldFixtures.inPlay()
+        var touches = TouchControls<Int>()
+        touches.began(Self.stickTouch, on: .stick, at: Self.stickCentre)
+        touches.moved(Self.stickTouch, to: Self.stickThumb)
+        // The Slow button is drawn in the middle of its zone, wherever its touch lands.
+        touches.began(Self.slowTouch, on: .slow, at: Vec2())
+        let scene = PlayfieldScene(
+            game: session.game, board: BoardImage(session.game.board),
+            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, pauseButton: .pause,
+            stick: touches.stick, slowHeld: touches.slowHeld
+        )
+
+        try assertScene(scene)
     }
 
     func testTheTitleScreenWithAFullHighScoreTable() throws {
