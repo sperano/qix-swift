@@ -14,9 +14,11 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   types. Its tests are in `QixKit/Tests/QixKitTests`. `FrontEnd/` holds what
   the app takes from qix-rs's front end (`crates/qix`) that needs no Apple
   framework, so it is tested on Linux too: the fixed timestep, the input latch,
-  the keyboard and game pad controls, the game loop, the palette, the HUD's
-  and the screens' text, what the board draws (border, stix runs, trail
-  colours, the claimed cells' pixels), the settings and their storage in
+  the keyboard and game pad controls, the game loop with the attract demo of
+  the title, the palette, the HUD's and the screens' text, what the board
+  draws (border, stix runs and their flicker, trail colours, the claimed
+  cells' pixels, the claim fill animation, `ClaimFill`, and the sprites,
+  `Sprite`), the settings and their storage in
   `UserDefaults` (`Settings`, `Persist`), the sound effects of the events and
   their synthesised samples (`Sound`, `Synth`). It also holds the touch
   controls (the floating stick's maths, the follow-the-finger steering,
@@ -34,7 +36,8 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   Taptic Engine, an `AVAudioEngine` in the ambient session, and silent ones),
   `Views/` the views (the playfield, the initials
   field, the settings sheet), their painters (SwiftUI `Canvas`) and their
-  layout maths, `Resources/` the asset catalog and the Info.plist xcodegen
+  layout maths, `Resources/` the asset catalog (with the app icon), the
+  privacy manifest (`PrivacyInfo.xcprivacy`) and the Info.plist xcodegen
   writes.
 - `QixTests/`: the app's unit tests (the model, layout maths, key map,
   Info.plist choices).
@@ -48,6 +51,10 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   `Qix/Resources/Info.plist` are committed and CI fails when either differs
   from what `xcodegen generate` writes. Edit `project.yml`, regenerate, commit
   them; never hand-edit the project or the Info.plist.
+- `Design/`: `render_icons.py`, which draws the app icon's light, dark and
+  tinted PNGs into the asset catalog from QixKit's `Palette.swift` and
+  `Sprite.swift` (Python's standard library only, so it runs on Linux), and its
+  tests. Change the icon there and run `make icons`; never edit the PNGs.
 - `Scripts/`: `coverage.sh` (the package's coverage gate, tested by
   `coverage_test.sh`), `select-xcode.sh` and `ci-simulators.sh` (CI's Xcode
   and simulator).
@@ -59,7 +66,9 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 | `make lint` | SwiftFormat in check mode, then SwiftLint `--strict` | Linux, macOS |
 | `make format` | SwiftFormat rewrites, then SwiftLint reports | Linux, macOS |
 | `make coverage` | `swift test` in `QixKit` with coverage; fails below 90 % of `QixKit/Sources` | Linux, macOS |
-| `make test-scripts` | `Scripts/coverage_test.sh`: the coverage gate on fixture exports | Linux, macOS |
+| `make test-scripts` | `Scripts/coverage_test.sh` (the coverage gate on fixture exports) and `Design/render_icons_test.py` | Linux, macOS |
+| `make icons` | `Design/render_icons.py`: renders the app icon's PNGs | Linux, macOS |
+| `make check-icons` | fails when a committed icon PNG is not what `Design/render_icons.py` draws | Linux, macOS |
 | `make check-project` | `xcodegen generate`, fails when `Qix.xcodeproj` or `Qix/Resources/Info.plist` changed | Linux, macOS |
 | `make build` | builds the app and every test bundle | macOS (Xcode) |
 | `make unit` | `QixTests` on `SIMULATOR` | macOS (Xcode) |
@@ -68,10 +77,11 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 | `make ui` | `QixUITests` on `SIMULATOR` | macOS (Xcode) |
 
 CI (`.github/workflows/ci.yml`) runs the same targets: a lint job, a Linux
-job for the package, and a macOS job for the project check, the package on
-macOS and the app's build, unit, snapshot and UI tests. Before a pull request,
-run `make lint`, `make coverage`, `make test-scripts` and `make check-project`;
-the app targets need Xcode.
+job for the package, the script tests and the icon check, and a macOS job for
+the project check, the package on macOS and the app's build, unit, snapshot
+and UI tests. Before a pull request,
+run `make lint`, `make coverage`, `make test-scripts`, `make check-icons` and
+`make check-project`; the app targets need Xcode.
 
 Snapshots are recorded on the iPhone 17 simulator, iOS 27.2 (Xcode 27.2), and
 skip on any other device. The app is landscape only, so the host window is a

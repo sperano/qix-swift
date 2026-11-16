@@ -40,7 +40,39 @@ private func drawingGame() -> Game {
     )
 }
 
+private func cellRun(_ row: UInt16, _ cols: Range<UInt16>, _ kind: DrawKind) -> CellRun {
+    CellRun(row: row, cols: cols, kind: kind)
+}
+
 final class BoardShapesTests: XCTestCase {
+    func testAFreshBoardHasNoClaimedRuns() {
+        XCTAssertEqual(BoardShapes.claimedRuns(Board(width: shapesW, height: shapesH)), [])
+    }
+
+    func testNeighbouringCellsOfOneKindMergeIntoOneRun() {
+        let board = boardWith([(1 ..< 2, 1 ..< 4, .fast)])
+
+        XCTAssertEqual(BoardShapes.claimedRuns(board), [cellRun(1, 1 ..< 4, .fast)])
+    }
+
+    func testAChangeOfKindOrAFreeCellEndsARun() {
+        let board = boardWith([(0 ..< 1, 0 ..< 2, .fast), (0 ..< 1, 2 ..< 3, .slow), (0 ..< 1, 4 ..< 6, .slow)])
+
+        XCTAssertEqual(
+            BoardShapes.claimedRuns(board),
+            [cellRun(0, 0 ..< 2, .fast), cellRun(0, 2 ..< 3, .slow), cellRun(0, 4 ..< 6, .slow)]
+        )
+    }
+
+    func testRunsNeverSpanTwoRows() {
+        let board = boardWith([(2 ..< 4, 0 ..< shapesW, .slow)])
+
+        XCTAssertEqual(
+            BoardShapes.claimedRuns(board),
+            [cellRun(2, 0 ..< shapesW, .slow), cellRun(3, 0 ..< shapesW, .slow)]
+        )
+    }
+
     func testTheBorderOfAFreshBoardIsItsFourSides() {
         XCTAssertEqual(
             BoardShapes.borderSegments(Board(width: shapesW, height: shapesH)),
@@ -105,6 +137,28 @@ final class BoardShapesTests: XCTestCase {
         )
     }
 
+    func testAStixStartsInTheColourOfItsKind() {
+        XCTAssertEqual(BoardShapes.stixColour(.fast, ticks: 0), Palette.fastStix)
+        XCTAssertEqual(BoardShapes.stixColour(.slow, ticks: 0), Palette.slowStix)
+    }
+
+    func testAStixFlickersToTheBrightColourAndBackEveryFlickerPeriod() {
+        let period = BoardShapes.stixFlickerTicks
+
+        XCTAssertEqual(BoardShapes.stixColour(.fast, ticks: period - 1), Palette.fastStix)
+        XCTAssertEqual(BoardShapes.stixColour(.fast, ticks: period), Palette.stixFlicker)
+        XCTAssertEqual(BoardShapes.stixColour(.fast, ticks: 2 * period - 1), Palette.stixFlicker)
+        XCTAssertEqual(BoardShapes.stixColour(.fast, ticks: 2 * period), Palette.fastStix)
+    }
+
+    func testTheFlickerPeriodIsTheSameForBothKinds() {
+        for ticks in 0 ..< 4 * BoardShapes.stixFlickerTicks {
+            let flickering = { (kind: DrawKind) in BoardShapes.stixColour(kind, ticks: ticks) == Palette.stixFlicker }
+
+            XCTAssertEqual(flickering(.fast), flickering(.slow), "at tick \(ticks)")
+        }
+    }
+
     func testTheMarkerIsPlainUntilTheStixHasASegment() {
         XCTAssertEqual(BoardShapes.markerInner(nil), Palette.marker)
         XCTAssertEqual(BoardShapes.markerInner(Stix(start: point(2, shapesH))), Palette.marker)
@@ -166,6 +220,19 @@ final class EnemyShapesTests: XCTestCase {
 
     func testATrailLongerThanTheTicksStillCyclesBackwards() {
         XCTAssertEqual(BoardShapes.trailColours(2, ticks: 0), [trail[trail.count - 1], trail[0]])
+    }
+
+    func testASparkStartsOnItsFirstFrame() {
+        XCTAssertEqual(BoardShapes.sparkFrame(ticks: 0), Sprite.sparkFrames[0])
+    }
+
+    func testASparkFlickersToItsOtherFrameAndBackEveryFlickerPeriod() {
+        let period = BoardShapes.sparkFlickerTicks
+
+        XCTAssertEqual(BoardShapes.sparkFrame(ticks: period - 1), Sprite.sparkFrames[0])
+        XCTAssertEqual(BoardShapes.sparkFrame(ticks: period), Sprite.sparkFrames[1])
+        XCTAssertEqual(BoardShapes.sparkFrame(ticks: 2 * period - 1), Sprite.sparkFrames[1])
+        XCTAssertEqual(BoardShapes.sparkFrame(ticks: 2 * period), Sprite.sparkFrames[0])
     }
 
     func testNoFuseIsDrawnWhileItIsOut() {

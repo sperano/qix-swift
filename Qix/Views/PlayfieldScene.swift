@@ -2,15 +2,21 @@ import CoreGraphics
 import Foundation
 import QixKit
 
-/// Everything one frame draws: the game, what is drawn of its board, the HUD, the screen over the
-/// board or the prompt of the initials field, the HUD's button and the touch controls, as the
+/// Everything one frame draws: the game shown (the attract demo's while one plays), what is drawn
+/// of its board and of its claim being animated, the HUD, the screen over the board, the demo's
+/// banner or the prompt of the initials field, the HUD's button and the touch controls, as the
 /// settings place them, with the steering's target.
 struct PlayfieldScene {
     let game: Game
     let board: BoardImage
+    /// The cells of the claim being animated and how far the animation is (`ClaimFill.fresh`).
+    let claim: (runs: [CellRun], progress: Float)?
     let hud: Hud
-    /// The screen over the board, none in play and while the initials field asks for initials.
+    /// The screen over the board, none in play, while the demo plays and while the initials field
+    /// asks for initials.
     let screen: Screen?
+    /// The banner over the attract demo, which plays on under it, undimmed.
+    let banner: Screen?
     /// What the initials field asks, shown with it instead of a screen while the session waits
     /// for initials.
     let initialsPrompt: Screen?
@@ -23,31 +29,49 @@ struct PlayfieldScene {
     /// The settings, which place the touch controls and set their size and opacity.
     let settings: Settings
 
-    /// The scene of `session`, whose board `board` was drawn from, with the touch controls as
-    /// `touches` hold them and `settings` place them, and the target of `steering` in play.
+    /// The scene of `loop`, whose game shown `board` was drawn from, with the touch controls as
+    /// `touches` hold them and `settings` place them, and the target of its steering in play.
+    init(
+        loop: GameLoop, board: BoardImage, touches: TouchControls<ObjectIdentifier> = TouchControls(),
+        settings: Settings = Settings()
+    ) {
+        let session = loop.session
+        let game = loop.shownGame
+        let demo = loop.attract.demo != nil
+        let screen = demo ? nil : Screen(session: session)
+        let entersInitials = if case .highScoreEntry = session.state { true } else { false }
+        self.init(
+            game: game, board: board, claim: loop.claimFill.fresh, hud: Hud(game: game, highScore: session.highScore),
+            screen: entersInitials ? nil : screen, banner: demo ? .demo : nil,
+            initialsPrompt: entersInitials ? screen : nil, hudButton: HudButtonRole(session.state),
+            stick: touches.stick, slowHeld: touches.slowHeld,
+            cursor: session.state == .playing ? loop.steering.target(on: game.board) : nil, settings: settings
+        )
+    }
+
+    /// The scene of `session`, as `init(loop:)` draws a loop playing it whose steering is
+    /// `steering`.
     init(
         session: Session, board: BoardImage, touches: TouchControls<ObjectIdentifier> = TouchControls(),
         steering: TouchSteering = TouchSteering(), settings: Settings = Settings()
     ) {
-        let screen = Screen(session: session)
-        let entersInitials = if case .highScoreEntry = session.state { true } else { false }
-        self.init(
-            game: session.game, board: board, hud: Hud(game: session.game, highScore: session.highScore),
-            screen: entersInitials ? nil : screen, initialsPrompt: entersInitials ? screen : nil,
-            hudButton: HudButtonRole(session.state), stick: touches.stick, slowHeld: touches.slowHeld,
-            cursor: session.state == .playing ? steering.target(on: session.game.board) : nil, settings: settings
-        )
+        var loop = GameLoop(session: session)
+        loop.steering = steering
+        self.init(loop: loop, board: board, touches: touches, settings: settings)
     }
 
     init(
-        game: Game, board: BoardImage, hud: Hud, screen: Screen?, initialsPrompt: Screen? = nil,
-        hudButton: HudButtonRole?, stick: FloatingStick = FloatingStick(), slowHeld: Bool = false,
-        cursor: Point? = nil, settings: Settings = Settings()
+        game: Game, board: BoardImage, claim: (runs: [CellRun], progress: Float)? = nil, hud: Hud, screen: Screen?,
+        banner: Screen? = nil, initialsPrompt: Screen? = nil, hudButton: HudButtonRole?,
+        stick: FloatingStick = FloatingStick(), slowHeld: Bool = false, cursor: Point? = nil,
+        settings: Settings = Settings()
     ) {
         self.game = game
         self.board = board
+        self.claim = claim
         self.hud = hud
         self.screen = screen
+        self.banner = banner
         self.initialsPrompt = initialsPrompt
         self.hudButton = hudButton
         self.stick = stick

@@ -1,7 +1,7 @@
 # The checks, as CI runs them: lint and the package tests (brew install swiftlint swiftformat), and
 # the app's build, unit, snapshot and UI tests on the simulator. The app targets need Xcode; they
 # are named targets so CI and mactest run the same steps.
-.PHONY: lint format coverage test-scripts check-project build unit snapshot record-snapshots ui
+.PHONY: lint format coverage test-scripts icons check-icons check-project build unit snapshot record-snapshots ui
 
 # Every recipe line runs with pipefail, so a test failure is not lost in the pipe to the formatter.
 SHELL := /bin/bash
@@ -49,9 +49,19 @@ coverage:
 	cd QixKit && swift test --parallel --enable-code-coverage
 	Scripts/coverage.sh "$$(cd QixKit && swift test --show-codecov-path)"
 
-# Tests of the coverage gate itself (Scripts/coverage_test.sh), on fixture coverage exports.
+# Tests of the coverage gate itself (Scripts/coverage_test.sh), on fixture coverage exports, and of
+# the icon renderer (Design/render_icons_test.py).
 test-scripts:
 	Scripts/coverage_test.sh
+	python3 Design/render_icons_test.py
+
+# Renders the app icon's light, dark and tinted PNGs into the asset catalog; commit them.
+icons:
+	python3 Design/render_icons.py
+
+# Fails when a committed icon PNG is not what Design/render_icons.py draws from the sources.
+check-icons:
+	python3 Design/render_icons.py --check
 
 # Fails when the committed Qix.xcodeproj or app Info.plist is not what xcodegen generates from
 # project.yml.

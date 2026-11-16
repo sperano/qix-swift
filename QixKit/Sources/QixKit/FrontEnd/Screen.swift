@@ -1,5 +1,5 @@
 // The screens over the playfield outside play: the title with the high scores and the controls,
-// the pause, the end of a level, the end of the game and the entry of a high score. qix-rs's
+// the banner of its demo, the pause, the end of a level, the end of the game and the entry of a high score. qix-rs's
 // `crates/qix/src/render/screen.rs` and `high_score.rs`, without their painting, which the app
 // does, and with the keys, the taps and the initials field of the iPhone.
 
@@ -61,6 +61,9 @@ public struct Screen: Hashable, Sendable {
             ]
         )
     }
+
+    /// The banner over the attract-mode demo: the demo plays on under it, and a tap starts a game.
+    public static let demo = Self(heading: "DEMO", lines: ["\(confirmName) to play"])
 
     /// The pause overlay.
     public static let paused = Self(heading: "PAUSED", lines: ["Press \(pauseName) to resume"])

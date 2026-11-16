@@ -19,7 +19,9 @@ of the touch controls, the stick's size and the controls' opacity, haptics (on
 by default: a tick on a turn and on leaving the border, a bump on a refused
 step, a success on a claim, an error on a death) and sounds (off by default:
 qix-rs's synthesised tones, muted by the silent switch). Rule changes apply to
-the next game. The settings and the high scores are kept between launches.
+the next game. The settings and the high scores are kept between launches. Left
+idle for ten seconds, the title screen plays a demo game; any touch stops it,
+and a tap on the board starts a game.
 
 | Key | Game controller | |
 | --- | --- | --- |

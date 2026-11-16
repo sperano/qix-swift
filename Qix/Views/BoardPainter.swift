@@ -1,8 +1,10 @@
 import QixKit
 import SwiftUI
 
-/// Paints the board and its enemies: the claimed cells, the border, the stix by kind and the marker
-/// (qix-rs's `render/board.rs`), then each Qix's trail, the Sparx and the fuse (`render/enemies.rs`).
+/// Paints the board and its enemies: the claimed cells and over them the claim being animated, the
+/// border, the stix by kind, flickering, and the marker's sprite (qix-rs's `render/board.rs` and
+/// `render/claim_fill.rs`), then each Qix's trail, the Sparx's sprites and the fuse
+/// (`render/enemies.rs`).
 ///
 /// Line widths and sprite sizes are in points, so they keep their look at every screen size;
 /// positions go through the layout.
@@ -15,21 +17,6 @@ enum BoardPainter {
 
     /// Width of each segment of the Qix's trail, in points.
     static let qixWidth: CGFloat = 1.5
-
-    /// Distance from the marker's centre to each of its corners, in points.
-    static let markerRadius: CGFloat = 5.5
-
-    /// Width of the marker's outline, as a fraction of its radius.
-    static let markerOutlineShare: CGFloat = 0.25
-
-    /// Distance from a Sparx's centre to the tip of each of its arms, in points.
-    static let sparxRadius: CGFloat = 5.5
-
-    /// Width of a Sparx's arms, in points.
-    static let sparxArmWidth: CGFloat = 1.5
-
-    /// Radius of a Sparx's bright heart, in points.
-    static let sparxCoreRadius: CGFloat = 1.75
 
     /// Radius of the fuse's bright dot, in points.
     static let fuseRadius: CGFloat = 2.5
@@ -49,40 +36,52 @@ enum BoardPainter {
         if let claimed = scene.board.claimed {
             context.draw(Image(decorative: claimed, scale: 1).interpolation(.none), in: layout.field)
         }
+        if let claim = scene.claim {
+            claimFill(&context, claim.runs, progress: claim.progress, layout)
+        }
         border(&context, scene.board.border, layout)
         let game = scene.game
         if let stix = game.stix {
-            self.stix(&context, stix, layout)
+            self.stix(&context, stix, ticks: game.ticks, layout)
         }
-        marker(
-            &context,
-            at: layout.position(game.marker.pos),
-            radius: markerRadius,
-            inner: BoardShapes.markerInner(game.stix)
-        )
+        let marker = Vec2(layout.position(game.marker.pos))
+        sprite(&context, Sprite.marker(centre: marker, pixel: Sprite.pixel, inner: BoardShapes.markerInner(game.stix)))
         for qix in game.qix {
             trail(&context, qix, ticks: game.ticks, layout)
         }
+        let frame = BoardShapes.sparkFrame(ticks: game.ticks)
         for sparx in game.sparx {
-            self.sparx(&context, sparx, layout)
+            sprite(&context, Sprite.spark(frame, centre: Vec2(layout.position(sparx.pos)), kind: sparx.kind))
         }
         if let point = BoardShapes.fusePoint(game) {
             fuse(&context, at: layout.position(point))
         }
     }
 
-    /// Paints the marker centred on `centre`: a diamond `radius` from its centre to each corner,
-    /// `inner` inside its outline.
-    static func marker(_ context: inout GraphicsContext, at centre: CGPoint, radius: CGFloat, inner: RGBA) {
-        let diamond = Path { path in
-            path.move(to: CGPoint(x: centre.x, y: centre.y - radius))
-            path.addLine(to: CGPoint(x: centre.x + radius, y: centre.y))
-            path.addLine(to: CGPoint(x: centre.x, y: centre.y + radius))
-            path.addLine(to: CGPoint(x: centre.x - radius, y: centre.y))
-            path.closeSubpath()
+    /// Paints `squares`, a sprite's pixels, one path per colour and without antialiasing, so pixels
+    /// that share an edge leave no seam. The pixels never overlap, so the colours' order is free.
+    static func sprite(_ context: inout GraphicsContext, _ squares: [SpriteSquare]) {
+        for (colour, squares) in Dictionary(grouping: squares, by: \.colour) {
+            let path = Path { path in
+                path.addRects(squares.map {
+                    CGRect(x: CGFloat($0.x), y: CGFloat($0.y), width: CGFloat($0.side), height: CGFloat($0.side))
+                })
+            }
+            context.fill(path, with: .color(Color(colour)), style: FillStyle(antialiased: false))
         }
-        context.fill(diamond, with: .color(Color(inner)))
-        context.stroke(diamond, with: .color(Color(Palette.markerOutline)), lineWidth: radius * markerOutlineShare)
+    }
+
+    /// Paints the cells of `runs`, those of the claim being animated, `progress` through its
+    /// animation: one path per kind over the fill the claimed cells' image paints them with.
+    private static func claimFill(
+        _ context: inout GraphicsContext, _ runs: [CellRun], progress: Float, _ layout: PlayfieldLayout
+    ) {
+        for kind in [DrawKind.fast, .slow] {
+            let path = Path { path in
+                path.addRects(runs.filter { $0.kind == kind }.map { layout.rect(of: $0) })
+            }
+            context.fill(path, with: .color(Color(BoardShapes.fillColour(kind, progress: progress))))
+        }
     }
 
     /// Paints the border's segments, their ends squared off so that the corners are filled.
@@ -101,12 +100,13 @@ enum BoardPainter {
         context.stroke(path, with: .color(Color(Palette.border)), style: style)
     }
 
-    /// Paints the stix, each run of segments in the colour of its kind.
-    private static func stix(_ context: inout GraphicsContext, _ stix: Stix, _ layout: PlayfieldLayout) {
+    /// Paints the stix, each run of segments in the colour of its kind as it flickers after `ticks`
+    /// game ticks (`BoardShapes.stixColour`).
+    private static func stix(_ context: inout GraphicsContext, _ stix: Stix, ticks: UInt64, _ layout: PlayfieldLayout) {
         for run in BoardShapes.stixRuns(stix) {
             let path = Path { $0.addLines(run.points.map { layout.position($0) }) }
             let style = StrokeStyle(lineWidth: stixWidth, lineCap: .square, lineJoin: .miter)
-            context.stroke(path, with: .color(Color(Palette.stix(run.kind))), style: style)
+            context.stroke(path, with: .color(Color(BoardShapes.stixColour(run.kind, ticks: ticks))), style: style)
         }
     }
 
@@ -122,23 +122,6 @@ enum BoardPainter {
             let segment = Path { $0.addLines([layout.position(a), layout.position(b)]) }
             context.stroke(segment, with: .color(Color(colour)), lineWidth: qixWidth)
         }
-    }
-
-    /// Paints a Sparx on its lattice point: a cross in the colour of its kind around a bright heart.
-    private static func sparx(_ context: inout GraphicsContext, _ sparx: Sparx, _ layout: PlayfieldLayout) {
-        let centre = layout.position(sparx.pos)
-        let arms = Path { path in
-            path.addLines([
-                CGPoint(x: centre.x - sparxRadius, y: centre.y),
-                CGPoint(x: centre.x + sparxRadius, y: centre.y),
-            ])
-            path.addLines([
-                CGPoint(x: centre.x, y: centre.y - sparxRadius),
-                CGPoint(x: centre.x, y: centre.y + sparxRadius),
-            ])
-        }
-        context.stroke(arms, with: .color(Color(Palette.sparx(sparx.kind))), lineWidth: sparxArmWidth)
-        context.fill(circle(centre, sparxCoreRadius), with: .color(Color(Palette.sparxCore(sparx.kind))))
     }
 
     /// Paints the fuse at `centre`: the rings of its glow, outermost first, then its bright dot.

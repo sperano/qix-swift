@@ -1,6 +1,5 @@
 // The session the app plays, advanced frame by frame: qix-rs's `QixApp::advance` and `tick`
-// (`crates/qix/src/app.rs`), without the attract demo yet, and with the iPhone's initials typed in a
-// text field and its haptics.
+// (`crates/qix/src/app.rs`), with the iPhone's initials typed in a text field and its haptics.
 
 /// A `Session` with the controls that steer it and the clock that ticks it: each frame samples
 /// the controls through an `InputLatch` and runs the ticks a `FixedTimestep` owes, so a press is
@@ -14,6 +13,11 @@
 ///
 /// Each tick queues the sounds of the session's events (`Sound.sounds`) and its haptic
 /// (`HapticCues`), which the front end takes once a frame (`takeSounds`, `takeHaptics`).
+///
+/// On the title screen the attract mode (`Attract`) ticks first with the same input, so the input
+/// that stops its demo also reaches the title: a tap stops the demo and starts a game. The demo is
+/// silent: it queues neither sounds nor haptics. Each tick then runs the claim animation
+/// (`ClaimFill`) of the game shown, the demo's while one plays (`shownGame`).
 public struct GameLoop: Sendable {
     /// The session played.
     public private(set) var session: Session
@@ -28,6 +32,10 @@ public struct GameLoop: Sendable {
     /// The haptics the ticks raised since `takeHaptics` last took them, in order: one a tick at
     /// most.
     public private(set) var haptics: [Haptic] = []
+    /// The demo the title screen plays once left idle.
+    public private(set) var attract = Attract()
+    /// The fill animation of the claims of the game shown.
+    public private(set) var claimFill: ClaimFill
     private var cues = HapticCues()
     private var timestep = FixedTimestep()
     private var latch = InputLatch()
@@ -35,6 +43,13 @@ public struct GameLoop: Sendable {
     /// A loop playing `session`, nothing held.
     public init(session: Session) {
         self.session = session
+        claimFill = ClaimFill(board: session.game.board)
+    }
+
+    /// The game painted on the playfield: the attract demo's while one plays, the session's
+    /// otherwise.
+    public var shownGame: Game {
+        attract.demo?.game ?? session.game
     }
 
     /// The session waits for the initials of a high score, which `enterInitials` types: its
@@ -79,14 +94,28 @@ public struct GameLoop: Sendable {
         return haptics
     }
 
-    /// Ticks the session with `input` and queues the tick's sounds and haptic.
+    /// Ticks the session with `input`, and the attract mode before it on the title screen (off
+    /// the title, no demo plays), queues the session's sounds and haptic, then ticks the claim
+    /// animation of the game shown.
     private mutating func tick(_ input: InputState) {
+        if session.state == .title {
+            attract.tick(input)
+        } else {
+            attract.reset()
+        }
         let marker = session.game.marker
         session.tick(input)
         sounds += Sound.sounds(session.events)
         if let haptic = cues.cue(input, from: marker, to: session) {
             haptics.append(haptic)
         }
+        claimFill.tick(shownGame.board)
+    }
+
+    /// A touch landed on the screen: the attract demo stops, if one plays, and the title's idle
+    /// count starts again, whatever the touch holds. Only a tap also starts a game, as a confirm.
+    public mutating func touchDown() {
+        attract.reset()
     }
 
     /// `input` with the steering's direction this tick, in play when `input` holds none.
@@ -100,11 +129,13 @@ public struct GameLoop: Sendable {
         return input
     }
 
-    /// The app leaves the foreground: a game in play pauses at once, without a tick of play, and
-    /// every key and touch control held, the steering's aim and every press not yet delivered are
-    /// dropped, so nothing acts on the return. The game pad is polled again on the next frame.
+    /// The app leaves the foreground: a game in play pauses at once, without a tick of play, the
+    /// attract demo stops, and every key and touch control held, the steering's aim and every
+    /// press not yet delivered are dropped, so nothing acts on the return. The game pad is polled
+    /// again on the next frame.
     public mutating func suspend() {
         releaseControls()
+        attract.reset()
         if session.state == .playing {
             session.tick(InputState(pause: true))
         }

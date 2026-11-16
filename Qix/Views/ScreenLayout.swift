@@ -24,6 +24,9 @@ enum ScreenLayout {
     /// Corner radius of the panel, in line sizes: qix-rs's 8 points.
     static let cornerRadius: CGFloat = 8.0 / 18.0
 
+    /// Space between the top of the board and a banner's panel, in line sizes: qix-rs's 16 points.
+    static let bannerMargin: CGFloat = 16.0 / 18.0
+
     /// The most of the board's height the panel may take.
     static let maxPanelShare: CGFloat = 0.94
 

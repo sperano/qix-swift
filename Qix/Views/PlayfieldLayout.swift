@@ -45,6 +45,13 @@ struct PlayfieldLayout: Equatable {
         position(x: CGFloat(point.x), y: CGFloat(point.y))
     }
 
+    /// The cells `run` covers, on screen.
+    func rect(of run: CellRun) -> CGRect {
+        let topLeft = position(x: CGFloat(run.cols.lowerBound), y: CGFloat(run.row))
+        let bottomRight = position(x: CGFloat(run.cols.upperBound), y: CGFloat(run.row) + 1)
+        return CGRect(x: topLeft.x, y: topLeft.y, width: bottomRight.x - topLeft.x, height: bottomRight.y - topLeft.y)
+    }
+
     /// The screen position of `vector`, in playfield units.
     func position(_ vector: Vec2) -> CGPoint {
         position(x: CGFloat(vector.x), y: CGFloat(vector.y))
