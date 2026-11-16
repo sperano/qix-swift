@@ -20,6 +20,15 @@ private func secs(_ sound: Sound) -> Float {
 /// Phases a quarter of a cycle apart, from the start of the cycle.
 private let quarterPhases: [Float] = [0, 0.25, 0.5, 0.75]
 
+/// Phases an eighth of a cycle apart, from the start of the cycle.
+private let eighthPhases: [Float] = [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]
+
+/// The phase half a cycle in.
+private let halfCycle: Float = 0.5
+
+/// The phase at the end of the cycle.
+private let fullCycle: Float = 1
+
 final class SynthTests: XCTestCase {
     func testEveryToneLastsItsSeconds() {
         for sound in Sound.all {
@@ -100,9 +109,10 @@ final class SynthTests: XCTestCase {
 
     func testASquareWaveHoldsFullAmplitudeForHalfACycleThenItsOpposite() {
         XCTAssertEqual(quarterPhases.map(Wave.square.at), [1, 1, -1, -1])
+        XCTAssertEqual([halfCycle.nextDown, halfCycle, fullCycle.nextDown].map(Wave.square.at), [1, -1, -1])
     }
 
-    func testATriangleWaveFallsToItsTroughAtHalfACycleAndRisesBack() {
-        XCTAssertEqual(quarterPhases.map(Wave.triangle.at), [1, 0, -1, 0])
+    func testATriangleWaveFallsLinearlyToItsTroughAtHalfACycleAndRisesBack() {
+        XCTAssertEqual(eighthPhases.map(Wave.triangle.at), [1, 0.5, 0, -0.5, -1, -0.5, 0, 0.5])
     }
 }
