@@ -13,7 +13,9 @@ Status: the whole game plays with the touch controls below, a hardware
 keyboard or a game controller. Tap the board to start or continue, and pause
 with the button in the HUD. The title screen lists the ten best scores; a game
 that makes the table asks for three initials, typed on the keyboard. The gear
-on the title screen opens the settings: the share of the board that clears a
+on the title screen opens the settings, which start with a How to play page
+(the rules and the controls, as the settings set them), then the share of the
+board that clears a
 level (50 to 90 %), the starting lives, the control scheme, a left-handed swap
 of the touch controls, the stick's size and the controls' opacity, haptics (on
 by default: a tick on a turn and on leaving the border, a bump on a refused

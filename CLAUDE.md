@@ -23,8 +23,9 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   their synthesised samples (`Sound`, `Synth`). It also holds the touch
   controls (the floating stick's maths, the follow-the-finger steering,
   `TouchSteering`, and each touch's control), the initials field's filter and
-  the haptic each tick of play raises (`HapticCues`), which are the iPhone
-  front end's own: qix-rs has none.
+  the haptic each tick of play raises (`HapticCues`) and the How to play
+  page's text (`HowToPlay`), which are the iPhone front end's own: qix-rs has
+  none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
   the entry point and the launch options (`--ui-testing`: an emptied
@@ -35,8 +36,8 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   `Feedback/` the haptic and sound players (`HapticPlayer`, `SoundPlayer`: the
   Taptic Engine, an `AVAudioEngine` in the ambient session, and silent ones),
   `Views/` the views (the playfield, the initials
-  field, the settings sheet), their painters (SwiftUI `Canvas`) and their
-  layout maths, `Resources/` the asset catalog (with the app icon), the
+  field, the settings sheet and its How to play page), their painters (SwiftUI
+  `Canvas`) and their layout maths, `Resources/` the asset catalog (with the app icon), the
   privacy manifest (`PrivacyInfo.xcprivacy`) and the Info.plist xcodegen
   writes.
 - `QixTests/`: the app's unit tests (the model, layout maths, key map,
