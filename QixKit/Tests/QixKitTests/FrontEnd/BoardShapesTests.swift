@@ -73,6 +73,15 @@ final class BoardShapesTests: XCTestCase {
         )
     }
 
+    func testARunEndingWhereTheNextRowsCellStartsDoesNotTakeIt() {
+        let board = boardWith([(0 ..< 1, 0 ..< 2, .fast), (1 ..< 2, 2 ..< 3, .fast)])
+
+        XCTAssertEqual(
+            BoardShapes.claimedRuns(board),
+            [cellRun(0, 0 ..< 2, .fast), cellRun(1, 2 ..< 3, .fast)]
+        )
+    }
+
     func testTheBorderOfAFreshBoardIsItsFourSides() {
         XCTAssertEqual(
             BoardShapes.borderSegments(Board(width: shapesW, height: shapesH)),

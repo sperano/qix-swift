@@ -85,12 +85,32 @@ final class ClaimFillTests: XCTestCase {
         XCTAssertNil(fill.fresh)
     }
 
-    func testABoardOfAnotherSizeStartsNothing() {
+    func testABoardOfAnotherWidthStartsNothing() {
         var fill = ClaimFill(board: Board(width: fillW, height: fillH))
         var larger = Board(width: fillW + 1, height: fillH)
         larger.setCell(x: 0, y: 0, to: fastCell)
+        // Off the seen board reads as `Board.outside`, a claimed cell: the extra column claimed
+        // too leaves the size check, not a lost claim, to stop the animation.
+        for y in 0 ..< fillH {
+            larger.setCell(x: fillW, y: y, to: Board.outside)
+        }
 
         fill.tick(larger)
+
+        XCTAssertNil(fill.fresh)
+    }
+
+    func testABoardOfAnotherHeightStartsNothing() {
+        var fill = ClaimFill(board: Board(width: fillW, height: fillH))
+        var taller = Board(width: fillW, height: fillH + 1)
+        taller.setCell(x: 0, y: 0, to: fastCell)
+        // Off the seen board reads as `Board.outside`, a claimed cell: the extra row claimed too
+        // leaves the size check, not a lost claim, to stop the animation.
+        for x in 0 ..< fillW {
+            taller.setCell(x: x, y: fillH, to: Board.outside)
+        }
+
+        fill.tick(taller)
 
         XCTAssertNil(fill.fresh)
     }

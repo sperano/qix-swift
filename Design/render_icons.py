@@ -67,6 +67,14 @@ COLOUR_TYPE_RGB = 2
 COLOUR_TYPE_RGBA = 6
 COMPRESSION_LEVEL = 9
 NO_FILTER = b"\x00"
+# The bytes per pixel of the colour types the check reads, 8 bits per channel.
+CHANNELS = {COLOUR_TYPE_RGB: 3, COLOUR_TYPE_RGBA: 4}
+NO_INTERLACE = 0
+# IHDR: width, height, bit depth, colour type, compression, filter and interlace methods.
+IHDR_FORMAT = ">IIBBBBB"
+# The scanline filter types (PNG specification, section 9.2); filtered bytes wrap at a byte.
+FILTER_NONE, FILTER_SUB, FILTER_UP, FILTER_AVERAGE, FILTER_PAETH = range(5)
+BYTE_VALUES = 256
 
 # name, keeps the background, greys
 VARIANTS = (("AppIcon", True, False), ("AppIcon-Dark", False, False), ("AppIcon-Tinted", False, True))
@@ -214,7 +222,7 @@ def chunk(kind, data):
 
 def header(keeps_alpha):
     colour_type = COLOUR_TYPE_RGBA if keeps_alpha else COLOUR_TYPE_RGB
-    return struct.pack(">IIBBBBB", SIZE, SIZE, BIT_DEPTH, colour_type, 0, 0, 0)
+    return struct.pack(IHDR_FORMAT, SIZE, SIZE, BIT_DEPTH, colour_type, 0, 0, NO_INTERLACE)
 
 
 def png(rgba, keeps_alpha):
@@ -226,24 +234,74 @@ def png(rgba, keeps_alpha):
     )
 
 
-def decoded(data):
-    """The header and the decompressed scanlines of a PNG, or None when it is not one."""
-    if not data.startswith(PNG_SIGNATURE):
-        return None
-    position, ihdr, idat = len(PNG_SIGNATURE), None, b""
+def chunks(data):
+    """The (type, body) of each chunk after the signature."""
+    position = len(PNG_SIGNATURE)
     while position + 8 <= len(data):
         (length,) = struct.unpack(">I", data[position : position + 4])
-        kind = data[position + 4 : position + 8]
-        body = data[position + 8 : position + 8 + length]
-        if kind == b"IHDR":
-            ihdr = body
-        elif kind == b"IDAT":
-            idat += body
+        yield data[position + 4 : position + 8], data[position + 8 : position + 8 + length]
         position += length + 12
+
+
+def paeth(left, up, up_left):
+    estimate = left + up - up_left
+    to_left, to_up, to_up_left = abs(estimate - left), abs(estimate - up), abs(estimate - up_left)
+    if to_left <= to_up and to_left <= to_up_left:
+        return left
+    return up if to_up <= to_up_left else up_left
+
+
+def unfiltered(kind, row, previous, channels):
+    """The pixel bytes of one scanline filtered with `kind`, given the row above's, or None for an
+    unknown filter type."""
+    if kind == FILTER_NONE:
+        return bytes(row)
+    if kind == FILTER_UP:
+        return bytes((byte + up) % BYTE_VALUES for byte, up in zip(row, previous))
+    if kind not in (FILTER_SUB, FILTER_AVERAGE, FILTER_PAETH):
+        return None
+    pixels = bytearray(row)
+    for i, byte in enumerate(row):
+        left = pixels[i - channels] if i >= channels else 0
+        up_left = previous[i - channels] if i >= channels else 0
+        if kind == FILTER_SUB:
+            predicted = left
+        elif kind == FILTER_AVERAGE:
+            predicted = (left + previous[i]) // 2
+        else:
+            predicted = paeth(left, previous[i], up_left)
+        pixels[i] = (byte + predicted) % BYTE_VALUES
+    return bytes(pixels)
+
+
+def decoded(data):
+    """The header and the pixel bytes, row by row with their filters undone, of an 8-bit
+    non-interlaced RGB or RGBA PNG, or None when `data` is not one or cannot be read."""
+    if not data.startswith(PNG_SIGNATURE):
+        return None
+    found = list(chunks(data))
+    ihdr = next((body for kind, body in found if kind == b"IHDR"), None)
+    if ihdr is None or len(ihdr) != struct.calcsize(IHDR_FORMAT):
+        return None
+    width, height, depth, colour_type, _, _, interlace = struct.unpack(IHDR_FORMAT, ihdr)
+    channels = CHANNELS.get(colour_type)
+    if depth != BIT_DEPTH or channels is None or interlace != NO_INTERLACE:
+        return None
     try:
-        return ihdr, zlib.decompress(idat)
+        raw = zlib.decompress(b"".join(body for kind, body in found if kind == b"IDAT"))
     except zlib.error:
         return None
+    stride = width * channels
+    if len(raw) != height * (stride + 1):
+        return None
+    rows, previous = [], bytes(stride)
+    for y in range(height):
+        start = y * (stride + 1)
+        previous = unfiltered(raw[start], raw[start + 1 : start + 1 + stride], previous, channels)
+        if previous is None:
+            return None
+        rows.append(previous)
+    return ihdr, b"".join(rows)
 
 
 def variants():
@@ -262,7 +320,8 @@ def write(directory):
 
 
 def check(directory):
-    """The names of the PNGs in `directory` whose pixels differ from their render."""
+    """The names of the PNGs in `directory` whose pixels differ from their render, however their
+    rows are filtered and compressed; one written with another colour type or bit depth differs."""
     stale = []
     for name, data in variants():
         path = directory / name

@@ -1,8 +1,9 @@
 import XCTest
 @testable import Qix
 
-/// `PrivacyInfo.xcprivacy`: no tracking, no data collected, and a reason for every API Apple asks
-/// one for. The App Privacy answers in App Store Connect ("Data Not Collected") must agree.
+/// `PrivacyInfo.xcprivacy`: no tracking, no data collected, and a reason for each required-reason
+/// API the shipped code uses, as far as `requiredReasonSymbols` finds them. The App Privacy answers
+/// in App Store Connect ("Data Not Collected") must agree.
 final class PrivacyManifestTests: XCTestCase {
     private static let manifestName = "PrivacyInfo"
     private static let manifestExtension = "xcprivacy"
@@ -15,7 +16,8 @@ final class PrivacyManifestTests: XCTestCase {
         // CA92.1: settings read and written by the app itself.
         "NSPrivacyAccessedAPICategoryUserDefaults": ["CA92.1"],
     ]
-    /// The symbols that put code in each required-reason category.
+    /// The symbols that put code in each required-reason category: the ones this codebase could
+    /// reach for, not Apple's whole list (`stat`, `fstat`, `statvfs` and others are not searched).
     private static let requiredReasonSymbols = [
         "NSPrivacyAccessedAPICategoryUserDefaults": ["UserDefaults", "AppStorage"],
         "NSPrivacyAccessedAPICategoryFileTimestamp": ["creationDate", "modificationDate", "ModificationDate"],
@@ -51,8 +53,8 @@ final class PrivacyManifestTests: XCTestCase {
         XCTAssertEqual(declared, Self.declaredReasons)
     }
 
-    /// A new use of a required-reason API fails here until the manifest declares it, and a
-    /// declaration the code no longer needs fails too.
+    /// A new use of one of `requiredReasonSymbols` fails here until the manifest declares its
+    /// category, and a declaration the code no longer needs fails too.
     func testTheDeclaredCategoriesAreTheOnesTheCodeUses() throws {
         let code = try Self.shippedSources.map(swiftSource).joined(separator: "\n")
         let used = Self.requiredReasonSymbols.filter { _, symbols in symbols.contains { code.contains($0) } }

@@ -25,6 +25,14 @@ IHDR_OFFSET = len(icons.PNG_SIGNATURE) + 8
 COLOUR_TYPE_OFFSET = IHDR_OFFSET + 9
 # The pixel sampled inside the fast claim, away from its border and the marker.
 INSIDE_FAST_CLAIM = (200, 800)
+# A filter type past the five the PNG specification defines.
+UNKNOWN_FILTER = 5
+# A bit depth the check does not read.
+SIXTEEN_BITS = 16
+ADAM7_INTERLACE = 1
+COLOUR_TYPE_PALETTE = 3
+# A zlib level other than the renderer's.
+FAST_COMPRESSION = 1
 
 PALETTE_SOURCE = """
     public static let playfieldBackground = RGBA(red: 6, green: 6, blue: 20)
@@ -62,13 +70,10 @@ def rendered():
         ihdr, raw = icons.decoded(data)
         width, height, _, colour_type = struct.unpack(">IIBB", ihdr[:10])
         channels = RGBA_CHANNELS if colour_type == icons.COLOUR_TYPE_RGBA else RGB_CHANNELS
-        stride = width * channels + 1
         pixels = []
-        for y in range(height):
-            row = raw[y * stride + 1 : (y + 1) * stride]
-            for x in range(width):
-                pixel = tuple(row[x * channels : (x + 1) * channels])
-                pixels.append(pixel if channels == RGBA_CHANNELS else pixel + (icons.CHANNEL_MAX,))
+        for i in range(0, width * height * channels, channels):
+            pixel = tuple(raw[i : i + channels])
+            pixels.append(pixel if channels == RGBA_CHANNELS else pixel + (icons.CHANNEL_MAX,))
         images[name] = (width, height, pixels)
     return images
 
@@ -79,6 +84,54 @@ IMAGES = rendered()
 def pixel(name, x, y):
     width, _, pixels = IMAGES[name]
     return pixels[y * width + x]
+
+
+def paeth(a, b, c):
+    """The Paeth predictor as the PNG specification writes it: a left, b up, c up and left."""
+    p = a + b - c
+    pa, pb, pc = abs(p - a), abs(p - b), abs(p - c)
+    if pa <= pb and pa <= pc:
+        return a
+    if pb <= pc:
+        return b
+    return c
+
+
+def filtered(kind, row, previous, channels):
+    """`row` filtered with `kind` against the row above, its filter type byte first; a kind the
+    specification does not define is written unfiltered."""
+    out = bytearray([kind])
+    for i, byte in enumerate(row):
+        a = row[i - channels] if i >= channels else 0
+        b = previous[i]
+        c = previous[i - channels] if i >= channels else 0
+        predictors = {
+            icons.FILTER_NONE: 0,
+            icons.FILTER_SUB: a,
+            icons.FILTER_UP: b,
+            icons.FILTER_AVERAGE: (a + b) // 2,
+            icons.FILTER_PAETH: paeth(a, b, c),
+        }
+        out.append((byte - predictors.get(kind, 0)) % icons.BYTE_VALUES)
+    return bytes(out)
+
+
+def with_idat(ihdr, idat):
+    """A PNG of the header `ihdr` and the compressed data `idat`."""
+    return icons.PNG_SIGNATURE + icons.chunk(b"IHDR", ihdr) + icons.chunk(b"IDAT", idat) + icons.chunk(b"IEND", b"")
+
+
+def encoded(ihdr, pixels, filters, level=FAST_COMPRESSION):
+    """A PNG of `pixels` under `ihdr`, the rows filtered in turn with the types of `filters`."""
+    width, height, _, colour_type = struct.unpack(">IIBB", ihdr[:10])
+    channels = RGBA_CHANNELS if colour_type == icons.COLOUR_TYPE_RGBA else RGB_CHANNELS
+    stride = width * channels
+    rows, previous = [], bytes(stride)
+    for y in range(height):
+        row = pixels[y * stride : (y + 1) * stride]
+        rows.append(filtered(filters[y % len(filters)], row, previous, channels))
+        previous = row
+    return with_idat(ihdr, zlib.compress(b"".join(rows), level))
 
 
 class SourceTests(unittest.TestCase):
@@ -141,7 +194,12 @@ class VariantTests(unittest.TestCase):
 
     def test_the_dark_icon_keeps_the_colours_of_the_light_one(self):
         self.assertEqual(pixel("AppIcon-Dark.png", *INSIDE_FAST_CLAIM), self.colours["fastFill"] + (255,))
-        self.assertEqual(pixel("AppIcon.png", *INSIDE_FAST_CLAIM), self.colours["fastFill"] + (255,))
+        background = self.colours["playfieldBackground"] + (255,)
+        _, _, light = IMAGES["AppIcon.png"]
+        _, _, dark = IMAGES["AppIcon-Dark.png"]
+        expected = [icons.TRANSPARENT if p == background else p for p in light]
+        self.assertEqual(sum(p != icons.TRANSPARENT for p in dark), sum(p != background for p in light))
+        self.assertTrue(dark == expected)
 
     def test_the_tinted_icon_is_grey(self):
         _, _, pixels = IMAGES["AppIcon-Tinted.png"]
@@ -165,29 +223,25 @@ class CheckTests(unittest.TestCase):
 
     def test_the_same_pixels_compressed_otherwise_pass(self):
         icons.write(self.path)
-        ihdr, raw = icons.decoded((self.path / "AppIcon.png").read_bytes())
-        recompressed = (
-            icons.PNG_SIGNATURE
-            + icons.chunk(b"IHDR", ihdr)
-            + icons.chunk(b"IDAT", zlib.compress(raw, 1))
-            + icons.chunk(b"IEND", b"")
-        )
-        (self.path / "AppIcon.png").write_bytes(recompressed)
+        ihdr, pixels = icons.decoded((self.path / "AppIcon.png").read_bytes())
+        (self.path / "AppIcon.png").write_bytes(encoded(ihdr, pixels, [icons.FILTER_NONE]))
+        self.assertEqual(icons.check(self.path), [])
+
+    def test_the_same_pixels_filtered_otherwise_pass(self):
+        icons.write(self.path)
+        kinds = [icons.FILTER_NONE, icons.FILTER_SUB, icons.FILTER_UP, icons.FILTER_AVERAGE, icons.FILTER_PAETH]
+        ihdr, pixels = icons.decoded((self.path / "AppIcon-Dark.png").read_bytes())
+        reencoded = encoded(ihdr, pixels, kinds)
+        self.assertTrue(icons.decoded(reencoded) == (ihdr, pixels), "the filters were not undone")
+        (self.path / "AppIcon-Dark.png").write_bytes(reencoded)
         self.assertEqual(icons.check(self.path), [])
 
     def test_a_changed_pixel_fails(self):
         icons.write(self.path)
-        data = dict(icons.variants())
-        ihdr, raw = icons.decoded(data["AppIcon-Dark.png"])
-        changed = bytearray(raw)
-        changed[1] ^= 1
-        tampered = (
-            icons.PNG_SIGNATURE
-            + icons.chunk(b"IHDR", ihdr)
-            + icons.chunk(b"IDAT", zlib.compress(bytes(changed)))
-            + icons.chunk(b"IEND", b"")
-        )
-        (self.path / "AppIcon-Dark.png").write_bytes(tampered)
+        ihdr, pixels = icons.decoded(dict(icons.variants())["AppIcon-Dark.png"])
+        changed = bytearray(pixels)
+        changed[0] ^= 1
+        (self.path / "AppIcon-Dark.png").write_bytes(encoded(ihdr, bytes(changed), [icons.FILTER_NONE]))
         self.assertEqual(icons.check(self.path), ["AppIcon-Dark.png"])
         self.assertEqual(icons.main(["--check", "--directory", str(self.path)]), 1)
 
@@ -196,6 +250,30 @@ class CheckTests(unittest.TestCase):
         (self.path / "AppIcon.png").unlink()
         (self.path / "AppIcon-Tinted.png").write_bytes(b"not a png")
         self.assertEqual(icons.check(self.path), ["AppIcon.png", "AppIcon-Tinted.png"])
+
+    def test_a_png_the_check_cannot_read_fails(self):
+        icons.write(self.path)
+        ihdr, pixels = icons.decoded((self.path / "AppIcon-Tinted.png").read_bytes())
+        width, height, _, colour_type = struct.unpack(">IIBB", ihdr[:10])
+
+        def header(depth=icons.BIT_DEPTH, colour=colour_type, interlace=icons.NO_INTERLACE):
+            return struct.pack(icons.IHDR_FORMAT, width, height, depth, colour, 0, 0, interlace)
+
+        unreadable = {
+            "a damaged IDAT": with_idat(ihdr, b"garbage"),
+            "no IHDR": icons.PNG_SIGNATURE + icons.chunk(b"IEND", b""),
+            "a short IHDR": icons.PNG_SIGNATURE + icons.chunk(b"IHDR", ihdr[:-1]),
+            "sixteen bits a channel": with_idat(header(depth=SIXTEEN_BITS), zlib.compress(b"")),
+            "a palette": with_idat(header(colour=COLOUR_TYPE_PALETTE), zlib.compress(b"")),
+            "Adam7 interlacing": with_idat(header(interlace=ADAM7_INTERLACE), zlib.compress(b"")),
+            "rows missing": with_idat(ihdr, zlib.compress(icons.NO_FILTER)),
+            "an unknown filter type": encoded(ihdr, pixels, [UNKNOWN_FILTER]),
+        }
+        for case, data in unreadable.items():
+            with self.subTest(case):
+                self.assertIsNone(icons.decoded(data))
+                (self.path / "AppIcon-Tinted.png").write_bytes(data)
+                self.assertEqual(icons.check(self.path), ["AppIcon-Tinted.png"])
 
     def test_the_committed_icons_are_the_render(self):
         self.assertEqual(icons.check(icons.ICON_SET), [])

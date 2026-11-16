@@ -107,15 +107,20 @@ private struct Pixels {
     private let height: Int
 
     init(_ image: CGImage) throws {
-        width = image.width
-        height = image.height
+        let (width, height) = (image.width, image.height)
         var data = [UInt8](repeating: 0, count: width * height * Self.bytesPerPixel)
-        let context = try XCTUnwrap(CGContext(
-            data: &data, width: width, height: height, bitsPerComponent: Self.bitsPerComponent,
-            bytesPerRow: width * Self.bytesPerPixel, space: CGColorSpace(name: CGColorSpace.sRGB)!,
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ))
-        context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        // The context writes through its pointer when it draws, so it must not outlive the buffer.
+        try data.withUnsafeMutableBytes { buffer in
+            let context = try XCTUnwrap(CGContext(
+                data: buffer.baseAddress, width: width, height: height,
+                bitsPerComponent: Self.bitsPerComponent,
+                bytesPerRow: width * Self.bytesPerPixel, space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            ))
+            context.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        self.width = width
+        self.height = height
         self.data = data
     }
 
