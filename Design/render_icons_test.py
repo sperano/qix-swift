@@ -236,6 +236,23 @@ class CheckTests(unittest.TestCase):
         (self.path / "AppIcon-Dark.png").write_bytes(reencoded)
         self.assertEqual(icons.check(self.path), [])
 
+    def test_the_same_pixels_split_across_idat_chunks_pass(self):
+        icons.write(self.path)
+        single = (self.path / "AppIcon.png").read_bytes()
+        ihdr = next(body for kind, body in icons.chunks(single) if kind == b"IHDR")
+        stream = b"".join(body for kind, body in icons.chunks(single) if kind == b"IDAT")
+        half = len(stream) // 2
+        split = (
+            icons.PNG_SIGNATURE
+            + icons.chunk(b"IHDR", ihdr)
+            + icons.chunk(b"IDAT", stream[:half])
+            + icons.chunk(b"IDAT", stream[half:])
+            + icons.chunk(b"IEND", b"")
+        )
+        self.assertEqual(icons.decoded(split), icons.decoded(single))
+        (self.path / "AppIcon.png").write_bytes(split)
+        self.assertEqual(icons.check(self.path), [])
+
     def test_a_changed_pixel_fails(self):
         icons.write(self.path)
         ihdr, pixels = icons.decoded(dict(icons.variants())["AppIcon-Dark.png"])
@@ -256,6 +273,8 @@ class CheckTests(unittest.TestCase):
         ihdr, pixels = icons.decoded((self.path / "AppIcon-Tinted.png").read_bytes())
         width, height, _, colour_type = struct.unpack(">IIBB", ihdr[:10])
 
+        # The depth and interlace cases hold rows of the 8-bit length, so only their header can
+        # reject them.
         def header(depth=icons.BIT_DEPTH, colour=colour_type, interlace=icons.NO_INTERLACE):
             return struct.pack(icons.IHDR_FORMAT, width, height, depth, colour, 0, 0, interlace)
 
@@ -263,9 +282,9 @@ class CheckTests(unittest.TestCase):
             "a damaged IDAT": with_idat(ihdr, b"garbage"),
             "no IHDR": icons.PNG_SIGNATURE + icons.chunk(b"IEND", b""),
             "a short IHDR": icons.PNG_SIGNATURE + icons.chunk(b"IHDR", ihdr[:-1]),
-            "sixteen bits a channel": with_idat(header(depth=SIXTEEN_BITS), zlib.compress(b"")),
+            "sixteen bits a channel": encoded(header(depth=SIXTEEN_BITS), pixels, [icons.FILTER_NONE]),
             "a palette": with_idat(header(colour=COLOUR_TYPE_PALETTE), zlib.compress(b"")),
-            "Adam7 interlacing": with_idat(header(interlace=ADAM7_INTERLACE), zlib.compress(b"")),
+            "Adam7 interlacing": encoded(header(interlace=ADAM7_INTERLACE), pixels, [icons.FILTER_NONE]),
             "rows missing": with_idat(ihdr, zlib.compress(icons.NO_FILTER)),
             "an unknown filter type": encoded(ihdr, pixels, [UNKNOWN_FILTER]),
         }
