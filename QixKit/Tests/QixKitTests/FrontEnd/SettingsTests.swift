@@ -33,6 +33,10 @@ private let belowOpacityPercent = 0
 private let pastFloat = "1e39"
 private let belowFloat = "-1e39"
 
+/// Numbers past `Double`'s range, as stored, either side of it.
+private let pastDouble = "1e400"
+private let belowDouble = "-1e400"
+
 /// Converts percent points to a fraction.
 private let pointsPerUnit: Float = 100
 
@@ -195,6 +199,18 @@ final class SettingsTests: XCTestCase {
             XCTAssertEqual(settings.stickSize.get, bound(StickSize.range), number)
             XCTAssertEqual(settings.controlsOpacity.get, bound(ControlsOpacity.range), number)
             XCTAssertTrue(settings.sounds, number)
+        }
+    }
+
+    func testAStoredFractionPastDoubleFailsTheWholeValue() {
+        for number in [pastDouble, belowDouble] {
+            for field in ["threshold", "stickSize", "controlsOpacity"] {
+                let json = #"{"\#(field)": \#(number), "sounds": true}"#
+
+                XCTAssertThrowsError(try decoded(json), json) { error in
+                    XCTAssertTrue(error is DecodingError, "\(json): \(error)")
+                }
+            }
         }
     }
 
