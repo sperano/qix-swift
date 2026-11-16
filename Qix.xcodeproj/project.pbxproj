@@ -43,16 +43,20 @@
 		9F5A93229BBB9730CD88D5D1 /* BoardPainter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F904C99103F9B07ECCA5439C /* BoardPainter.swift */; };
 		9FFF71432D4684D71F4E67C0 /* QixKit in Frameworks */ = {isa = PBXBuildFile; productRef = E4A83BE8AAF7589ED69C1426 /* QixKit */; };
 		A2116F5024360C2BC4C50BC3 /* DisplayLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = E94BFCA3ED2C644899FCC7AE /* DisplayLink.swift */; };
+		A323A5E019A98F18CAAE7E46 /* SoundPlayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41ECE2CEEED76541D18D197 /* SoundPlayerTests.swift */; };
 		A3F8CE1077F693C9AD8B7865 /* ControlsLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C05FF3E6F7532EF6ACF664F /* ControlsLayout.swift */; };
 		A8E7F9FD091A5539DF08E00D /* ControlsLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A1F8B59059A7B8B61836495 /* ControlsLayoutTests.swift */; };
 		AD460C934EA3CF6A5755692D /* PlayfieldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA8E5B4E700944791713BEA /* PlayfieldView.swift */; };
+		AFCC686CC6CCDFD75919DBAE /* SoundPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9D7D7C96E704A8B175834D /* SoundPlayer.swift */; };
 		B037021ECD2AE7C46DC37B78 /* SnapshotTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87184851F7C012D05670177B /* SnapshotTestCase.swift */; };
 		B0654D729750AE57D95B9831 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */; };
 		B210378D7567A37F72997811 /* InfoPlistTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748EF8D16B797F67B5E74167 /* InfoPlistTests.swift */; };
 		B9E318F113191D889CB7EB5E /* GameModelSteeringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */; };
+		BE4BB7DEF915CF686BC5FF90 /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67861757DC8162197AD394D /* HapticPlayer.swift */; };
 		BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970969D3E728AF18724145CE /* HudLayout.swift */; };
 		C0CD96F79D61CE30B2558C9F /* QixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F82F7C3BFD2F9B144A417 /* QixApp.swift */; };
 		C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF306261B821BB6452B7994 /* GameView.swift */; };
+		CC9FAEB7CBE9DECF0F6E66EC /* GameModelFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0415FBDF5CBE687487AD9C /* GameModelFeedbackTests.swift */; };
 		DF018C588125DD90A3CF3B2A /* BoardImageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB4ED1EC58F0FC6FAAEC82AF /* BoardImageTests.swift */; };
 		E04C7DEB2A0E3A9978E2290E /* PlayfieldSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D8772754A7D646D94684732 /* PlayfieldSnapshotTests.swift */; };
 		EA1366ED55A171D84B5477D0 /* PlayfieldLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7978FF1DF1EBF0E296B9A6A /* PlayfieldLayout.swift */; };
@@ -86,9 +90,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0F9D7D7C96E704A8B175834D /* SoundPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPlayer.swift; sourceTree = "<group>"; };
 		126C34514E33A5F4F618389C /* QixSnapshotTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QixSnapshotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		160DB06177DA2CD5EE7DC894 /* QixUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = QixUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ADA0E2E22B15D97CC13F1A1 /* PaletteColours.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaletteColours.swift; sourceTree = "<group>"; };
+		1B0415FBDF5CBE687487AD9C /* GameModelFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelFeedbackTests.swift; sourceTree = "<group>"; };
 		1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		2421F3A3636D246F9AA07658 /* QixKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QixKit; path = QixKit; sourceTree = SOURCE_ROOT; };
 		26EEF4C324013F6BE2157A6D /* Qix.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Qix.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -124,6 +130,7 @@
 		98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelSteeringTests.swift; sourceTree = "<group>"; };
 		9DD14D7E4982F3918FBAFE6A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AEA8E5B4E700944791713BEA /* PlayfieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldView.swift; sourceTree = "<group>"; };
+		B41ECE2CEEED76541D18D197 /* SoundPlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPlayerTests.swift; sourceTree = "<group>"; };
 		C02F82F7C3BFD2F9B144A417 /* QixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QixApp.swift; sourceTree = "<group>"; };
 		C1D64DE8964BC14FEF29F78A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C9EB7EB28F077758083BEECC /* HardwareKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareKeyboard.swift; sourceTree = "<group>"; };
@@ -137,6 +144,7 @@
 		EFF306261B821BB6452B7994 /* GameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		F19108BF37F7465FDDB84E78 /* GamePad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePad.swift; sourceTree = "<group>"; };
 		F5D3B04BFAB9A390F6C97008 /* GamePadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamePadTests.swift; sourceTree = "<group>"; };
+		F67861757DC8162197AD394D /* HapticPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticPlayer.swift; sourceTree = "<group>"; };
 		F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenLayoutTests.swift; sourceTree = "<group>"; };
 		F7978FF1DF1EBF0E296B9A6A /* PlayfieldLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldLayout.swift; sourceTree = "<group>"; };
 		F904C99103F9B07ECCA5439C /* BoardPainter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardPainter.swift; sourceTree = "<group>"; };
@@ -177,6 +185,7 @@
 				CB4ED1EC58F0FC6FAAEC82AF /* BoardImageTests.swift */,
 				6A1F8B59059A7B8B61836495 /* ControlsLayoutTests.swift */,
 				8587D2B62917CD9A6E872F0E /* DisplayLinkTests.swift */,
+				1B0415FBDF5CBE687487AD9C /* GameModelFeedbackTests.swift */,
 				CD670B1048035B7CAD809A0D /* GameModelHighScoresTests.swift */,
 				CB1E9A8E8F389B17BDD5E961 /* GameModelSettingsTests.swift */,
 				98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */,
@@ -190,6 +199,7 @@
 				3711604D715BE49DC3F21337 /* LaunchOptionsTests.swift */,
 				3830FD38DCA5A086873C474F /* PlayfieldLayoutTests.swift */,
 				F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */,
+				B41ECE2CEEED76541D18D197 /* SoundPlayerTests.swift */,
 			);
 			path = QixTests;
 			sourceTree = "<group>";
@@ -223,6 +233,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		4E294A1D17A7F1F7F806E142 /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				F67861757DC8162197AD394D /* HapticPlayer.swift */,
+				0F9D7D7C96E704A8B175834D /* SoundPlayer.swift */,
+			);
+			path = Feedback;
+			sourceTree = "<group>";
+		};
 		5904F3643B9F3DA887C2A513 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -235,6 +254,7 @@
 			isa = PBXGroup;
 			children = (
 				1D01F90AE81C56CA8C400695 /* App */,
+				4E294A1D17A7F1F7F806E142 /* Feedback */,
 				D23E2D3C78CF1A295D7C7421 /* Input */,
 				5904F3643B9F3DA887C2A513 /* Model */,
 				2FEA00345B50C1FE188A7F0D /* Resources */,
@@ -475,6 +495,7 @@
 				B0654D729750AE57D95B9831 /* GameModel.swift in Sources */,
 				8775ABE97A93EC54B2C4E657 /* GamePad.swift in Sources */,
 				C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */,
+				BE4BB7DEF915CF686BC5FF90 /* HapticPlayer.swift in Sources */,
 				1144B39393E6E8B0AD422B78 /* HardwareKeyboard.swift in Sources */,
 				FEB05BB189B62778002B5602 /* HudButton.swift in Sources */,
 				BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */,
@@ -490,6 +511,7 @@
 				4B19AECB61B553EAD349A6B7 /* ScreenLayout.swift in Sources */,
 				93820036A2AB22D130243315 /* ScreenView.swift in Sources */,
 				96E221ACF46E01BA607AF2CC /* SettingsView.swift in Sources */,
+				AFCC686CC6CCDFD75919DBAE /* SoundPlayer.swift in Sources */,
 				0085B842C31FAFA394D7ECE8 /* TouchZone.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -523,6 +545,7 @@
 				DF018C588125DD90A3CF3B2A /* BoardImageTests.swift in Sources */,
 				A8E7F9FD091A5539DF08E00D /* ControlsLayoutTests.swift in Sources */,
 				12217AE652F8C4F8F9F8250D /* DisplayLinkTests.swift in Sources */,
+				CC9FAEB7CBE9DECF0F6E66EC /* GameModelFeedbackTests.swift in Sources */,
 				76801EB092FE76286E9A9535 /* GameModelHighScoresTests.swift in Sources */,
 				2118190879D45C171BA88100 /* GameModelSettingsTests.swift in Sources */,
 				B9E318F113191D889CB7EB5E /* GameModelSteeringTests.swift in Sources */,
@@ -536,6 +559,7 @@
 				6334C008F9E6A5DDF4C30B24 /* LaunchOptionsTests.swift in Sources */,
 				70DBC6CECE59382DA32EAF0E /* PlayfieldLayoutTests.swift in Sources */,
 				556E41A9FB85D20776FB01AB /* ScreenLayoutTests.swift in Sources */,
+				A323A5E019A98F18CAAE7E46 /* SoundPlayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

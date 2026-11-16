@@ -15,9 +15,11 @@ with the button in the HUD. The title screen lists the ten best scores; a game
 that makes the table asks for three initials, typed on the keyboard. The gear
 on the title screen opens the settings: the share of the board that clears a
 level (50 to 90 %), the starting lives, the control scheme, a left-handed swap
-of the touch controls, the stick's size and the controls' opacity, haptics and
-sounds (stored, not used yet). Rule changes apply to the next game. The
-settings and the high scores are kept between launches.
+of the touch controls, the stick's size and the controls' opacity, haptics (on
+by default: a tick on a turn and on leaving the border, a bump on a refused
+step, a success on a claim, an error on a death) and sounds (off by default:
+qix-rs's synthesised tones, muted by the silent switch). Rule changes apply to
+the next game. The settings and the high scores are kept between launches.
 
 | Key | Game controller | |
 | --- | --- | --- |

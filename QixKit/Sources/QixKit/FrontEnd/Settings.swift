@@ -83,7 +83,7 @@ public struct Settings: Hashable, Sendable {
     public var stickSize: StickSize
     /// The opacity of the touch controls.
     public var controlsOpacity: ControlsOpacity
-    /// The Taptic Engine plays on the game's events.
+    /// The Taptic Engine plays on the game's events, the turns and the refused steps (`HapticCues`).
     public var haptics: Bool
     /// The game's sounds play.
     public var sounds: Bool
