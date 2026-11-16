@@ -43,8 +43,9 @@ jobs:
       - name: Tests and coverage
         # Fails when the package's own tests cover less than the minimum in Scripts/coverage.sh.
         run: make coverage
-      - name: Coverage gate and icon renderer tests
-        # The gate's failure path, which a well-covered package never takes, and the icon renderer.
+      - name: Coverage gate, icon renderer and App Store listing tests
+        # The gate's failure path, which a well-covered package never takes, the icon renderer, and
+        # the listing and release settings the release reads.
         run: make test-scripts
       - name: Check the app icons are up to date
         # The PNGs in the asset catalog are what Design/render_icons.py draws from the palette.

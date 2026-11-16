@@ -58,7 +58,17 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   tests. Change the icon there and run `make icons`; never edit the PNGs.
 - `Scripts/`: `coverage.sh` (the package's coverage gate, tested by
   `coverage_test.sh`), `select-xcode.sh` and `ci-simulators.sh` (CI's Xcode
-  and simulator).
+  and simulator), and the release's: `screenshots.sh` (the App Store
+  screenshots, through `QixUITests/ScreenshotUITests.swift`, which skips
+  otherwise), `upload-listing.sh` (fastlane deliver) and `app_store_test.py`
+  (the checks of the listing and the release settings).
+- `AppStore/`: the App Store listing in fastlane deliver's layout
+  (`metadata/<locale>/` one file per field, English only like the app;
+  `Deliverfile`, `age_rating.json`, `Gemfile` and its lock for the upload) and
+  `ExportOptions.plist` for `.github/workflows/release.yml`, which archives a
+  `v<MARKETING_VERSION>` tag and uploads it to TestFlight. `PRIVACY.md` is the
+  privacy policy the listing links to. The store name avoids "Qix", Taito's
+  trademark. README's "Releasing" has the steps.
 
 ## Commands
 
@@ -67,7 +77,7 @@ patterns (tooling, snapshot tests, Makefile targets) come from
 | `make lint` | SwiftFormat in check mode, then SwiftLint `--strict` | Linux, macOS |
 | `make format` | SwiftFormat rewrites, then SwiftLint reports | Linux, macOS |
 | `make coverage` | `swift test` in `QixKit` with coverage; fails below 90 % of `QixKit/Sources` | Linux, macOS |
-| `make test-scripts` | `Scripts/coverage_test.sh` (the coverage gate on fixture exports) and `Design/render_icons_test.py` | Linux, macOS |
+| `make test-scripts` | `Scripts/coverage_test.sh` (the coverage gate on fixture exports), `Design/render_icons_test.py` and `Scripts/app_store_test.py` | Linux, macOS |
 | `make icons` | `Design/render_icons.py`: renders the app icon's PNGs | Linux, macOS |
 | `make check-icons` | fails when a committed icon PNG is not what `Design/render_icons.py` draws | Linux, macOS |
 | `make check-project` | `xcodegen generate`, fails when `Qix.xcodeproj` or `Qix/Resources/Info.plist` changed | Linux, macOS |

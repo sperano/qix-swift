@@ -1,0 +1,14 @@
+Claim the playfield one line at a time. Leave the safety of the border and draw a line through open space; close it back onto the border and the side without the enemy is yours. Claim enough of the field to clear the level.
+
+The open field is not empty. A tangle of lines roams it, and touching it or the line you are drawing costs a life. Sparks run along the border and over your finished lines, and stopping halfway lights a fuse that burns along your line toward you. Draw fast to stay out of danger, or draw slowly for double points.
+
+• The rules of the 1981 arcade game, with its fill animation, flickering lines and sprites
+• A floating stick under one thumb and a Slow button under the other, so your fingers never cover the board
+• Or follow the finger: touch the playfield and the marker heads for the point just above it
+• A left-handed layout, and a choice of stick size and control opacity
+• Clear a level at anything from 50 to 90 % of the board, and choose the starting lives
+• Your ten best scores, with three initials each
+• Haptics on turns, claims and deaths; synthesised arcade sounds if you want them, muted by the silent switch
+• A demo game on the title screen and a How to play page in the settings
+• Hardware keyboards and game controllers
+• No ads, no in-app purchases, no account, no tracking and no analytics: the game works offline and never sends anything anywhere
