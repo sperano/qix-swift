@@ -13,6 +13,9 @@ private let centre = CGPoint(x: 100, y: 100)
 /// 1.2e-8 off 0.7.
 private let opacityEpsilon = 1e-6
 
+/// Tolerance for comparing screen coordinates, in points.
+private let pointEpsilon: CGFloat = 1e-9
+
 /// The standard stick's layout, away from any board.
 private let standard = ControlsLayout(in: .zero, beside: .zero)
 
@@ -115,8 +118,8 @@ final class ControlsLayoutTests: XCTestCase {
     func testTheKnobStaysOnTheRimTowardsAThumbBeyondIt() {
         let knob = standard.knob(centre: centre, thumb: CGPoint(x: 160, y: 180))
 
-        XCTAssertEqual(knob.x, 100 + 0.6 * 44, accuracy: opacityEpsilon)
-        XCTAssertEqual(knob.y, 100 + 0.8 * 44, accuracy: opacityEpsilon)
+        XCTAssertEqual(knob.x, 100 + 0.6 * 44, accuracy: pointEpsilon)
+        XCTAssertEqual(knob.y, 100 + 0.8 * 44, accuracy: pointEpsilon)
     }
 
     /// The thumb of `testTheKnobStaysOnTheRimTowardsAThumbBeyondIt`, 50 points away: inside the

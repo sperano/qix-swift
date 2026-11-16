@@ -18,6 +18,9 @@ private let idleFrames: UInt32 = 10
 /// Where the stick's thumb lands.
 private let stickPoint = CGPoint(x: 60, y: 200)
 
+/// Where the Slow button's thumb lands.
+private let slowPoint = CGPoint(x: 800, y: 200)
+
 /// A stand-in for a `UITouch`: only its identity counts.
 private final class Finger: Sendable {}
 
@@ -148,8 +151,9 @@ final class GameModelSettingsTests: XCTestCase {
     }
 
     func testOpeningTheSettingsLetsGoOfTheTouchesHeld() {
-        model.touch(.began(touch: ObjectIdentifier(finger), on: .stick, at: stickPoint))
+        model.touch(.began(touch: ObjectIdentifier(finger), on: .slow, at: slowPoint))
         XCTAssertNotEqual(model.touches, TouchControls())
+        XCTAssertEqual(model.loop.controls.held, [.slow])
 
         model.openSettings()
 
