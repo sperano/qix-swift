@@ -4,7 +4,8 @@ import QixKit
 /// Where the touch controls sit and how they look: the stick in the zone left of the board and the
 /// Slow button in the zone right of it, swapped when left-handed, each the full height of the
 /// screen less a clearance from its edges, where the system's gestures start, and clear of the
-/// board; the stick at the size and the controls at the opacity the settings choose.
+/// board; the stick at the size and the controls at the opacity the settings choose. Following the
+/// finger, the board is the steering's zone and there is no stick.
 struct ControlsLayout: Equatable {
     /// Gap between a zone and the edges of the safe area, in points: a thumb in a zone does not
     /// start a system gesture.
@@ -23,14 +24,21 @@ struct ControlsLayout: Equatable {
     static let slowLabelShare: CGFloat = 0.45
     /// The width of the outlines, in points.
     static let lineWidth: CGFloat = 2
+    /// The radius of the ring the steering's target is drawn as, in points: about the marker's
+    /// size, so it shows around the marker on it.
+    static let cursorRadius: CGFloat = 8
+    /// The width of the target's ring, in points.
+    static let cursorWidth: CGFloat = 1.5
 
     /// The opacity of a control while not touched, as a fraction of its opacity while touched.
     static let idleShare: Double = 0.35
     /// The opacity of the stick's base fill, as a fraction of its outline's.
     static let baseFillShare: Double = 0.3
 
-    /// The stick's zone, empty when the board leaves no room on its side.
+    /// The stick's zone, empty when the board leaves no room on its side or the finger steers.
     let stick: CGRect
+    /// The board's zone, where a finger steers, empty unless the finger steers.
+    let board: CGRect
     /// The Slow button's zone, empty when the board leaves no room on its side.
     let slow: CGRect
     /// The radius of the stick's base, in points.
@@ -51,7 +59,9 @@ struct ControlsLayout: Equatable {
         let right = CGRect(
             x: rightX, y: top, width: max(available.maxX - Self.edgeClearance - rightX, 0), height: height
         )
-        stick = settings.leftHanded ? right : left
+        let followsTheFinger = settings.controlScheme == .followTheFinger
+        stick = followsTheFinger ? .zero : (settings.leftHanded ? right : left)
+        board = followsTheFinger ? field : .zero
         slow = settings.leftHanded ? left : right
         let scale = CGFloat(settings.stickSize.get)
         baseRadius = Self.standardBaseRadius * scale

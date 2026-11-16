@@ -23,6 +23,21 @@ private func playingLoop(file: StaticString = #filePath, line: UInt = #line) -> 
     return loop
 }
 
+/// A loop over a free full board in play, its Qix in the top-left cell, its marker at `(80, 120)`.
+private func steeringLoop(file: StaticString = #filePath, line: UInt = #line) -> GameLoop {
+    let board = Board(width: Tuning.boardW, height: Tuning.boardH)
+    var loop = GameLoop(session: Session(game: Game(board: board, qix: [qixAt((0, 0))], sparx: [], rng: Rng(seed: 0))))
+    loop.controls.press(.confirm)
+    loop.advance(frame60)
+    XCTAssertEqual(loop.session.state, .playing, file: file, line: line)
+    return loop
+}
+
+/// The aim at lattice point `(80, y)`, above the marker of `steeringLoop`.
+private func aimUp(_ y: UInt16) -> Vec2 {
+    Vec2(Point(x: 80, y: y))
+}
+
 final class GameLoopTests: XCTestCase {
     func testAFrameRunsTheTicksItOwes() {
         var loop = playingLoop()
@@ -263,5 +278,72 @@ final class GameLoopHoldTests: XCTestCase {
         loop.setRules(Rules(startingLives: StartingLives(ruledLives)))
 
         XCTAssertEqual(loop.session.game.lives, ruledLives)
+    }
+}
+
+/// The follow-the-finger steering, applied by the loop.
+final class GameLoopSteeringTests: XCTestCase {
+    func testTheSteeringDrawsFastInPlay() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(100))
+
+        loop.advance(Float(Tuning.markerStepTicks) * frame60)
+
+        XCTAssertEqual(loop.session.game.marker.pos, Point(x: 80, y: 119))
+        XCTAssertEqual(loop.session.game.stix?.kinds, [.fast])
+    }
+
+    func testTheSteeringDrawsSlowWhileSlowIsHeld() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(100))
+        loop.controls.setTouch([.slow])
+
+        for _ in 0 ..< Tuning.slowStepTicks {
+            loop.advance(frame60)
+        }
+
+        XCTAssertEqual(loop.session.game.marker.pos, Point(x: 80, y: 119))
+        XCTAssertEqual(loop.session.game.stix?.kinds, [.slow])
+    }
+
+    func testAHeldDirectionWinsOverTheSteering() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(100))
+        loop.controls.keyDown(.left)
+
+        loop.advance(Float(Tuning.markerStepTicks) * frame60)
+
+        XCTAssertEqual(loop.session.game.marker.pos, Point(x: 79, y: 120))
+        XCTAssertNil(loop.session.game.stix)
+    }
+
+    /// A frame of `Timestep.maxTicksPerFrame` ticks would take the marker two steps with one
+    /// direction for the frame: steered afresh each tick, it stops on the target one step away.
+    func testTheSteeringIsAskedAtEachTickOfAFrame() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(119))
+
+        XCTAssertEqual(loop.advance(Float(FixedTimestep.maxTicksPerFrame) * frame60), FixedTimestep.maxTicksPerFrame)
+
+        XCTAssertEqual(loop.session.game.marker.pos, Point(x: 80, y: 119))
+    }
+
+    func testOutOfPlayTheSteeringIsLeftAlone() {
+        var loop = titleLoop()
+        loop.steering.steer(towards: aimUp(0))
+        let steering = loop.steering
+
+        loop.advance(frame30)
+
+        XCTAssertEqual(loop.steering, steering)
+    }
+
+    func testSuspendingDropsTheAim() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(100))
+
+        loop.suspend()
+
+        XCTAssertEqual(loop.steering, TouchSteering())
     }
 }

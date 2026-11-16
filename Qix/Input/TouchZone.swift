@@ -7,8 +7,9 @@ import UIKit
 enum TouchEvent: Equatable {
     case began(touch: ObjectIdentifier, on: TouchControl, at: CGPoint)
     case moved(touch: ObjectIdentifier, to: CGPoint)
-    /// The touch lifted or was cancelled.
     case ended(touch: ObjectIdentifier)
+    /// The system took the touch over: it did not lift.
+    case cancelled(touch: ObjectIdentifier)
 }
 
 /// The zone of a touch control: a clear view over `zone` that hands each of its touches to
@@ -25,6 +26,7 @@ struct TouchZone: UIViewRepresentable {
         switch control {
         case .stick: "stick"
         case .slow: "slow"
+        case .board: "board"
         }
     }
 
@@ -33,6 +35,7 @@ struct TouchZone: UIViewRepresentable {
         switch control {
         case .stick: "Stick"
         case .slow: "Slow"
+        case .board: "Board"
         }
     }
 
@@ -44,6 +47,7 @@ struct TouchZone: UIViewRepresentable {
     }
 
     func updateUIView(_ view: TouchZoneView, context _: Context) {
+        view.control = control
         view.origin = zone.origin
         view.onTouch = onTouch
     }
@@ -51,7 +55,8 @@ struct TouchZone: UIViewRepresentable {
 
 /// The view that takes a zone's touches, several at once.
 final class TouchZoneView: UIView {
-    let control: TouchControl
+    /// The control the zone's touches land on: the board's moves with the layout.
+    var control: TouchControl
     /// Where the view's top-left corner is in the playfield's coordinates.
     var origin: CGPoint = .zero
     var onTouch: @MainActor (TouchEvent) -> Void = { _ in }
@@ -83,16 +88,14 @@ final class TouchZoneView: UIView {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
-        end(touches)
+        for touch in touches {
+            onTouch(.ended(touch: ObjectIdentifier(touch)))
+        }
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
-        end(touches)
-    }
-
-    private func end(_ touches: Set<UITouch>) {
         for touch in touches {
-            onTouch(.ended(touch: ObjectIdentifier(touch)))
+            onTouch(.cancelled(touch: ObjectIdentifier(touch)))
         }
     }
 

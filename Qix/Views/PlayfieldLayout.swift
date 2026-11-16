@@ -35,6 +35,11 @@ struct PlayfieldLayout: Equatable {
         field.width / Self.boardWidth
     }
 
+    /// Where the board is, for the touches aiming at it.
+    var boardFrame: BoardFrame {
+        BoardFrame(origin: Vec2(field.origin), pointsPerCell: Float(scale))
+    }
+
     /// The screen position of lattice point `point`.
     func position(_ point: Point) -> CGPoint {
         position(x: CGFloat(point.x), y: CGFloat(point.y))

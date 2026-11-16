@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The whole screen: the board letterboxed on the backdrop with the HUD above it, the screen of the
 /// session's state over the board, the HUD's button, and the touch controls on each side of the
-/// board, as the settings place them. A tap anywhere but on a control confirms.
+/// board, as the settings place them, and over it when the finger steers. A tap anywhere but on a
+/// control confirms, and on the board's zone out of play (`TouchControls`).
 struct PlayfieldView: View {
     /// What UI tests find the board by.
     static let playfieldIdentifier = "playfield"
@@ -27,6 +28,7 @@ struct PlayfieldView: View {
                     .onTapGesture { onTap() }
                 zone(.stick, controls.stick)
                 zone(.slow, controls.slow)
+                zone(.board(layout.boardFrame), controls.board)
             }
         }
         .background(Palette.backdrop)
@@ -46,7 +48,10 @@ struct PlayfieldView: View {
             Canvas { context, _ in
                 BoardPainter.paint(&context, scene, layout)
                 HudPainter.paint(&context, scene.hud, in: layout.hud)
-                ControlsPainter.paint(&context, stick: scene.stick, slowHeld: scene.slowHeld, controls)
+                ControlsPainter.paint(
+                    &context, stick: scene.stick, slowHeld: scene.slowHeld,
+                    cursor: scene.cursor.map { layout.position($0) }, controls
+                )
             }
             .accessibilityHidden(true)
             if let screen = scene.screen {

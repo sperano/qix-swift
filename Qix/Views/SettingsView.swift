@@ -69,6 +69,7 @@ struct SettingsView: View {
             ) {
                 LabeledContent("Stick size", value: "\(settings.stickSizePercent)%")
             }
+            .disabled(settings.controlScheme != .stick)
             .accessibilityIdentifier("stickSize")
             Stepper(
                 value: $settings.opacityPercent,
@@ -81,7 +82,10 @@ struct SettingsView: View {
         } header: {
             Text("Touch controls")
         } footer: {
-            Text("Left-handed puts the stick right of the board and the Slow button left of it.")
+            Text(
+                "Left-handed puts the stick right of the board and the Slow button left of it. "
+                    + "Following the finger, the marker heads for a point just above the finger on the board."
+            )
         }
     }
 

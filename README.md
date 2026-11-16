@@ -41,8 +41,11 @@ side for a thumb, so the controls never cover the board.
   more points.
 - **Stopping** while drawing is lifting the thumb; after half a second the
   fuse lights and burns along the line toward the marker.
-- **Follow the finger** is planned as a setting: touch the playfield and the
-  marker heads for the point under the finger.
+- **Follow the finger**, the other control scheme in the settings: touch the
+  playfield and the marker heads for the point just above the finger (a ring
+  shows it), along the longer axis first, and round the border when the point
+  is on it. Dragging moves the point and shapes the line; lifting the finger
+  stops the marker. The Slow button stays beside the board.
 
 A hardware keyboard and game controllers work too.
 

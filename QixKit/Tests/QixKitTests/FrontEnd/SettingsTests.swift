@@ -86,9 +86,19 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.rules, Rules(threshold: settings.threshold, startingLives: settings.startingLives))
     }
 
-    func testTheOnlyControlSchemeIsTheStick() {
-        XCTAssertEqual(ControlScheme.allCases, [.stick])
+    func testTheControlSchemesAreTheStickAndFollowTheFinger() {
+        XCTAssertEqual(ControlScheme.allCases, [.stick, .followTheFinger])
         XCTAssertEqual(ControlScheme.stick.title, "Stick")
+        XCTAssertEqual(ControlScheme.followTheFinger.title, "Follow the finger")
+    }
+
+    func testFollowTheFingerIsStoredByName() throws {
+        let settings = Settings(controlScheme: .followTheFinger)
+
+        let json = try XCTUnwrap(String(data: JSONEncoder().encode(settings), encoding: .utf8))
+
+        XCTAssertTrue(json.contains(#""controlScheme":"followTheFinger""#), json)
+        XCTAssertEqual(try decoded(#"{"controlScheme": "followTheFinger"}"#), settings)
     }
 
     func testAStickSizeInTheRangeIsKept() {
@@ -156,7 +166,7 @@ final class SettingsTests: XCTestCase {
     func testAFieldThatDoesNotDecodeFailsTheWholeValue() {
         for json in [
             #"{"threshold": "high", "leftHanded": true}"#,
-            #"{"controlScheme": "followTheFinger"}"#,
+            #"{"controlScheme": "swipe"}"#,
             #"{"haptics": "yes"}"#,
             #"{"stickSize": [1]}"#,
             "[]",

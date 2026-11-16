@@ -4,7 +4,7 @@ import QixKit
 
 /// Everything one frame draws: the game, what is drawn of its board, the HUD, the screen over the
 /// board or the prompt of the initials field, the HUD's button and the touch controls, as the
-/// settings place them.
+/// settings place them, with the steering's target.
 struct PlayfieldScene {
     let game: Game
     let board: BoardImage
@@ -18,14 +18,16 @@ struct PlayfieldScene {
     let hudButton: HudButtonRole?
     let stick: FloatingStick
     let slowHeld: Bool
+    /// The lattice point the finger steers the marker to, in play only.
+    let cursor: Point?
     /// The settings, which place the touch controls and set their size and opacity.
     let settings: Settings
 
     /// The scene of `session`, whose board `board` was drawn from, with the touch controls as
-    /// `touches` hold them and `settings` place them.
+    /// `touches` hold them and `settings` place them, and the target of `steering` in play.
     init(
         session: Session, board: BoardImage, touches: TouchControls<ObjectIdentifier> = TouchControls(),
-        settings: Settings = Settings()
+        steering: TouchSteering = TouchSteering(), settings: Settings = Settings()
     ) {
         let screen = Screen(session: session)
         let entersInitials = if case .highScoreEntry = session.state { true } else { false }
@@ -33,14 +35,14 @@ struct PlayfieldScene {
             game: session.game, board: board, hud: Hud(game: session.game, highScore: session.highScore),
             screen: entersInitials ? nil : screen, initialsPrompt: entersInitials ? screen : nil,
             hudButton: HudButtonRole(session.state), stick: touches.stick, slowHeld: touches.slowHeld,
-            settings: settings
+            cursor: session.state == .playing ? steering.target(on: session.game.board) : nil, settings: settings
         )
     }
 
     init(
         game: Game, board: BoardImage, hud: Hud, screen: Screen?, initialsPrompt: Screen? = nil,
         hudButton: HudButtonRole?, stick: FloatingStick = FloatingStick(), slowHeld: Bool = false,
-        settings: Settings = Settings()
+        cursor: Point? = nil, settings: Settings = Settings()
     ) {
         self.game = game
         self.board = board
@@ -50,6 +52,7 @@ struct PlayfieldScene {
         self.hudButton = hudButton
         self.stick = stick
         self.slowHeld = slowHeld
+        self.cursor = cursor
         self.settings = settings
     }
 

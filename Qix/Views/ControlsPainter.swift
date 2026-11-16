@@ -2,16 +2,23 @@ import QixKit
 import SwiftUI
 
 /// Paints the touch controls at the size and the opacity of their layout: the stick's base and
-/// knob where the thumb holds them, or faintly in the middle of its zone while not touched, and the
-/// Slow button, faint until held. The knob takes the fast stix's colour and the Slow button the
-/// slow one's: what each draws.
+/// knob where the thumb holds them, or faintly in the middle of its zone while not touched, the
+/// Slow button, faint until held, and the steering's target, at `cursor`, as a ring of the
+/// marker's colour. The knob takes the fast stix's colour and the Slow button the slow one's: what
+/// each draws.
 enum ControlsPainter {
     static func paint(
-        _ context: inout GraphicsContext, stick: FloatingStick, slowHeld: Bool, _ layout: ControlsLayout
+        _ context: inout GraphicsContext, stick: FloatingStick, slowHeld: Bool, cursor: CGPoint? = nil,
+        _ layout: ControlsLayout
     ) {
         paintStick(&context, stick, layout)
         if !layout.slow.isEmpty {
             paintSlow(&context, held: slowHeld, layout)
+        }
+        if let cursor {
+            let ring = circle(at: cursor, radius: ControlsLayout.cursorRadius)
+            let colour = Color(Palette.marker).opacity(layout.touchedOpacity)
+            context.stroke(ring, with: .color(colour), lineWidth: ControlsLayout.cursorWidth)
         }
     }
 

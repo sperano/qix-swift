@@ -21,6 +21,9 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
     private static let stickCentre = Vec2(x: 64, y: 220)
     private static let stickThumb = Vec2(x: 94, y: 150)
 
+    /// Where the finger steers the marker in the follow-the-finger snapshot.
+    private static let cursor = Point(x: 60, y: 70)
+
     /// The initials typed in the field's snapshot: two letters, so Done is still disabled.
     private static let typedInitials = "QI"
 
@@ -81,6 +84,20 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
             game: session.game, board: BoardImage(session.game.board),
             hud: Hud(game: session.game, highScore: session.highScore), screen: nil, hudButton: .pause,
             stick: touches.stick, slowHeld: touches.slowHeld, settings: settings
+        )
+
+        try assertScene(scene)
+    }
+
+    /// Following the finger: no stick, the cursor on the finger's target and the Slow button held.
+    func testFollowingTheFinger() throws {
+        let session = PlayfieldFixtures.inPlay()
+        var touches = TouchControls<Int>()
+        touches.began(Self.slowTouch, on: .slow, at: Vec2())
+        let scene = PlayfieldScene(
+            game: session.game, board: BoardImage(session.game.board),
+            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, hudButton: .pause,
+            slowHeld: touches.slowHeld, cursor: Self.cursor, settings: QixKit.Settings(controlScheme: .followTheFinger)
         )
 
         try assertScene(scene)

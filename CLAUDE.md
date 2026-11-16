@@ -18,8 +18,9 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   and the screens' text, what the board draws (border, stix runs, trail
   colours, the claimed cells' pixels), the settings and their storage in
   `UserDefaults` (`Settings`, `Persist`). It also holds the touch controls (the
-  floating stick's maths and each touch's control) and the initials field's
-  filter, which are the iPhone front end's own: qix-rs has none.
+  floating stick's maths, the follow-the-finger steering, `TouchSteering`, and
+  each touch's control) and the initials field's filter, which are the iPhone
+  front end's own: qix-rs has none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
   the entry point and the launch options (`--ui-testing`: an emptied

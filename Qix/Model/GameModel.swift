@@ -80,7 +80,7 @@ final class GameModel {
 
     /// Everything the frame draws.
     var scene: PlayfieldScene {
-        PlayfieldScene(session: session, board: board, touches: touches, settings: settings)
+        PlayfieldScene(session: session, board: board, touches: touches, steering: loop.steering, settings: settings)
     }
 
     /// The screen is to stay awake: a game is in play.
@@ -120,17 +120,23 @@ final class GameModel {
         loop.controls.releaseKeys()
     }
 
-    /// A touch on a touch control's zone: the controls the touches hold go to the loop at once, to
-    /// be sampled on the next frame. A touch landing on hold is ignored.
+    /// A touch on a touch control's zone: the controls the touches hold and the board's aim go to
+    /// the loop at once, to be sampled on the next frame, and a tap on the board's zone out of play
+    /// confirms (`tap`) once it lifts, not when it is cancelled. A touch landing on hold is ignored.
     func touch(_ event: TouchEvent) {
         switch event {
         case let .began(touch, on: control, at: point):
             guard !isOnHold else { return }
-            touches.began(touch, on: control, at: Vec2(point))
+            touches.began(touch, on: control, at: Vec2(point), inPlay: session.state == .playing)
         case let .moved(touch, to: point): touches.moved(touch, to: Vec2(point))
-        case let .ended(touch): touches.ended(touch)
+        case let .ended(touch):
+            if touches.ended(touch) {
+                tap()
+            }
+        case let .cancelled(touch): touches.cancelled(touch)
         }
         loop.controls.setTouch(touches.held)
+        loop.steering.steer(towards: touches.aim)
     }
 
     /// A tap on the screen: confirm, to start or continue; ignored on hold.
