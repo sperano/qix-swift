@@ -4,7 +4,9 @@
 
 /// A `Session` with the controls that steer it and the clock that ticks it: each frame samples
 /// the controls through an `InputLatch` and runs the ticks a `FixedTimestep` owes, so a press is
-/// neither lost nor doubled at any frame rate.
+/// neither lost nor doubled at any frame rate. A finger aiming on the board (`steering`) steers
+/// in play when no other control holds a direction, afresh at each tick, drawing fast unless slow
+/// is held: drawing B, as with the stick.
 ///
 /// The loop is on hold, and runs no tick, while the settings are open over it (`interrupt`) and
 /// while the initials of a high score are typed (`enterInitials`): the controls do not act on
@@ -14,6 +16,8 @@ public struct GameLoop: Sendable {
     public private(set) var session: Session
     /// The keyboard's, the game pad's and the touch screen's controls, and the taps.
     public var controls = Controls()
+    /// The follow-the-finger steering, aimed by the board's touch.
+    public var steering = TouchSteering()
     /// Something is open over the game: see `interrupt`.
     public private(set) var isInterrupted = false
     private var timestep = FixedTimestep()
@@ -49,14 +53,25 @@ public struct GameLoop: Sendable {
         latch.record(controls.sample())
         let ticks = timestep.advance(dt)
         for _ in 0 ..< ticks {
-            session.tick(latch.nextTick())
+            session.tick(steered(latch.nextTick()))
         }
         return ticks
     }
 
+    /// `input` with the steering's direction this tick, in play when `input` holds none.
+    private mutating func steered(_ input: InputState) -> InputState {
+        guard session.state == .playing, input.dir == nil, let dir = steering.dir(session.game) else {
+            return input
+        }
+        var input = input
+        input.dir = dir
+        input.fast = input.fast || !input.slow
+        return input
+    }
+
     /// The app leaves the foreground: a game in play pauses at once, without a tick of play, and
-    /// every key and touch control held and press not yet delivered is dropped, so nothing acts on
-    /// the return. The game pad is polled again on the next frame.
+    /// every key and touch control held, the steering's aim and every press not yet delivered are
+    /// dropped, so nothing acts on the return. The game pad is polled again on the next frame.
     public mutating func suspend() {
         releaseControls()
         if session.state == .playing {
@@ -94,10 +109,12 @@ public struct GameLoop: Sendable {
         return rank
     }
 
-    /// Drops every key and touch control held and every press not yet delivered.
+    /// Drops every key and touch control held, the steering's aim and every press not yet
+    /// delivered.
     private mutating func releaseControls() {
         controls.releaseKeys()
         controls.setTouch([])
+        steering = TouchSteering()
         controls.dropPresses()
         latch = InputLatch()
     }

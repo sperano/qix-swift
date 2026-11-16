@@ -6,11 +6,14 @@
 public enum ControlScheme: String, Hashable, Sendable, Codable, CaseIterable {
     /// The floating stick on one side of the board and the Slow button on the other.
     case stick
+    /// A finger on the board aims the marker (`TouchSteering`), with the Slow button beside it.
+    case followTheFinger
 
     /// The name the settings show.
     public var title: String {
         switch self {
         case .stick: "Stick"
+        case .followTheFinger: "Follow the finger"
         }
     }
 }

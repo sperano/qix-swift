@@ -76,4 +76,13 @@ final class PlayfieldLayoutTests: XCTestCase {
         XCTAssertEqual(layout.position(Vec2(x: 0.5, y: 1.5)), CGPoint(x: 149, y: 35))
         XCTAssertEqual(layout.position(Point(x: Tuning.boardW, y: Tuning.boardH)), CGPoint(x: 468, y: 272))
     }
+
+    /// A finger `BoardFrame.fingerLift` below lattice point `(10, 20)` aims at it.
+    func testTheBoardFrameIsTheBoardsCornerAndScale() {
+        let layout = PlayfieldLayout(in: phone)
+
+        XCTAssertEqual(layout.boardFrame, BoardFrame(origin: Vec2(x: 148, y: 32), pointsPerCell: 2))
+        let finger = Vec2(layout.position(Point(x: 10, y: 20))) + Vec2(x: 0, y: BoardFrame.fingerLift)
+        XCTAssertEqual(layout.boardFrame.aim(at: finger), Vec2(x: 10, y: 20))
+    }
 }

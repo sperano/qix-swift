@@ -23,6 +23,7 @@
 		4B19AECB61B553EAD349A6B7 /* ScreenLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76944C9178B1FA6775676351 /* ScreenLayout.swift */; };
 		50502A3C14EC2FC9E26B9014 /* PlayfieldFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6975B52A1F1A875D1EE08195 /* PlayfieldFixtures.swift */; };
 		556E41A9FB85D20776FB01AB /* ScreenLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6ABE6EAA13889911EC90814 /* ScreenLayoutTests.swift */; };
+		620B9E8A42B30C61F800584F /* FollowTheFingerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F65118F085BABFAC90BEAD8 /* FollowTheFingerUITests.swift */; };
 		6334C008F9E6A5DDF4C30B24 /* LaunchOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3711604D715BE49DC3F21337 /* LaunchOptionsTests.swift */; };
 		70DBC6CECE59382DA32EAF0E /* PlayfieldLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3830FD38DCA5A086873C474F /* PlayfieldLayoutTests.swift */; };
 		70F9066008118295EE398898 /* LaunchOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C0D4861FE7E12088AB2E98E /* LaunchOptions.swift */; };
@@ -48,6 +49,7 @@
 		B037021ECD2AE7C46DC37B78 /* SnapshotTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87184851F7C012D05670177B /* SnapshotTestCase.swift */; };
 		B0654D729750AE57D95B9831 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */; };
 		B210378D7567A37F72997811 /* InfoPlistTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748EF8D16B797F67B5E74167 /* InfoPlistTests.swift */; };
+		B9E318F113191D889CB7EB5E /* GameModelSteeringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */; };
 		BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970969D3E728AF18724145CE /* HudLayout.swift */; };
 		C0CD96F79D61CE30B2558C9F /* QixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F82F7C3BFD2F9B144A417 /* QixApp.swift */; };
 		C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF306261B821BB6452B7994 /* GameView.swift */; };
@@ -96,6 +98,7 @@
 		3CC81C2E0276995EFC0AC095 /* TouchZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchZone.swift; sourceTree = "<group>"; };
 		471076FD57F5E156114A8B99 /* InitialsEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialsEntryView.swift; sourceTree = "<group>"; };
 		4DF40AE28D6B6F4FF1E9AFFF /* ControlsPainter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsPainter.swift; sourceTree = "<group>"; };
+		4F65118F085BABFAC90BEAD8 /* FollowTheFingerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FollowTheFingerUITests.swift; sourceTree = "<group>"; };
 		540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchUITests.swift; sourceTree = "<group>"; };
 		620A748B7CFD49003D533469 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		64DF8F5EC33DF16E19671350 /* SettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
@@ -118,6 +121,7 @@
 		8806DB991C8CC65875BB4F01 /* ScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenView.swift; sourceTree = "<group>"; };
 		942F7EC00A5BC5F5453BF3EA /* HudButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudButton.swift; sourceTree = "<group>"; };
 		970969D3E728AF18724145CE /* HudLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HudLayout.swift; sourceTree = "<group>"; };
+		98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelSteeringTests.swift; sourceTree = "<group>"; };
 		9DD14D7E4982F3918FBAFE6A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		AEA8E5B4E700944791713BEA /* PlayfieldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayfieldView.swift; sourceTree = "<group>"; };
 		C02F82F7C3BFD2F9B144A417 /* QixApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QixApp.swift; sourceTree = "<group>"; };
@@ -175,6 +179,7 @@
 				8587D2B62917CD9A6E872F0E /* DisplayLinkTests.swift */,
 				CD670B1048035B7CAD809A0D /* GameModelHighScoresTests.swift */,
 				CB1E9A8E8F389B17BDD5E961 /* GameModelSettingsTests.swift */,
+				98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */,
 				395803128ED1BB6C1A938765 /* GameModelTests.swift */,
 				F5D3B04BFAB9A390F6C97008 /* GamePadTests.swift */,
 				7AF232FE5806EDABC9E57198 /* HudButtonRoleTests.swift */,
@@ -283,6 +288,7 @@
 		C9D87CDB477DEC652204B30B /* QixUITests */ = {
 			isa = PBXGroup;
 			children = (
+				4F65118F085BABFAC90BEAD8 /* FollowTheFingerUITests.swift */,
 				7DEA0C82F7BA63EBE779BCEA /* GameUITests.swift */,
 				540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */,
 				64DF8F5EC33DF16E19671350 /* SettingsUITests.swift */,
@@ -492,6 +498,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				620B9E8A42B30C61F800584F /* FollowTheFingerUITests.swift in Sources */,
 				F1B993A7BE6FB499087CB279 /* GameUITests.swift in Sources */,
 				053D4B7BFDC2A945B06937D7 /* LaunchUITests.swift in Sources */,
 				8AB1F2D5D90246EB7EF7B048 /* SettingsUITests.swift in Sources */,
@@ -518,6 +525,7 @@
 				12217AE652F8C4F8F9F8250D /* DisplayLinkTests.swift in Sources */,
 				76801EB092FE76286E9A9535 /* GameModelHighScoresTests.swift in Sources */,
 				2118190879D45C171BA88100 /* GameModelSettingsTests.swift in Sources */,
+				B9E318F113191D889CB7EB5E /* GameModelSteeringTests.swift in Sources */,
 				97F04CD13E962F4C4E8B711D /* GameModelTests.swift in Sources */,
 				18F46151E019526CDABD0265 /* GamePadTests.swift in Sources */,
 				448BB8FED3AD1E527DDB901B /* HudButtonRoleTests.swift in Sources */,

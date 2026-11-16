@@ -25,6 +25,7 @@ struct TouchZone: UIViewRepresentable {
         switch control {
         case .stick: "stick"
         case .slow: "slow"
+        case .board: "board"
         }
     }
 
@@ -33,6 +34,7 @@ struct TouchZone: UIViewRepresentable {
         switch control {
         case .stick: "Stick"
         case .slow: "Slow"
+        case .board: "Board"
         }
     }
 
@@ -44,6 +46,7 @@ struct TouchZone: UIViewRepresentable {
     }
 
     func updateUIView(_ view: TouchZoneView, context _: Context) {
+        view.control = control
         view.origin = zone.origin
         view.onTouch = onTouch
     }
@@ -51,7 +54,8 @@ struct TouchZone: UIViewRepresentable {
 
 /// The view that takes a zone's touches, several at once.
 final class TouchZoneView: UIView {
-    let control: TouchControl
+    /// The control the zone's touches land on: the board's moves with the layout.
+    var control: TouchControl
     /// Where the view's top-left corner is in the playfield's coordinates.
     var origin: CGPoint = .zero
     var onTouch: @MainActor (TouchEvent) -> Void = { _ in }

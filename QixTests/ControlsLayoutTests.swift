@@ -65,6 +65,30 @@ final class ControlsLayoutTests: XCTestCase {
         XCTAssertEqual(largest.idleOpacity, 0.14, accuracy: opacityEpsilon)
     }
 
+    /// Following the finger, the board is the steering's zone, the stick has none and the Slow
+    /// button keeps its own, on either hand.
+    func testFollowingTheFingerTheBoardTakesTheSticksPlace() {
+        let field = PlayfieldLayout(in: phone).field
+        for leftHanded in [false, true] {
+            let settings = Settings(controlScheme: .followTheFinger, leftHanded: leftHanded)
+
+            let layout = ControlsLayout(in: phone, beside: field, settings: settings)
+
+            XCTAssertEqual(layout.board, field)
+            XCTAssertTrue(layout.stick.isEmpty)
+            XCTAssertEqual(
+                layout.slow,
+                ControlsLayout(in: phone, beside: field, settings: Settings(leftHanded: leftHanded)).slow
+            )
+        }
+    }
+
+    func testWithTheStickTheBoardIsNoZone() {
+        let layout = ControlsLayout(in: phone, beside: PlayfieldLayout(in: phone).field)
+
+        XCTAssertTrue(layout.board.isEmpty)
+    }
+
     func testTheStickSizeLeavesTheZonesAlone() {
         let field = PlayfieldLayout(in: phone).field
         let settings = Settings(stickSize: StickSize(StickSize.range.upperBound))
