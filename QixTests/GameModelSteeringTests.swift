@@ -86,15 +86,27 @@ final class GameModelSteeringTests: XCTestCase {
         XCTAssertEqual(model.touches, TouchControls())
     }
 
+    /// The finger lifts once the hold is over: had it been taken on hold, it would be a tap.
     func testAFingerOnTheBoardOnHoldIsNoTap() {
         model.openSettings()
         touchTheBoard()
-        lift()
         model.isShowingSettings = false
+        lift()
 
         frames(1)
 
         XCTAssertEqual(model.session.state, .title)
+        XCTAssertEqual(model.touches, TouchControls())
+    }
+
+    func testACancelledFingerOnTheBoardOutOfPlayIsNoTap() {
+        touchTheBoard()
+
+        model.touch(.cancelled(touch: ObjectIdentifier(finger)))
+        frames(1)
+
+        XCTAssertEqual(model.session.state, .title)
+        XCTAssertEqual(model.touches, TouchControls())
     }
 
     /// Paused, the finger still aims, but no cursor shows.

@@ -236,6 +236,27 @@ final class TouchControlsTests: XCTestCase {
         XCTAssertEqual(touches, TouchControls())
     }
 
+    func testACancelledFingerOnTheBoardOutOfPlayIsNoTap() {
+        touches.began(finger, on: .board(board), at: onBoard, inPlay: false)
+
+        touches.cancelled(finger)
+
+        XCTAssertFalse(touches.ended(finger), "the cancel ended the tap")
+        XCTAssertEqual(touches, TouchControls())
+    }
+
+    func testCancelledTouchesLetGoOfTheirControls() {
+        steerLeft()
+        touches.began(finger, on: .board(board), at: onBoard)
+        touches.began(otherThumb, on: .slow, at: slowPoint)
+
+        touches.cancelled(thumb)
+        touches.cancelled(finger)
+        touches.cancelled(otherThumb)
+
+        XCTAssertEqual(touches, TouchControls())
+    }
+
     func testTouchesOffTheBoardAreNoTaps() {
         steerLeft()
         touches.began(finger, on: .slow, at: slowPoint)

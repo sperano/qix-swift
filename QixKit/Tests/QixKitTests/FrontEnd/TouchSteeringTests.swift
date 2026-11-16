@@ -229,6 +229,17 @@ final class TouchSteeringTests: XCTestCase {
         XCTAssertEqual(steering.dir(game), .right)
     }
 
+    /// From `(80, 120)`, `(0, 0)` is 200 steps away leftwards and 360 rightwards, `(160, 0)` 200
+    /// rightwards and 360 leftwards: the way found to the first target is not kept for the second.
+    func testTheWayRoundIsFoundAgainForAnotherTarget() {
+        steering.steer(towards: aim(0, 0))
+        XCTAssertEqual(steering.dir(game), .left)
+
+        steering.steer(towards: aim(160, 0))
+
+        XCTAssertEqual(steering.dir(game), .right)
+    }
+
     /// A border the marker's own does not lead to (a claimed island, which play never leaves): the
     /// marker draws straight for it instead, and the stix closes there.
     func testABorderTargetTheBorderDoesNotLeadToIsHeadedForStraight() {

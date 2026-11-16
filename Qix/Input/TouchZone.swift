@@ -7,8 +7,9 @@ import UIKit
 enum TouchEvent: Equatable {
     case began(touch: ObjectIdentifier, on: TouchControl, at: CGPoint)
     case moved(touch: ObjectIdentifier, to: CGPoint)
-    /// The touch lifted or was cancelled.
     case ended(touch: ObjectIdentifier)
+    /// The system took the touch over: it did not lift.
+    case cancelled(touch: ObjectIdentifier)
 }
 
 /// The zone of a touch control: a clear view over `zone` that hands each of its touches to
@@ -87,16 +88,14 @@ final class TouchZoneView: UIView {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with _: UIEvent?) {
-        end(touches)
+        for touch in touches {
+            onTouch(.ended(touch: ObjectIdentifier(touch)))
+        }
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with _: UIEvent?) {
-        end(touches)
-    }
-
-    private func end(_ touches: Set<UITouch>) {
         for touch in touches {
-            onTouch(.ended(touch: ObjectIdentifier(touch)))
+            onTouch(.cancelled(touch: ObjectIdentifier(touch)))
         }
     }
 

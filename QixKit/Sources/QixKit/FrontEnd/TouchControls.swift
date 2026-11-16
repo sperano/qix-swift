@@ -96,8 +96,8 @@ public struct TouchControls<Touch: Hashable & Sendable>: Equatable, Sendable {
         }
     }
 
-    /// `touch` lifted or was cancelled: it releases the control it held. Returns whether it was a
-    /// tap on the board: it landed there out of play.
+    /// `touch` lifted: it releases the control it held. Returns whether it was a tap on the board:
+    /// it landed there out of play.
     @discardableResult
     public mutating func ended(_ touch: Touch) -> Bool {
         if touch == stickTouch {
@@ -110,6 +110,11 @@ public struct TouchControls<Touch: Hashable & Sendable>: Equatable, Sendable {
         }
         slowTouches.remove(touch)
         return boardTaps.remove(touch) != nil
+    }
+
+    /// `touch` was cancelled: it releases the control it held, as when it lifts, but it is no tap.
+    public mutating func cancelled(_ touch: Touch) {
+        ended(touch)
     }
 
     /// The controls held: the stick's direction with fast, or with slow while the Slow button is

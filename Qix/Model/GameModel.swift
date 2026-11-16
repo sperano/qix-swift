@@ -122,7 +122,7 @@ final class GameModel {
 
     /// A touch on a touch control's zone: the controls the touches hold and the board's aim go to
     /// the loop at once, to be sampled on the next frame, and a tap on the board's zone out of play
-    /// confirms (`tap`). A touch landing on hold is ignored.
+    /// confirms (`tap`) once it lifts, not when it is cancelled. A touch landing on hold is ignored.
     func touch(_ event: TouchEvent) {
         switch event {
         case let .began(touch, on: control, at: point):
@@ -133,6 +133,7 @@ final class GameModel {
             if touches.ended(touch) {
                 tap()
             }
+        case let .cancelled(touch): touches.cancelled(touch)
         }
         loop.controls.setTouch(touches.held)
         loop.steering.steer(towards: touches.aim)
