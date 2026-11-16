@@ -129,6 +129,15 @@ final class GameLoopTests: XCTestCase {
         XCTAssertEqual(loop.controls.held, [])
     }
 
+    func testSuspendingDropsTheHeldTouchControls() {
+        var loop = playingLoop()
+        loop.controls.setTouch([.left, .slow])
+
+        loop.suspend()
+
+        XCTAssertEqual(loop.controls.held, [])
+    }
+
     func testSuspendingKeepsTheGamePadHeld() {
         var loop = playingLoop()
         loop.controls.setPad([.slow])

@@ -3,8 +3,8 @@ import Observation
 import QixKit
 
 /// The game the app plays, the only thing the views read: a `GameLoop` over a `Session`, fed by the
-/// display link's frames, the keyboard, the game pad and the taps, and what is drawn of its board,
-/// redrawn only when the board changes.
+/// display link's frames, the keyboard, the game pad, the touch controls and the taps, and what is
+/// drawn of its board, redrawn only when the board changes.
 @MainActor
 @Observable
 final class GameModel {
@@ -16,6 +16,8 @@ final class GameModel {
     /// What is drawn of the board shown, from the last frame whose board differed from the one
     /// before.
     private(set) var board: BoardImage
+    /// The touch controls, as the touches on their zones hold them.
+    private(set) var touches = TouchControls<ObjectIdentifier>()
 
     /// A model playing `session`.
     init(session: Session) {
@@ -35,7 +37,7 @@ final class GameModel {
 
     /// Everything the frame draws.
     var scene: PlayfieldScene {
-        PlayfieldScene(session: session, board: board)
+        PlayfieldScene(session: session, board: board, touches: touches)
     }
 
     /// The screen is to stay awake: a game is in play.
@@ -66,6 +68,17 @@ final class GameModel {
         loop.controls.releaseKeys()
     }
 
+    /// A touch on a touch control's zone: the controls the touches hold go to the loop at once, to
+    /// be sampled on the next frame.
+    func touch(_ event: TouchEvent) {
+        switch event {
+        case let .began(touch, on: control, at: point): touches.began(touch, on: control, at: Vec2(point))
+        case let .moved(touch, to: point): touches.moved(touch, to: Vec2(point))
+        case let .ended(touch): touches.ended(touch)
+        }
+        loop.controls.setTouch(touches.held)
+    }
+
     /// A tap on the screen: confirm, to start or continue.
     func tap() {
         loop.controls.press(.confirm)
@@ -76,8 +89,10 @@ final class GameModel {
         loop.controls.press(.pause)
     }
 
-    /// The app left the foreground: see `GameLoop.suspend`.
+    /// The app left the foreground: see `GameLoop.suspend`. The touches held let go of their
+    /// controls; a thumb still down steers again once it touches anew.
     func suspend() {
+        touches = TouchControls()
         loop.suspend()
     }
 

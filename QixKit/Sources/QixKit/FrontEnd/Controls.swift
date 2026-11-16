@@ -1,6 +1,6 @@
-// The hardware controls the app reads, a keyboard and game pads, and their sampling into the core's
-// `InputState` once a frame: qix-rs's `crates/qix/src/input.rs` and `bindings.rs`, with its keys
-// fixed.
+// The controls the app reads, a keyboard, game pads and the touch screen, and their sampling into
+// the core's `InputState` once a frame: qix-rs's `crates/qix/src/input.rs` and `bindings.rs`, with
+// its keys fixed, and the touch controls, which qix-rs does not have.
 
 /// What a key or a game pad button does: a held control or a press.
 public enum Control: Hashable, Sendable, CaseIterable {
@@ -23,21 +23,23 @@ public enum Control: Hashable, Sendable, CaseIterable {
     }
 }
 
-/// The controls held on the keyboard and on a game pad, and the presses since the last `sample`.
+/// The controls held on the keyboard, on a game pad and on the touch screen, and the presses since
+/// the last `sample`.
 ///
-/// A control held on both counts once; a press is a control going down while it was not held,
-/// so a key repeat or the second device holding it too is no press.
+/// A control held on several devices counts once; a press is a control going down while it was not
+/// held, so a key repeat or a second device holding it too is no press.
 public struct Controls: Hashable, Sendable {
     private var keys: Set<Control> = []
     private var pad: Set<Control> = []
+    private var touch: Set<Control> = []
     private var presses: Set<Control> = []
 
     /// Nothing held or pressed.
     public init() {}
 
-    /// The controls held on either device.
+    /// The controls held on any device.
     public var held: Set<Control> {
-        keys.union(pad)
+        keys.union(pad).union(touch)
     }
 
     /// The key of `control` went down.
@@ -64,11 +66,18 @@ public struct Controls: Hashable, Sendable {
         presses.removeAll()
     }
 
-    /// The game pad holds `controls` now, as polled this frame: the ones neither device held before
-    /// are pressed.
+    /// The game pad holds `controls` now, as polled this frame: the ones no device held before are
+    /// pressed.
     public mutating func setPad(_ controls: Set<Control>) {
         presses.formUnion(controls.subtracting(held))
         pad = controls
+    }
+
+    /// The touch controls hold `controls` now (`TouchControls.held`): the ones no device held
+    /// before are pressed.
+    public mutating func setTouch(_ controls: Set<Control>) {
+        presses.formUnion(controls.subtracting(held))
+        touch = controls
     }
 
     /// `control` was pressed and released at once: a tap on the screen or on a button.

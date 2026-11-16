@@ -16,14 +16,16 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   framework, so it is tested on Linux too: the fixed timestep, the input latch,
   the keyboard and game pad controls, the game loop, the palette, the HUD's
   and the screens' text, and what the board draws (border, stix runs, trail
-  colours, the claimed cells' pixels).
+  colours, the claimed cells' pixels). It also holds the touch controls (the
+  floating stick's maths and each touch's control), which are the iPhone front
+  end's own: qix-rs has none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
   the entry point, `Model/` the `@MainActor @Observable` `GameModel` (the only
-  thing views read), `Input/` the display link, the hardware keyboard and the
-  game pad, `Views/` the views, their painters (SwiftUI `Canvas`) and their
-  layout maths, `Resources/` the asset catalog and the Info.plist xcodegen
-  writes.
+  thing views read), `Input/` the display link, the hardware keyboard, the
+  game pad and the touch controls' zones, `Views/` the views, their painters
+  (SwiftUI `Canvas`) and their layout maths, `Resources/` the asset catalog
+  and the Info.plist xcodegen writes.
 - `QixTests/`: the app's unit tests (the model, layout maths, key map,
   Info.plist choices).
 - `QixSnapshotTests/`: image comparisons with swift-snapshot-testing (pinned
