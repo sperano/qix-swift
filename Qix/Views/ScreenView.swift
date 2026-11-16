@@ -15,12 +15,6 @@ struct ScreenView: View {
         ZStack {
             Rectangle().fill(Color(Palette.screenDim))
             ScreenPanel(screen: screen, line: line)
-                .padding(line * ScreenLayout.padding)
-                .background(
-                    RoundedRectangle(cornerRadius: line * ScreenLayout.cornerRadius)
-                        .fill(Color(Palette.screenBackground))
-                )
-                .accessibilityElement(children: .combine)
                 .accessibilityIdentifier(Self.identifier)
         }
         .frame(width: field.width, height: field.height)
@@ -29,12 +23,42 @@ struct ScreenView: View {
     }
 }
 
-/// The text of a screen, lines `line` points high.
+/// A screen as a banner at the top of the board, which it leaves undimmed: the attract demo plays
+/// on under it. qix-rs's `render/screen.rs`, `paint_banner`.
+struct BannerView: View {
+    /// What UI tests find the banner by.
+    static let identifier = "banner"
+
+    let screen: Screen
+    let field: CGRect
+
+    var body: some View {
+        let line = ScreenLayout.lineSize(screen, fieldHeight: field.height)
+        ScreenPanel(screen: screen, line: line)
+            .accessibilityIdentifier(Self.identifier)
+            .padding(.top, line * ScreenLayout.bannerMargin)
+            .frame(width: field.width, height: field.height, alignment: .top)
+            .position(x: field.midX, y: field.midY)
+            .allowsHitTesting(false)
+    }
+}
+
+/// The text of a screen, lines `line` points high, on its panel, read by VoiceOver as one element.
 private struct ScreenPanel: View {
     let screen: Screen
     let line: CGFloat
 
     var body: some View {
+        text
+            .padding(line * ScreenLayout.padding)
+            .background(
+                RoundedRectangle(cornerRadius: line * ScreenLayout.cornerRadius)
+                    .fill(Color(Palette.screenBackground))
+            )
+            .accessibilityElement(children: .combine)
+    }
+
+    private var text: some View {
         VStack(spacing: 0) {
             Text(screen.heading)
                 .font(.system(size: line * ScreenLayout.headingScale, weight: .bold))

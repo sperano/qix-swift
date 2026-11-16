@@ -2,8 +2,9 @@ import QixKit
 import SwiftUI
 
 /// The whole screen: the board letterboxed on the backdrop with the HUD above it, the screen of the
-/// session's state over the board, the HUD's button, and the touch controls on each side of the
-/// board, as the settings place them, and over it when the finger steers. A tap anywhere but on a
+/// session's state over the board or the attract demo's banner, the HUD's button, and the touch
+/// controls on each side of the board, as the settings place them, and over it when the finger
+/// steers. A tap anywhere but on a
 /// control confirms, and on the board's zone out of play (`TouchControls`).
 struct PlayfieldView: View {
     /// What UI tests find the board by.
@@ -56,6 +57,9 @@ struct PlayfieldView: View {
             .accessibilityHidden(true)
             if let screen = scene.screen {
                 ScreenView(screen: screen, field: layout.field)
+            }
+            if let banner = scene.banner {
+                BannerView(screen: banner, field: layout.field)
             }
             if let role = scene.hudButton {
                 HudButton(role: role, column: HudLayout.rect(of: .pause, in: layout.hud)) {

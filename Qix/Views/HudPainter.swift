@@ -57,11 +57,12 @@ enum HudPainter {
         context.draw(Text(text).font(font).foregroundStyle(Color(Palette.hudValue)), at: position, anchor: anchor)
     }
 
-    /// Paints `lives` as markers, or past `HudLayout.maxLifeMarkers` one marker and their count.
+    /// Paints `lives` as markers' sprites `HudLayout.lifeSize` of the strip wide, or past
+    /// `HudLayout.maxLifeMarkers` one marker and their count.
     private static func lives(_ context: inout GraphicsContext, _ lives: UInt32, at centre: CGPoint, height: CGFloat) {
-        let radius = HudLayout.lifeSize * height / 2
+        let pixel = Float(HudLayout.lifeSize * height) / Float(Sprite.maskSize(Sprite.markerMask).width)
         for life in HudLayout.lifeCentres(lives, centre: centre, height: height) {
-            BoardPainter.marker(&context, at: life, radius: radius, inner: Palette.hudLife)
+            BoardPainter.sprite(&context, Sprite.marker(centre: Vec2(life), pixel: pixel, inner: Palette.hudLife))
         }
         if lives > HudLayout.maxLifeMarkers {
             value(&context, "x\(lives)", at: centre, anchor: .leading, height: height)

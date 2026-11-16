@@ -63,6 +63,41 @@ enum PlayfieldFixtures {
         return session
     }
 
+    /// Ticks of the demo the attract snapshot shows: a slow stix drawn up and left after the
+    /// first claim.
+    static let demoTicks: UInt32 = 660
+
+    /// Ticks into its animation the claim of the flash snapshot is shown at: a third of the way.
+    static let flashTicks: UInt32 = ClaimFill.claimFillTicks / 3
+
+    /// A loop over `title()` sitting idle until its demo starts, then `demoTicks` ticks into it.
+    static func demo() -> GameLoop {
+        var loop = GameLoop(session: title())
+        for _ in 0 ..< Tuning.attractDelayTicks + demoTicks {
+            loop.advance(1 / Float(Tuning.tickHz))
+        }
+        return loop
+    }
+
+    /// The session of `inPlay` stopped `flashTicks` ticks after the script's claim, with the claim's
+    /// animation as the loop runs it; past the script when there is no claim.
+    static func claimFlash() -> (session: Session, fill: ClaimFill) {
+        var session = title()
+        session.tick(InputState(confirm: true))
+        var fill = ClaimFill(board: session.game.board)
+        let flash = Float(flashTicks) / Float(ClaimFill.claimFillTicks)
+        for leg in script {
+            for _ in 0 ..< leg.ticks {
+                session.tick(leg.input)
+                fill.tick(session.game.board)
+                if fill.fresh?.progress == flash {
+                    return (session, fill)
+                }
+            }
+        }
+        return (session, fill)
+    }
+
     /// `inPlay`, paused.
     static func paused() -> Session {
         var session = inPlay()

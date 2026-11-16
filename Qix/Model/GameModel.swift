@@ -4,7 +4,8 @@ import QixKit
 
 /// The game the app plays, the only thing the views read: a `GameLoop` over a `Session`, fed by the
 /// display link's frames, the keyboard, the game pad, the touch controls and the taps, what is
-/// drawn of its board, redrawn only when the board changes, and the settings. The settings and the
+/// drawn of the board shown (the attract demo's while one plays), redrawn only when the board
+/// changes, and the settings. The settings and the
 /// high score table are kept in `UserDefaults` (`Persist`), each saved as soon as it changes. Each
 /// frame plays the haptics and the sounds its ticks queued, as the settings allow.
 @MainActor
@@ -66,8 +67,9 @@ final class GameModel {
         if session.game.rules != settings.rules {
             session.setRules(settings.rules)
         }
-        loop = GameLoop(session: session)
-        board = BoardImage(session.game.board)
+        let loop = GameLoop(session: session)
+        self.loop = loop
+        board = BoardImage(loop.shownGame.board)
         savedHighScores = session.highScores
         self.settings = settings
         self.defaults = defaults
@@ -95,7 +97,7 @@ final class GameModel {
 
     /// Everything the frame draws.
     var scene: PlayfieldScene {
-        PlayfieldScene(session: session, board: board, touches: touches, steering: loop.steering, settings: settings)
+        PlayfieldScene(loop: loop, board: board, touches: touches, settings: settings)
     }
 
     /// The screen is to stay awake: a game is in play.
@@ -110,14 +112,14 @@ final class GameModel {
     }
 
     /// Runs a frame of `dt` seconds with the game pad as polled, `nil` without one, plays its
-    /// haptics and sounds, then redraws the board if it changed and saves the high score table if
+    /// haptics and sounds, then redraws the board shown if it changed and saves the high score table if
     /// it did.
     func advance(by dt: TimeInterval, pad: PadState?) {
         loop.controls.setPad(pad?.controls ?? [])
         loop.advance(Float(dt))
         playFeedback()
-        if board.board != session.game.board {
-            board = BoardImage(session.game.board)
+        if board.board != loop.shownGame.board {
+            board = BoardImage(loop.shownGame.board)
         }
         saveHighScoresIfChanged()
     }
@@ -139,11 +141,13 @@ final class GameModel {
 
     /// A touch on a touch control's zone: the controls the touches hold and the board's aim go to
     /// the loop at once, to be sampled on the next frame, and a tap on the board's zone out of play
-    /// confirms (`tap`) once it lifts, not when it is cancelled. A touch landing on hold is ignored.
+    /// confirms (`tap`) once it lifts, not when it is cancelled. A touch landing stops the attract
+    /// demo (`GameLoop.touchDown`); one landing on hold is ignored.
     func touch(_ event: TouchEvent) {
         switch event {
         case let .began(touch, on: control, at: point):
             guard !isOnHold else { return }
+            loop.touchDown()
             touches.began(touch, on: control, at: Vec2(point), inPlay: session.state == .playing)
         case let .moved(touch, to: point): touches.moved(touch, to: Vec2(point))
         case let .ended(touch):

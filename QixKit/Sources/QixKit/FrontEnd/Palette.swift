@@ -28,6 +28,22 @@ public struct RGBA: Hashable, Sendable {
     public static func grey(_ level: UInt8) -> Self {
         Self(red: level, green: level, blue: level)
     }
+
+    /// This colour moved `share` of the way to `other`, each channel on its 8-bit value and
+    /// rounded: egui's `Color32::lerp_to_gamma`. Past either end, the channels saturate.
+    public func lerpToGamma(_ other: Self, _ share: Float) -> Self {
+        let channel = { (from: UInt8, to: UInt8) -> UInt8 in
+            let value = (1 - share) * Float(from) + share * Float(to)
+            return UInt8(min(max(value + Self.roundingOffset, 0), Float(UInt8.max)))
+        }
+        return Self(
+            red: channel(red, other.red), green: channel(green, other.green), blue: channel(blue, other.blue),
+            alpha: channel(alpha, other.alpha)
+        )
+    }
+
+    /// Added before truncating to round to the nearest value, as egui's `fast_round` does.
+    private static let roundingOffset: Float = 0.5
 }
 
 public enum Palette {
@@ -49,12 +65,22 @@ public enum Palette {
     /// Segments of the stix drawn slow.
     public static let slowStix = RGBA(red: 255, green: 115, blue: 75)
 
+    /// The bright colour the stix being drawn flickers to, from the colour of its kind.
+    public static let stixFlicker = RGBA(red: 255, green: 250, blue: 225)
+
+    /// The bright colour newly claimed cells start from, before they settle to the fill of their
+    /// kind.
+    public static let claimFlash = RGBA(red: 235, green: 245, blue: 255)
+
     /// The inside of the player's marker.
     public static let marker = RGBA(red: 255, green: 220, blue: 60)
 
-    /// The outline of the marker: dark enough to stand out from the white border and the claimed
-    /// cells alike.
+    /// The outline of the marker's sprite: dark enough to stand out from the white border and the
+    /// claimed cells alike.
     public static let markerOutline = RGBA(red: 140, green: 70, blue: 0)
+
+    /// The highlight on the marker's sprite.
+    public static let markerHighlight = RGBA(red: 255, green: 255, blue: 200)
 
     /// The colours the Qix's trail cycles through, one per segment.
     public static let qixTrail: [RGBA] = [
@@ -74,10 +100,10 @@ public enum Palette {
     /// A Super Sparx.
     public static let superSparx = RGBA(red: 90, green: 255, blue: 140)
 
-    /// The bright heart of a Sparx.
+    /// The bright heart of a Sparx's sprite.
     public static let sparxCore = RGBA(red: 255, green: 235, blue: 210)
 
-    /// The bright heart of a Super Sparx.
+    /// The bright heart of a Super Sparx's sprite.
     public static let superSparxCore = RGBA(red: 225, green: 255, blue: 235)
 
     /// The fuse's burning point.

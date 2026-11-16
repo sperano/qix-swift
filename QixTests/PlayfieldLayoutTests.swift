@@ -85,4 +85,13 @@ final class PlayfieldLayoutTests: XCTestCase {
         let finger = Vec2(layout.position(Point(x: 10, y: 20))) + Vec2(x: 0, y: BoardFrame.fingerLift)
         XCTAssertEqual(layout.boardFrame.aim(at: finger), Vec2(x: 10, y: 20))
     }
+
+    /// Cells 10 to 12 of row 20 start at lattice point `(10, 20)` and are 3 by 1 cells.
+    func testARunCoversItsCellsOnScreen() {
+        let layout = PlayfieldLayout(in: phone)
+
+        let rect = layout.rect(of: CellRun(row: 20, cols: 10 ..< 13, kind: .fast))
+
+        XCTAssertEqual(rect, CGRect(x: 168, y: 72, width: 6, height: 2))
+    }
 }

@@ -87,6 +87,10 @@ final class ScreenTests: XCTestCase {
         )
     }
 
+    func testTheDemosBannerSaysATapPlays() {
+        XCTAssertEqual(Screen.demo, Screen(heading: "DEMO", lines: ["Tap or press Return to play"]))
+    }
+
     func testPlayingShowsNoScreen() {
         XCTAssertNil(Screen(session: playing(Game(rng: Rng(seed: screenSeed)))))
     }

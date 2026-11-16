@@ -5,7 +5,8 @@ import XCTest
 @testable import Qix
 
 /// The playfield of each state of a session, on the host window (the iPhone 17) and on the
-/// smallest landscape iPhone: the board, its enemies, the HUD and the screen over the board.
+/// smallest landscape iPhone: the board, its enemies, the HUD and the screen over the board, the
+/// attract demo's banner and a claim's flash.
 final class PlayfieldSnapshotTests: SnapshotTestCase {
     /// The reference name of the small phone's images.
     private static let smallName = "small"
@@ -162,6 +163,31 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
         let scene = PlayfieldScene(
             game: session.game, board: BoardImage(session.game.board), hud: PlayfieldFixtures.widestHud,
             screen: nil, hudButton: .pause
+        )
+
+        try assertScene(scene)
+    }
+
+    /// The attract demo under its banner, undimmed: a slow stix drawn up and left after its first
+    /// claim, the demo's score in the HUD.
+    func testTheAttractDemoUnderItsBanner() throws {
+        let loop = PlayfieldFixtures.demo()
+        let demo = try XCTUnwrap(loop.attract.demo, "the demo does not play")
+        XCTAssertEqual(demo.game.ticks, UInt64(PlayfieldFixtures.demoTicks))
+        XCTAssertEqual(demo.game.stix?.kinds, [.slow, .slow])
+        XCTAssertGreaterThan(demo.game.board.claimedFraction(), 0)
+
+        try assertScene(PlayfieldScene(loop: loop, board: BoardImage(loop.shownGame.board)))
+    }
+
+    /// The script's claim a third of the way through its flash, from the claim colour to the fill.
+    func testAClaimFlashing() throws {
+        let (session, fill) = PlayfieldFixtures.claimFlash()
+        let claim = try XCTUnwrap(fill.fresh, "no claim flashes")
+        XCTAssertEqual(claim.progress, Float(PlayfieldFixtures.flashTicks) / Float(ClaimFill.claimFillTicks))
+        let scene = PlayfieldScene(
+            game: session.game, board: BoardImage(session.game.board), claim: claim,
+            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, hudButton: .pause
         )
 
         try assertScene(scene)

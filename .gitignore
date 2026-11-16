@@ -71,3 +71,6 @@ Package.resolved
 
 # macOS
 .DS_Store
+
+# Python bytecode of the scripts
+__pycache__/
