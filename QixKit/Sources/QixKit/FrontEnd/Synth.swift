@@ -66,33 +66,58 @@ public enum Synth {
         glide(wave, hz, hz, secs)
     }
 
+    /// Pitch and length of the fast step's blip.
+    private static let drawFastHz: Float = 1_000
+    private static let drawFastSecs: Float = 0.02
+
+    /// Pitch and length of the slow step's blip.
+    private static let drawSlowHz: Float = 500
+    private static let drawSlowSecs: Float = 0.04
+
+    /// Start and end pitches of the claim's sweep, and its length.
+    private static let claimFromHz: Float = 300
+    private static let claimToHz: Float = 1_200
+    private static let claimSecs: Float = 0.18
+
+    /// Start and end pitches of the death's sweep, and its length.
+    private static let deathFromHz: Float = 900
+    private static let deathToHz: Float = 60
+    private static let deathSecs: Float = 0.8
+
+    /// Length of each note of the level's arpeggio but the last, and of the last, held.
+    private static let arpeggioNoteSecs: Float = 0.12
+    private static let arpeggioHeldSecs: Float = 0.3
+
+    /// Length of each note of the extra life's trill.
+    private static let trillNoteSecs: Float = 0.06
+
     /// A high blip for each fast step, shorter than the `Tuning.markerStepTicks` between two of
     /// them.
-    private static let drawFast = [note(.square, 1_000.0, 0.02)]
+    private static let drawFast = [note(.square, drawFastHz, drawFastSecs)]
 
     /// A lower blip for each slow step, shorter than the `Tuning.slowStepTicks` between two of them.
-    private static let drawSlow = [note(.square, 500.0, 0.04)]
+    private static let drawSlow = [note(.square, drawSlowHz, drawSlowSecs)]
 
     /// A rising sweep.
-    private static let claim = [glide(.triangle, 300.0, 1_200.0, 0.18)]
+    private static let claim = [glide(.triangle, claimFromHz, claimToHz, claimSecs)]
 
     /// A long falling sweep.
-    private static let death = [glide(.square, 900.0, 60.0, 0.8)]
+    private static let death = [glide(.square, deathFromHz, deathToHz, deathSecs)]
 
     /// A rising arpeggio, its last note held.
     private static let levelComplete = [
-        note(.triangle, c5, 0.12),
-        note(.triangle, e5, 0.12),
-        note(.triangle, g5, 0.12),
-        note(.triangle, c6, 0.3),
+        note(.triangle, c5, arpeggioNoteSecs),
+        note(.triangle, e5, arpeggioNoteSecs),
+        note(.triangle, g5, arpeggioNoteSecs),
+        note(.triangle, c6, arpeggioHeldSecs),
     ]
 
     /// A quick high trill.
     private static let extraLife = [
-        note(.square, e6, 0.06),
-        note(.square, g6, 0.06),
-        note(.square, e6, 0.06),
-        note(.square, g6, 0.06),
+        note(.square, e6, trillNoteSecs),
+        note(.square, g6, trillNoteSecs),
+        note(.square, e6, trillNoteSecs),
+        note(.square, g6, trillNoteSecs),
     ]
 
     /// The tones `sound` plays, one after the other.
