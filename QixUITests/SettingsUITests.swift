@@ -101,7 +101,19 @@ final class SettingsUITests: XCTestCase {
         XCTAssertGreaterThan(stick.frame.midX, slow.frame.midX)
     }
 
+    /// Swipes the How to play page up until `text` is on screen, then checks it is.
+    private func assertShown(_ text: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
+        let page = element("howToPlay")
+        for _ in 0 ..< Self.maxSwipes where !text.isHittable {
+            page.swipeUp()
+        }
+        XCTAssertTrue(text.isHittable, file: file, line: line)
+    }
+
     func testHowToPlayTellsTheSidesTheLeftHandedSettingChose() {
+        let stickText = app.staticTexts[
+            "Drag the stick right of the board to move along the border; push into the open to draw a fast stix."
+        ]
         let slowText = app.staticTexts[
             "Hold Slow, left of the board, while moving to draw a slow stix: it is slower, but scores x2 points."
         ]
@@ -109,10 +121,7 @@ final class SettingsUITests: XCTestCase {
         turnOnLeftHanded()
         openHowToPlay()
 
-        let page = element("howToPlay")
-        for _ in 0 ..< Self.maxSwipes where !slowText.isHittable {
-            page.swipeUp()
-        }
-        XCTAssertTrue(slowText.isHittable)
+        assertShown(stickText)
+        assertShown(slowText)
     }
 }
