@@ -1,6 +1,6 @@
 // The session the app plays, advanced frame by frame: qix-rs's `QixApp::advance` and `tick`
-// (`crates/qix/src/app.rs`), without the sounds and the attract demo yet, and with the iPhone's
-// initials typed in a text field.
+// (`crates/qix/src/app.rs`), without the attract demo yet, and with the iPhone's initials typed in a
+// text field and its haptics.
 
 /// A `Session` with the controls that steer it and the clock that ticks it: each frame samples
 /// the controls through an `InputLatch` and runs the ticks a `FixedTimestep` owes, so a press is
@@ -11,6 +11,9 @@
 /// The loop is on hold, and runs no tick, while the settings are open over it (`interrupt`) and
 /// while the initials of a high score are typed (`enterInitials`): the controls do not act on
 /// the game behind a sheet or a text field.
+///
+/// Each tick queues the sounds of the session's events (`Sound.sounds`) and its haptic
+/// (`HapticCues`), which the front end takes once a frame (`takeSounds`, `takeHaptics`).
 public struct GameLoop: Sendable {
     /// The session played.
     public private(set) var session: Session
@@ -20,6 +23,12 @@ public struct GameLoop: Sendable {
     public var steering = TouchSteering()
     /// Something is open over the game: see `interrupt`.
     public private(set) var isInterrupted = false
+    /// The sounds the ticks raised since `takeSounds` last took them, in order.
+    public private(set) var sounds: [Sound] = []
+    /// The haptics the ticks raised since `takeHaptics` last took them, in order: one a tick at
+    /// most.
+    public private(set) var haptics: [Haptic] = []
+    private var cues = HapticCues()
     private var timestep = FixedTimestep()
     private var latch = InputLatch()
 
@@ -53,9 +62,31 @@ public struct GameLoop: Sendable {
         latch.record(controls.sample())
         let ticks = timestep.advance(dt)
         for _ in 0 ..< ticks {
-            session.tick(steered(latch.nextTick()))
+            tick(steered(latch.nextTick()))
         }
         return ticks
+    }
+
+    /// Empties the queue of sounds and returns what it held.
+    public mutating func takeSounds() -> [Sound] {
+        defer { sounds = [] }
+        return sounds
+    }
+
+    /// Empties the queue of haptics and returns what it held.
+    public mutating func takeHaptics() -> [Haptic] {
+        defer { haptics = [] }
+        return haptics
+    }
+
+    /// Ticks the session with `input` and queues the tick's sounds and haptic.
+    private mutating func tick(_ input: InputState) {
+        let marker = session.game.marker
+        session.tick(input)
+        sounds += Sound.sounds(session.events)
+        if let haptic = cues.cue(input, from: marker, to: session) {
+            haptics.append(haptic)
+        }
     }
 
     /// `input` with the steering's direction this tick, in play when `input` holds none.

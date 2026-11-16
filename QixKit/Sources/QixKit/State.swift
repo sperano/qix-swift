@@ -34,8 +34,8 @@ public struct Session: Sendable {
     /// The best score of the high score table and of every game of the session, the one being
     /// played included: it rises with the score as soon as the score passes it.
     public private(set) var highScore: UInt32
-    /// The last tick of the session ticked the game.
-    private var played: Bool
+    /// The last tick of the session ticked the game: `events` are that tick's.
+    private(set) var played: Bool
 
     /// A session on the title screen, which starts `game` on confirm, with the table `highScores`
     /// of earlier sessions; an empty one by default, as Rust's `Session::new`.

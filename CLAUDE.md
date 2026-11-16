@@ -17,17 +17,22 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   the keyboard and game pad controls, the game loop, the palette, the HUD's
   and the screens' text, what the board draws (border, stix runs, trail
   colours, the claimed cells' pixels), the settings and their storage in
-  `UserDefaults` (`Settings`, `Persist`). It also holds the touch controls (the
-  floating stick's maths, the follow-the-finger steering, `TouchSteering`, and
-  each touch's control) and the initials field's filter, which are the iPhone
+  `UserDefaults` (`Settings`, `Persist`), the sound effects of the events and
+  their synthesised samples (`Sound`, `Synth`). It also holds the touch
+  controls (the floating stick's maths, the follow-the-finger steering,
+  `TouchSteering`, and each touch's control), the initials field's filter and
+  the haptic each tick of play raises (`HapticCues`), which are the iPhone
   front end's own: qix-rs has none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
   the entry point and the launch options (`--ui-testing`: an emptied
   `UserDefaults` suite), `Model/` the `@MainActor @Observable` `GameModel` (the
   only thing views read; it loads and saves the settings and the high
-  scores), `Input/` the display link, the hardware keyboard, the game pad and
-  the touch controls' zones, `Views/` the views (the playfield, the initials
+  scores and plays the loop's haptics and sounds), `Input/` the display link,
+  the hardware keyboard, the game pad and the touch controls' zones,
+  `Feedback/` the haptic and sound players (`HapticPlayer`, `SoundPlayer`: the
+  Taptic Engine, an `AVAudioEngine` in the ambient session, and silent ones),
+  `Views/` the views (the playfield, the initials
   field, the settings sheet), their painters (SwiftUI `Canvas`) and their
   layout maths, `Resources/` the asset catalog and the Info.plist xcodegen
   writes.

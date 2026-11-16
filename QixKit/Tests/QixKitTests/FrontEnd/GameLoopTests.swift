@@ -346,4 +346,44 @@ final class GameLoopSteeringTests: XCTestCase {
 
         XCTAssertEqual(loop.steering, TouchSteering())
     }
+
+    /// Drawing up from the border, the first tick ticks for the direction pressed and the second,
+    /// the stix's first step, ticks for leaving the border and blips.
+    func testTheTicksQueueTheirSoundsAndHapticsUntilTaken() {
+        var loop = playingLoop()
+        loop.controls.keyDown(.fast)
+        loop.controls.keyDown(.up)
+
+        XCTAssertEqual(loop.advance(Float(Tuning.markerStepTicks) * frame60), Tuning.markerStepTicks)
+
+        XCTAssertEqual(loop.sounds, [.draw(.fast)])
+        XCTAssertEqual(loop.haptics, [.tick, .tick])
+        XCTAssertEqual(loop.takeSounds(), [.draw(.fast)])
+        XCTAssertEqual(loop.takeHaptics(), [.tick, .tick])
+        XCTAssertEqual(loop.sounds, [])
+        XCTAssertEqual(loop.haptics, [])
+    }
+
+    func testAPausedGameQueuesNoSoundOrHaptic() {
+        var loop = playingLoop()
+        loop.controls.press(.pause)
+        loop.advance(frame60)
+        loop.controls.keyDown(.fast)
+        loop.controls.keyDown(.up)
+
+        loop.advance(Float(Tuning.markerStepTicks) * frame60)
+
+        XCTAssertEqual(loop.session.state, .paused)
+        XCTAssertEqual(loop.sounds, [])
+        XCTAssertEqual(loop.haptics, [])
+    }
+
+    func testTheSteeringsDirectionIsFelt() {
+        var loop = steeringLoop()
+        loop.steering.steer(towards: aimUp(100))
+
+        loop.advance(frame60)
+
+        XCTAssertEqual(loop.haptics, [.tick])
+    }
 }

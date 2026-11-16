@@ -5,7 +5,8 @@ import QixKit
 /// The game the app plays, the only thing the views read: a `GameLoop` over a `Session`, fed by the
 /// display link's frames, the keyboard, the game pad, the touch controls and the taps, what is
 /// drawn of its board, redrawn only when the board changes, and the settings. The settings and the
-/// high score table are kept in `UserDefaults` (`Persist`), each saved as soon as it changes.
+/// high score table are kept in `UserDefaults` (`Persist`), each saved as soon as it changes. Each
+/// frame plays the haptics and the sounds its ticks queued, as the settings allow.
 @MainActor
 @Observable
 final class GameModel {
@@ -23,6 +24,10 @@ final class GameModel {
     private let defaults: UserDefaults?
     /// The high score table as last saved.
     @ObservationIgnored private var savedHighScores: HighScores
+    /// What the player feels, while `Settings.haptics` is on.
+    private let hapticPlayer: any HapticPlayer
+    /// What the player hears, while `Settings.sounds` is on.
+    private let soundPlayer: any SoundPlayer
 
     /// The settings: an edit is saved at once and its rules apply to the next game.
     var settings: Settings {
@@ -51,8 +56,12 @@ final class GameModel {
     }
 
     /// A model playing `session` with `settings`, keeping them and the high scores in `defaults`,
-    /// or nowhere. A session not playing by the settings' rules is given them (`Session.setRules`).
-    init(session: Session, settings: Settings = Settings(), defaults: UserDefaults? = nil) {
+    /// or nowhere, and playing its haptics and sounds on `haptics` and `sounds`. A session not
+    /// playing by the settings' rules is given them (`Session.setRules`).
+    init(
+        session: Session, settings: Settings = Settings(), defaults: UserDefaults? = nil,
+        haptics: any HapticPlayer = SilentHaptics(), sounds: any SoundPlayer = SilentSounds()
+    ) {
         var session = session
         if session.game.rules != settings.rules {
             session.setRules(settings.rules)
@@ -62,15 +71,21 @@ final class GameModel {
         savedHighScores = session.highScores
         self.settings = settings
         self.defaults = defaults
+        hapticPlayer = haptics
+        soundPlayer = sounds
     }
 
     /// A model on the title screen of a new game seeded from `date`, so each launch plays
-    /// differently, with the settings and the high score table kept in `defaults`.
-    convenience init(defaults: UserDefaults, seededAt date: Date = .now) {
+    /// differently, with the settings and the high score table kept in `defaults`, playing its
+    /// haptics and sounds on `haptics` and `sounds`.
+    convenience init(
+        defaults: UserDefaults, seededAt date: Date = .now,
+        haptics: any HapticPlayer = SilentHaptics(), sounds: any SoundPlayer = SilentSounds()
+    ) {
         let game = Game(rng: Rng(seed: Self.seed(at: date)))
         self.init(
             session: Session(game: game, highScores: Persist.loadHighScores(defaults)),
-            settings: Persist.loadSettings(defaults), defaults: defaults
+            settings: Persist.loadSettings(defaults), defaults: defaults, haptics: haptics, sounds: sounds
         )
     }
 
@@ -94,11 +109,13 @@ final class GameModel {
         loop.isOnHold
     }
 
-    /// Runs a frame of `dt` seconds with the game pad as polled, `nil` without one, then redraws the
-    /// board if it changed and saves the high score table if it did.
+    /// Runs a frame of `dt` seconds with the game pad as polled, `nil` without one, plays its
+    /// haptics and sounds, then redraws the board if it changed and saves the high score table if
+    /// it did.
     func advance(by dt: TimeInterval, pad: PadState?) {
         loop.controls.setPad(pad?.controls ?? [])
         loop.advance(Float(dt))
+        playFeedback()
         if board.board != session.game.board {
             board = BoardImage(session.game.board)
         }
@@ -173,6 +190,23 @@ final class GameModel {
     func suspend() {
         touches = TouchControls()
         loop.suspend()
+    }
+
+    /// Takes the haptics and the sounds the loop queued and plays those the settings allow: a
+    /// sound queued while sounds are off is dropped, never played once they are on.
+    private func playFeedback() {
+        let haptics = loop.takeHaptics()
+        let sounds = loop.takeSounds()
+        if settings.haptics {
+            for haptic in haptics {
+                hapticPlayer.play(haptic)
+            }
+        }
+        if settings.sounds {
+            for sound in sounds {
+                soundPlayer.play(sound)
+            }
+        }
     }
 
     /// Saves the high score table when it differs from the one saved last.
