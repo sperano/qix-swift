@@ -78,8 +78,8 @@ def project_setting(name, text=None):
 
 
 def quoted_project_setting(name, text):
-    """The value of `name: "value"` in a project.yml's text, or None when it is not quoted: the form
-    the release workflow's version check reads."""
+    """The value of `name: "value"` in a project.yml's text, or None unless the name is set exactly
+    once, quoted: the form the release workflow's version check reads."""
     values = re.findall(rf'^ *{name}: "([^"\n]*)"$', text, re.MULTILINE)
     return values[0] if len(values) == 1 else None
 

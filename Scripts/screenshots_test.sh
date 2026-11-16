@@ -1,8 +1,9 @@
 #!/bin/sh
 # Tests of Scripts/screenshots.sh with xcrun and xcodebuild stubbed, in a copy of the repository's
 # layout so the real AppStore/screenshots is never touched: the shots are named after the device and
-# replace the previous ones, a portrait shot or a failed test run keeps the previous ones, and the
-# simulator the script booted is shut down, failed or not, while one already booted is left running.
+# replace the previous ones, a portrait shot or a test run failing on any locale keeps the previous
+# ones of every locale, and the simulator the script booted is shut down, failed or not, while one
+# already booted is left running.
 #
 #   Scripts/screenshots_test.sh
 set -u
@@ -13,7 +14,12 @@ trap 'rm -rf "$work"' EXIT
 failures=0
 
 udid=FAKE-UDID
-locale=en-US
+# Two locales, so a run failing on the last one shows whether the first one's shots were kept.
+first_locale=en-US
+last_locale=fr-FR
+locales="$first_locale $last_locale"
+# The FAKE_FAIL_LOCALE of a run whose test runs all pass.
+no_locale=none
 # The device's name without spaces, as the script prefixes the shots with it.
 slug=iPhone17ProMax
 landscape_width=2868
@@ -22,7 +28,7 @@ landscape_height=1320
 already_booted=149
 
 root=$work/root
-mkdir -p "$root/Scripts" "$root/AppStore/metadata/$locale" "$work/bin"
+mkdir -p "$root/Scripts" "$root/AppStore/metadata/$first_locale" "$root/AppStore/metadata/$last_locale" "$work/bin"
 cp "$script" "$root/Scripts/screenshots.sh"
 output=$root/AppStore/screenshots
 
@@ -52,8 +58,8 @@ esac
 SH
 cat > "$work/bin/xcodebuild" <<'SH'
 #!/bin/sh
-echo "xcodebuild" >> "$FAKE_LOG"
-exit "$FAKE_XCODEBUILD_STATUS"
+echo "xcodebuild $TEST_RUNNER_SCREENSHOT_LOCALE" >> "$FAKE_LOG"
+[ "$TEST_RUNNER_SCREENSHOT_LOCALE" != "$FAKE_FAIL_LOCALE" ]
 SH
 chmod +x "$work/bin/xcrun" "$work/bin/xcodebuild"
 
@@ -62,15 +68,18 @@ fail() {
     failures=$((failures + 1))
 }
 
-# run <boot status> <xcodebuild status> <width> <height>: runs the script over a previous shot,
-# leaving its status in $status, its output in $work/out and the stubs' calls in $work/log.
+# run <boot status> <locale whose test run fails> <width> <height>: runs the script over a previous
+# shot in each locale, leaving its status in $status, its output in $work/out and the stubs' calls in
+# $work/log.
 run() {
     rm -rf "$output" "$work/log"
-    mkdir -p "$output/$locale"
-    echo previous > "$output/$locale/previous.png"
+    for locale in $locales; do
+        mkdir -p "$output/$locale"
+        echo previous > "$output/$locale/previous.png"
+    done
     status=0
     PATH="$work/bin:$PATH" FAKE_LOG="$work/log" FAKE_UDID="$udid" FAKE_BOOT_STATUS=$1 \
-        FAKE_XCODEBUILD_STATUS=$2 FAKE_WIDTH=$3 FAKE_HEIGHT=$4 \
+        FAKE_FAIL_LOCALE=$2 FAKE_WIDTH=$3 FAKE_HEIGHT=$4 \
         "$root/Scripts/screenshots.sh" > "$work/out" 2>&1 || status=$?
     touch "$work/log"
 }
@@ -88,28 +97,40 @@ expect_shutdown() {
 }
 
 expect_previous_kept() {
-    [ "$(ls "$output/$locale")" = previous.png ] || fail "$1: the shots are $(ls "$output/$locale")"
+    for locale in $locales; do
+        [ "$(ls "$output/$locale")" = previous.png ] ||
+            fail "$1: the $locale shots are $(ls "$output/$locale")"
+    done
 }
 
-run 0 0 "$landscape_width" "$landscape_height"
+run 0 "$no_locale" "$landscape_width" "$landscape_height"
 expect_status "landscape shots" 0
-[ "$(ls "$output/$locale" | tr '\n' ' ')" = "$slug-01-demo.png $slug-02-game.png " ] ||
-    fail "landscape shots: the shots are $(ls "$output/$locale")"
+for locale in $locales; do
+    [ "$(ls "$output/$locale" | tr '\n' ' ')" = "$slug-01-demo.png $slug-02-game.png " ] ||
+        fail "landscape shots: the $locale shots are $(ls "$output/$locale")"
+done
+[ "$(grep xcodebuild "$work/log" | tr '\n' ' ')" = "xcodebuild $first_locale xcodebuild $last_locale " ] ||
+    fail "landscape shots: the test runs were $(grep xcodebuild "$work/log")"
 expect_shutdown "landscape shots"
 
-run 0 0 "$landscape_height" "$landscape_width"
+run 0 "$no_locale" "$landscape_height" "$landscape_width"
 expect_failure "a portrait shot"
 grep -qxF "01-demo is $landscape_height x $landscape_width, not landscape" "$work/out" ||
     fail "a portrait shot: no refusal in: $(cat "$work/out")"
 expect_previous_kept "a portrait shot"
 expect_shutdown "a portrait shot"
 
-run 0 1 "$landscape_width" "$landscape_height"
-expect_failure "a failed test run"
-expect_previous_kept "a failed test run"
-expect_shutdown "a failed test run"
+run 0 "$first_locale" "$landscape_width" "$landscape_height"
+expect_failure "a test run failing on the first locale"
+expect_previous_kept "a test run failing on the first locale"
+expect_shutdown "a test run failing on the first locale"
 
-run "$already_booted" 0 "$landscape_width" "$landscape_height"
+run 0 "$last_locale" "$landscape_width" "$landscape_height"
+expect_failure "a test run failing on the last locale"
+expect_previous_kept "a test run failing on the last locale"
+expect_shutdown "a test run failing on the last locale"
+
+run "$already_booted" "$no_locale" "$landscape_width" "$landscape_height"
 expect_status "a simulator already booted" 0
 ! grep -q "simctl shutdown" "$work/log" || fail "a simulator already booted: it was shut down"
 
