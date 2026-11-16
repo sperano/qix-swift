@@ -15,6 +15,8 @@ final class LaunchUITests: XCTestCase {
         try await super.setUp()
         continueAfterFailure = false
         app = XCUIApplication()
+        // Default settings and an empty high score table, whatever an earlier run saved.
+        app.launchArguments = ["--ui-testing"]
         app.launch()
     }
 

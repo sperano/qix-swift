@@ -21,12 +21,18 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
     private static let stickCentre = Vec2(x: 64, y: 220)
     private static let stickThumb = Vec2(x: 94, y: 150)
 
+    /// The initials typed in the field's snapshot: two letters, so Done is still disabled.
+    private static let typedInitials = "QI"
+
     /// Asserts `scene` on both phones.
     private func assertScene(_ scene: PlayfieldScene, testName: String = #function, line: UInt = #line) throws {
-        try assertScreen(PlayfieldView(scene: scene), testName: testName, line: line)
-        try assertScreen(
-            PlayfieldView(scene: scene), on: Self.smallPhone, named: Self.smallName, testName: testName, line: line
-        )
+        try assertBoth(PlayfieldView(scene: scene), testName: testName, line: line)
+    }
+
+    /// Asserts `view` on both phones.
+    private func assertBoth(_ view: some View, testName: String = #function, line: UInt = #line) throws {
+        try assertScreen(view, testName: testName, line: line)
+        try assertScreen(view, on: Self.smallPhone, named: Self.smallName, testName: testName, line: line)
     }
 
     /// The scene of `session`.
@@ -34,12 +40,12 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
         PlayfieldScene(session: session, board: BoardImage(session.game.board))
     }
 
-    /// The board in play, with `screen` over it and no pause button.
-    private func inPlay(with screen: Screen) -> PlayfieldScene {
+    /// The board in play, with `screen` over it and no HUD button.
+    private func inPlay(with screen: Screen?) -> PlayfieldScene {
         let session = PlayfieldFixtures.inPlay()
         return PlayfieldScene(
             game: session.game, board: BoardImage(session.game.board),
-            hud: Hud(game: session.game, highScore: session.highScore), screen: screen, pauseButton: nil
+            hud: Hud(game: session.game, highScore: session.highScore), screen: screen, hudButton: nil
         )
     }
 
@@ -54,8 +60,27 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
         touches.began(Self.slowTouch, on: .slow, at: Vec2())
         let scene = PlayfieldScene(
             game: session.game, board: BoardImage(session.game.board),
-            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, pauseButton: .pause,
+            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, hudButton: .pause,
             stick: touches.stick, slowHeld: touches.slowHeld
+        )
+
+        try assertScene(scene)
+    }
+
+    /// Left-handed, the largest stick at full opacity: the stick, not touched, in the middle of
+    /// the zone right of the board, and the Slow button, held, in the zone left of it.
+    func testTheLeftHandedTouchControls() throws {
+        let session = PlayfieldFixtures.inPlay()
+        var touches = TouchControls<Int>()
+        touches.began(Self.slowTouch, on: .slow, at: Vec2())
+        let settings = QixKit.Settings(
+            leftHanded: true, stickSize: StickSize(StickSize.range.upperBound),
+            controlsOpacity: ControlsOpacity(ControlsOpacity.range.upperBound)
+        )
+        let scene = PlayfieldScene(
+            game: session.game, board: BoardImage(session.game.board),
+            hud: Hud(game: session.game, highScore: session.highScore), screen: nil, hudButton: .pause,
+            stick: touches.stick, slowHeld: touches.slowHeld, settings: settings
         )
 
         try assertScene(scene)
@@ -100,11 +125,17 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
         try assertScene(inPlay(with: .gameOver(PlayfieldFixtures.inPlay().game, HighScores())))
     }
 
-    func testTheHighScoreEntryScreen() throws {
+    /// The initials field over the board, two letters typed, without the keyboard, which the
+    /// field brings up only when it focuses on appearing.
+    func testTheInitialsField() throws {
         let game = PlayfieldFixtures.inPlay().game
-        let screen = Screen.highScoreEntry(game, PlayfieldFixtures.highScores, InitialsEntry())
+        let prompt = Screen.highScoreEntry(game, PlayfieldFixtures.highScores)
+        let view = ZStack {
+            PlayfieldView(scene: inPlay(with: nil))
+            InitialsEntryView(prompt: prompt, text: Self.typedInitials, focusesOnAppear: false) { _ in false }
+        }
 
-        try assertScene(inPlay(with: screen))
+        try assertBoth(view)
     }
 
     /// Every HUD value at its widest, the lives past the markers shown, the multiplier and the
@@ -113,7 +144,7 @@ final class PlayfieldSnapshotTests: SnapshotTestCase {
         let session = PlayfieldFixtures.inPlay()
         let scene = PlayfieldScene(
             game: session.game, board: BoardImage(session.game.board), hud: PlayfieldFixtures.widestHud,
-            screen: nil, pauseButton: .pause
+            screen: nil, hudButton: .pause
         )
 
         try assertScene(scene)

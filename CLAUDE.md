@@ -15,24 +15,29 @@ patterns (tooling, snapshot tests, Makefile targets) come from
   the app takes from qix-rs's front end (`crates/qix`) that needs no Apple
   framework, so it is tested on Linux too: the fixed timestep, the input latch,
   the keyboard and game pad controls, the game loop, the palette, the HUD's
-  and the screens' text, and what the board draws (border, stix runs, trail
-  colours, the claimed cells' pixels). It also holds the touch controls (the
-  floating stick's maths and each touch's control), which are the iPhone front
-  end's own: qix-rs has none.
+  and the screens' text, what the board draws (border, stix runs, trail
+  colours, the claimed cells' pixels), the settings and their storage in
+  `UserDefaults` (`Settings`, `Persist`). It also holds the touch controls (the
+  floating stick's maths and each touch's control) and the initials field's
+  filter, which are the iPhone front end's own: qix-rs has none.
 - `Qix/`: the SwiftUI app, iOS 17+, iPhone only (`TARGETED_DEVICE_FAMILY: 1`),
   landscape left and right only, full screen, status bar hidden. `App/` holds
-  the entry point, `Model/` the `@MainActor @Observable` `GameModel` (the only
-  thing views read), `Input/` the display link, the hardware keyboard, the
-  game pad and the touch controls' zones, `Views/` the views, their painters
-  (SwiftUI `Canvas`) and their layout maths, `Resources/` the asset catalog
-  and the Info.plist xcodegen writes.
+  the entry point and the launch options (`--ui-testing`: an emptied
+  `UserDefaults` suite), `Model/` the `@MainActor @Observable` `GameModel` (the
+  only thing views read; it loads and saves the settings and the high
+  scores), `Input/` the display link, the hardware keyboard, the game pad and
+  the touch controls' zones, `Views/` the views (the playfield, the initials
+  field, the settings sheet), their painters (SwiftUI `Canvas`) and their
+  layout maths, `Resources/` the asset catalog and the Info.plist xcodegen
+  writes.
 - `QixTests/`: the app's unit tests (the model, layout maths, key map,
   Info.plist choices).
 - `QixSnapshotTests/`: image comparisons with swift-snapshot-testing (pinned
   in `project.yml`); the references are in `__Snapshots__/<TestFile>/`, which
   `project.yml` excludes from the target's sources. `PlayfieldFixtures.swift`
   plays the sessions they draw from fixed seeds and scripts, with QixKit only.
-- `QixUITests/`: XCUITests of the launched app.
+- `QixUITests/`: XCUITests of the launched app, launched with `--ui-testing`
+  so a run starts from the default settings and an empty table.
 - `project.yml`: the XcodeGen definition. The generated `Qix.xcodeproj` and
   `Qix/Resources/Info.plist` are committed and CI fails when either differs
   from what `xcodegen generate` writes. Edit `project.yml`, regenerate, commit

@@ -3,8 +3,9 @@ import Observation
 import QixKit
 
 /// The game the app plays, the only thing the views read: a `GameLoop` over a `Session`, fed by the
-/// display link's frames, the keyboard, the game pad, the touch controls and the taps, and what is
-/// drawn of its board, redrawn only when the board changes.
+/// display link's frames, the keyboard, the game pad, the touch controls and the taps, what is
+/// drawn of its board, redrawn only when the board changes, and the settings. The settings and the
+/// high score table are kept in `UserDefaults` (`Persist`), each saved as soon as it changes.
 @MainActor
 @Observable
 final class GameModel {
@@ -18,17 +19,59 @@ final class GameModel {
     private(set) var board: BoardImage
     /// The touch controls, as the touches on their zones hold them.
     private(set) var touches = TouchControls<ObjectIdentifier>()
+    /// Where the settings and the high scores are kept; nowhere when nil.
+    private let defaults: UserDefaults?
+    /// The high score table as last saved.
+    @ObservationIgnored private var savedHighScores: HighScores
 
-    /// A model playing `session`.
-    init(session: Session) {
+    /// The settings: an edit is saved at once and its rules apply to the next game.
+    var settings: Settings {
+        didSet {
+            guard settings != oldValue else { return }
+            if settings.rules != oldValue.rules {
+                loop.setRules(settings.rules)
+            }
+            if let defaults {
+                Persist.saveSettings(settings, to: defaults)
+            }
+        }
+    }
+
+    /// The settings sheet is open: the loop is interrupted (`GameLoop.interrupt`) until it closes.
+    var isShowingSettings = false {
+        didSet {
+            guard isShowingSettings != oldValue else { return }
+            if isShowingSettings {
+                touches = TouchControls()
+                loop.interrupt()
+            } else {
+                loop.resume()
+            }
+        }
+    }
+
+    /// A model playing `session` with `settings`, keeping them and the high scores in `defaults`,
+    /// or nowhere. A session not playing by the settings' rules is given them (`Session.setRules`).
+    init(session: Session, settings: Settings = Settings(), defaults: UserDefaults? = nil) {
+        var session = session
+        if session.game.rules != settings.rules {
+            session.setRules(settings.rules)
+        }
         loop = GameLoop(session: session)
         board = BoardImage(session.game.board)
+        savedHighScores = session.highScores
+        self.settings = settings
+        self.defaults = defaults
     }
 
     /// A model on the title screen of a new game seeded from `date`, so each launch plays
-    /// differently, with an empty high score table.
-    convenience init(seededAt date: Date = .now) {
-        self.init(session: Session(game: Game(rng: Rng(seed: Self.seed(at: date)))))
+    /// differently, with the settings and the high score table kept in `defaults`.
+    convenience init(defaults: UserDefaults, seededAt date: Date = .now) {
+        let game = Game(rng: Rng(seed: Self.seed(at: date)))
+        self.init(
+            session: Session(game: game, highScores: Persist.loadHighScores(defaults)),
+            settings: Persist.loadSettings(defaults), defaults: defaults
+        )
     }
 
     var session: Session {
@@ -37,7 +80,7 @@ final class GameModel {
 
     /// Everything the frame draws.
     var scene: PlayfieldScene {
-        PlayfieldScene(session: session, board: board, touches: touches)
+        PlayfieldScene(session: session, board: board, touches: touches, settings: settings)
     }
 
     /// The screen is to stay awake: a game is in play.
@@ -45,17 +88,26 @@ final class GameModel {
         session.state == .playing
     }
 
+    /// The controls do not act on the game: the settings are open or the initials are being typed
+    /// (`GameLoop.isOnHold`).
+    var isOnHold: Bool {
+        loop.isOnHold
+    }
+
     /// Runs a frame of `dt` seconds with the game pad as polled, `nil` without one, then redraws the
-    /// board if it changed.
+    /// board if it changed and saves the high score table if it did.
     func advance(by dt: TimeInterval, pad: PadState?) {
         loop.controls.setPad(pad?.controls ?? [])
         loop.advance(Float(dt))
         if board.board != session.game.board {
             board = BoardImage(session.game.board)
         }
+        saveHighScoresIfChanged()
     }
 
+    /// The key of `control` went down; ignored on hold.
     func keyDown(_ control: Control) {
+        guard !isOnHold else { return }
         loop.controls.keyDown(control)
     }
 
@@ -69,24 +121,45 @@ final class GameModel {
     }
 
     /// A touch on a touch control's zone: the controls the touches hold go to the loop at once, to
-    /// be sampled on the next frame.
+    /// be sampled on the next frame. A touch landing on hold is ignored.
     func touch(_ event: TouchEvent) {
         switch event {
-        case let .began(touch, on: control, at: point): touches.began(touch, on: control, at: Vec2(point))
+        case let .began(touch, on: control, at: point):
+            guard !isOnHold else { return }
+            touches.began(touch, on: control, at: Vec2(point))
         case let .moved(touch, to: point): touches.moved(touch, to: Vec2(point))
         case let .ended(touch): touches.ended(touch)
         }
         loop.controls.setTouch(touches.held)
     }
 
-    /// A tap on the screen: confirm, to start or continue.
+    /// A tap on the screen: confirm, to start or continue; ignored on hold.
     func tap() {
+        guard !isOnHold else { return }
         loop.controls.press(.confirm)
     }
 
-    /// The HUD's pause button: pause, or resume.
+    /// The HUD's pause button: pause, or resume; ignored on hold.
     func pressPause() {
+        guard !isOnHold else { return }
         loop.controls.press(.pause)
+    }
+
+    /// The title screen's settings button: opens the settings, on the title screen only.
+    func openSettings() {
+        guard session.state == .title else { return }
+        isShowingSettings = true
+    }
+
+    /// The initials typed in the initials field: when they are initials (`InitialsField`) and the
+    /// session waits for them, the score goes into the table, which is saved, and the title screen
+    /// shows. Returns whether they were taken.
+    @discardableResult
+    func enterInitials(_ text: String) -> Bool {
+        guard let initials = InitialsField.initials(text), loop.enterInitials(initials) != nil else { return false }
+        touches = TouchControls()
+        saveHighScoresIfChanged()
+        return true
     }
 
     /// The app left the foreground: see `GameLoop.suspend`. The touches held let go of their
@@ -94,6 +167,15 @@ final class GameModel {
     func suspend() {
         touches = TouchControls()
         loop.suspend()
+    }
+
+    /// Saves the high score table when it differs from the one saved last.
+    private func saveHighScoresIfChanged() {
+        guard session.highScores != savedHighScores else { return }
+        savedHighScores = session.highScores
+        if let defaults {
+            Persist.saveHighScores(savedHighScores, to: defaults)
+        }
     }
 
     /// The nanoseconds from the Unix epoch to `date`, as qix-rs seeds a game; zero before the epoch

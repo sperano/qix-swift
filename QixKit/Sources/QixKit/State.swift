@@ -63,6 +63,19 @@ public struct Session: Sendable {
         }
     }
 
+    /// Enters `name` at once as the initials of the game's score, as the iPhone's text field types
+    /// them: in `GameState.highScoreEntry`, the score goes into the table and the title screen
+    /// shows a new game, as when the entry's last letter is confirmed; any other state is left
+    /// alone. Returns the score's rank in the table, nil when nothing was entered. qix-rs has no
+    /// such call: its entry takes the letters one by one, through `tick`.
+    @discardableResult
+    public mutating func enterInitials(_ name: Initials) -> Int? {
+        guard case .highScoreEntry = state else { return nil }
+        let rank = highScores.insert(HighScore(name: name, score: game.score.points))
+        state = restart()
+        return rank
+    }
+
     /// Advances the session by one step: `Game.tick` with `input` while `GameState.playing`, or the
     /// transition `input` asks for.
     ///

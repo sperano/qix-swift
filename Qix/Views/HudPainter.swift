@@ -2,7 +2,8 @@ import QixKit
 import SwiftUI
 
 /// Paints the HUD in its strip above the board: each column's name, then its value, its lives or
-/// its meter. The pause button is a view of its own over the last column.
+/// its meter. The HUD's button (pause, or settings on the title) is a view of its own over the last
+/// column.
 enum HudPainter {
     /// The names of the columns, in the order of `HudLayout.Column`, the pause button's excepted.
     static func label(_ column: HudLayout.Column) -> String? {

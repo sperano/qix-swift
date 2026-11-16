@@ -57,10 +57,12 @@ final class GameModelTests: XCTestCase {
         XCTAssertEqual(model.session.state, .playing, file: file, line: line)
     }
 
-    func testANewModelShowsTheTitleScreenWithoutPauseButtonAndLetsTheScreenSleep() {
+    func testANewModelShowsTheTitleScreenWithTheSettingsButtonAndLetsTheScreenSleep() {
         XCTAssertEqual(model.session.state, .title)
         XCTAssertEqual(model.scene.screen, .title(HighScores()))
-        XCTAssertNil(model.scene.pauseButton)
+        XCTAssertEqual(model.scene.hudButton, .settings)
+        XCTAssertFalse(model.isShowingSettings)
+        XCTAssertFalse(model.isOnHold)
         XCTAssertFalse(model.keepsScreenAwake)
     }
 
@@ -72,7 +74,7 @@ final class GameModelTests: XCTestCase {
 
         XCTAssertEqual(model.session.state, .playing)
         XCTAssertNil(model.scene.screen)
-        XCTAssertEqual(model.scene.pauseButton, .pause)
+        XCTAssertEqual(model.scene.hudButton, .pause)
         XCTAssertTrue(model.keepsScreenAwake)
     }
 
@@ -83,7 +85,7 @@ final class GameModelTests: XCTestCase {
         frames(1)
         XCTAssertEqual(model.session.state, .paused)
         XCTAssertEqual(model.scene.screen, .paused)
-        XCTAssertEqual(model.scene.pauseButton, .resume)
+        XCTAssertEqual(model.scene.hudButton, .resume)
         XCTAssertFalse(model.keepsScreenAwake)
 
         model.pressPause()

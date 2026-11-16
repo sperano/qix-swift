@@ -27,7 +27,7 @@ private func tableOf(_ score: UInt32) throws -> HighScores {
 
 /// A session over `levelGame` with `table`, played until the game is over: it completes the first
 /// level, then loses every life to the Sparx of the next one, with points.
-private func scoredGameOver(_ table: HighScores, file: StaticString = #filePath, line: UInt = #line) -> Session {
+func scoredGameOver(_ table: HighScores, file: StaticString = #filePath, line: UInt = #line) -> Session {
     var session = Session(game: levelGame(), highScores: table)
     session.tick(confirmInput)
     hold(&session, drawUpInput, UInt32(levelGameHeight) * Tuning.markerStepTicks)
@@ -151,5 +151,46 @@ final class StateHighScoresTests: XCTestCase {
 
         XCTAssertEqual(session.state, .title)
         XCTAssertTrue(session.highScores.entries.isEmpty)
+    }
+}
+
+/// The initials the tests of `Session.enterInitials` type.
+private let typedName = "QIX"
+
+/// The tests of `Session.enterInitials`, the iPhone's initials typed at once.
+final class StateTypedInitialsTests: XCTestCase {
+    func testTypedInitialsPutTheScoreInTheTableAndShowTheTitle() throws {
+        var session = scoredGameOver(HighScores())
+        let points = session.game.score.points
+        session.tick(confirmInput)
+
+        XCTAssertEqual(try session.enterInitials(initials(typedName)), 0)
+
+        XCTAssertEqual(session.state, .title)
+        XCTAssertEqual(session.highScores.entries, [try HighScore(name: initials(typedName), score: points)])
+        XCTAssertEqual(session.game.score.points, 0)
+        XCTAssertEqual(session.highScore, points)
+    }
+
+    func testTypedInitialsRankBelowAHigherScore() throws {
+        let top = try HighScore(name: initials("TOP"), score: .max)
+        var session = scoredGameOver(HighScores([top]))
+        let points = session.game.score.points
+        session.tick(confirmInput)
+
+        XCTAssertEqual(try session.enterInitials(initials(typedName)), 1)
+
+        XCTAssertEqual(session.highScores.entries, [top, try HighScore(name: initials(typedName), score: points)])
+    }
+
+    func testTypedInitialsOutsideTheEntryChangeNothing() throws {
+        var session = scoredGameOver(HighScores())
+        let game = session.game
+
+        XCTAssertNil(try session.enterInitials(initials(typedName)))
+
+        XCTAssertEqual(session.state, .gameOver)
+        XCTAssertEqual(session.game, game)
+        XCTAssertEqual(session.highScores, HighScores())
     }
 }
