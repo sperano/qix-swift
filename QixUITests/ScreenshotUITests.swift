@@ -42,6 +42,14 @@ final class ScreenshotUITests: XCTestCase {
         app.descendants(matching: .any)[identifier]
     }
 
+    /// The marker's lattice point, as the playfield's accessibility value reads it.
+    private func markerPosition() -> [Int] {
+        let value = element("playfield").value as? String ?? ""
+        let numbers = value.split { !$0.isNumber }.compactMap { Int($0) }
+        XCTAssertEqual(numbers.count, 2, "no marker in \(value)")
+        return numbers
+    }
+
     /// Waits `settle` seconds, then attaches the screen as `name`. The wait is the picture's own
     /// timing (how far a demo or an animation got), not a stand-in for an element to appear.
     private func snap(_ name: String, after settle: TimeInterval = animationSettle) {
@@ -60,6 +68,7 @@ final class ScreenshotUITests: XCTestCase {
         // on the stick draws a fast line into the open.
         element("playfield").tap()
         XCTAssertTrue(app.buttons["pause"].waitForExistence(timeout: Self.timeout))
+        let start = markerPosition()
         let centre = element("stick").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
         let up = centre.withOffset(CGVector(dx: 0, dy: -Self.dragDistance))
         centre.press(
@@ -67,6 +76,8 @@ final class ScreenshotUITests: XCTestCase {
             thenHoldForDuration: Self.drawDuration
         )
         snap("02-game", after: Self.immediately)
+        // Read after the picture, which the read would delay: a board with no line fails the run.
+        XCTAssertNotEqual(markerPosition()[1], start[1], "the drag drew no line")
     }
 
     func testSettingsAndHowToPlay() {

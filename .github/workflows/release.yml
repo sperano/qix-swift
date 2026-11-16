@@ -7,8 +7,10 @@ on:
   push:
     tags: ["v*"]
 
+# One run per tag: a group shared by every tag keeps only one run pending, so a third tag pushed
+# while a release runs would cancel the second's.
 concurrency:
-  group: release
+  group: release-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -19,6 +21,8 @@ jobs:
   testflight:
     name: Archive and upload to TestFlight
     runs-on: xcode-27
+    # An archive and an upload take minutes; a stalled one stops here, not at GitHub's six hours.
+    timeout-minutes: 60
     env:
       API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -37,6 +41,7 @@ jobs:
           echo "ARCHIVE=$RUNNER_TEMP/Qix.xcarchive" >> "$GITHUB_ENV"
           echo "API_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
       - name: Check the tag is the version, on main
+        # The version is quoted in project.yml; Scripts/app_store_test.py checks it is.
         run: |
           version=$(sed -n 's/^ *MARKETING_VERSION: "\(.*\)"$/\1/p' project.yml)
           if [ "$GITHUB_REF_NAME" != "v$version" ]; then

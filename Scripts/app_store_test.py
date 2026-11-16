@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Checks of what the App Store release reads from the repository: the listing under
-AppStore/metadata (one file per App Store Connect field, fastlane deliver's layout), the privacy
-policy it links to, the age rating, the export options, and the version and bundle identifier in
-project.yml. They read files only, so they run on Linux with the other script tests.
+"""Checks of what the App Store release reads from the repository (app_store.py): the listing under
+AppStore/metadata, the privacy policy it links to, the age rating, the export options, and the
+version and bundle identifier in project.yml; then the checks themselves, on fixtures. They read
+files only, so they run on Linux with the other script tests.
 
     python3 Scripts/app_store_test.py
 """
@@ -11,80 +11,21 @@ import json
 import pathlib
 import plistlib
 import re
+import tempfile
 import unittest
 from urllib.parse import urlparse
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
-STORE = ROOT / "AppStore"
-METADATA = STORE / "metadata"
-PROJECT = ROOT / "project.yml"
-TEXT_EXTENSION = ".txt"
+from app_store import (
+    APP_SOURCES, GAMES_CATEGORY, GAMES_SUBCATEGORY_PREFIX, LIMITS, LOCALISATION_PATTERNS, METADATA,
+    PRIMARY_LOCALE, PRIVACY_POLICIES, PROJECT, RELEASE_NOTES, RELEASE_NOTES_LIMIT, REPOSITORY_FILE_PREFIX, ROOT,
+    SEARCHED_FIELDS, SHARED_FIELDS, STORE, STORE_LOCALES, TEXT_EXTENSION, URL_FIELDS, VERSION_PATTERN,
+    BUILD_PATTERN, age_rating_problems, field, field_names, keyword_problems, language_code, locales,
+    project_setting, quoted_project_setting, release_notes_problems, uses_trademark,
+)
 
-# The listing every other locale falls back to; App Store Connect calls it the primary language.
-PRIMARY_LOCALE = "en-US"
-# The locale codes App Store Connect accepts (fastlane deliver's names), so a folder named `en_US`
-# or `en` fails here instead of at upload.
-STORE_LOCALES = {
-    "ar-SA", "ca", "cs", "da", "de-DE", "el", "en-AU", "en-CA", "en-GB", "en-US", "es-ES", "es-MX",
-    "fi", "fr-CA", "fr-FR", "he", "hi", "hr", "hu", "id", "it", "ja", "ko", "ms", "nl-NL", "no", "pl",
-    "pt-BR", "pt-PT", "ro", "ru", "sk", "sv", "th", "tr", "uk", "vi", "zh-Hans", "zh-Hant",
-}
-REGION_SEPARATOR = "-"
-# App Store Connect's limits, in characters.
-LIMITS = {
-    "name": 30,
-    "subtitle": 30,
-    "promotional_text": 170,
-    "keywords": 100,
-    "description": 4_000,
-}
-# The first version takes no release notes; every later one has them in every locale.
-RELEASE_NOTES = "release_notes"
-RELEASE_NOTES_LIMIT = 4_000
-URL_FIELDS = ["privacy_url", "support_url"]
-SHARED_FIELDS = ["copyright", "primary_category", "primary_first_sub_category"]
-GAMES_CATEGORY = "GAMES"
-GAMES_SUBCATEGORY_PREFIX = "GAMES_"
-# Where `privacy_url` points: a file in this repository, as GitHub shows it on main.
-REPOSITORY_FILE_PREFIX = "https://github.com/sperano/qix-swift/blob/main/"
-# The privacy policy each listing links to, in its own language.
-PRIVACY_POLICIES = {"en-US": "PRIVACY.md"}
-KEYWORD_SEPARATOR = ","
-# Taito's trademark, which the listing must not use (App Review Guidelines 2.3.7 and 5.2.1).
-TRADEMARK = "qix"
-# The fields a store search reads or a listing shows.
-SEARCHED_FIELDS = ["name", "subtitle", "keywords", "promotional_text", "description"]
-# What a localisation of the app would add: a String Catalog or a language's folder.
-LOCALISATION_PATTERNS = ["*.xcstrings", "*.lproj"]
-APP_SOURCES = ROOT / "Qix"
-# Three dot-separated numbers, as App Store Connect wants and the release tag repeats.
-VERSION_PATTERN = r"^[0-9]+\.[0-9]+\.[0-9]+$"
-BUILD_PATTERN = r"^[0-9]+$"
-
-
-def project_setting(name):
-    """The value of `name: value` in project.yml, unquoted; the file sets each name once."""
-    values = re.findall(rf'^ *{name}: *"?([^"\n]*)"?$', PROJECT.read_text(), re.MULTILINE)
-    if len(values) != 1:
-        raise AssertionError(f"{name} is set {len(values)} times in project.yml")
-    return values[0]
-
-
-def locales():
-    return sorted(path.name for path in METADATA.iterdir() if path.is_dir())
-
-
-def field(name, locale=None):
-    directory = METADATA / locale if locale else METADATA
-    return (directory / (name + TEXT_EXTENSION)).read_text(encoding="utf-8").strip("\n")
-
-
-def field_names(directory):
-    return sorted(path.stem for path in directory.glob("*" + TEXT_EXTENSION))
-
-
-def language_code(locale):
-    return locale.split(REGION_SEPARATOR)[0]
+STORE_NAME = "Stix: Claim the Field"
+FIXTURE_LOCALES = ["en-US", "fr-FR"]
+FIXTURE_NOTES = "Faster Sparx."
 
 
 class ListingTests(unittest.TestCase):
@@ -116,12 +57,7 @@ class ListingTests(unittest.TestCase):
             self.assertEqual([name for name in names if name != RELEASE_NOTES], expected, locale)
 
     def test_release_notes_are_in_every_locale_or_none(self):
-        present = [locale for locale in locales() if RELEASE_NOTES in field_names(METADATA / locale)]
-        self.assertIn(present, ([], locales()))
-        for locale in present:
-            notes = field(RELEASE_NOTES, locale)
-            self.assertTrue(notes, locale)
-            self.assertLessEqual(len(notes), RELEASE_NOTES_LIMIT, locale)
+        self.assertEqual(release_notes_problems(), [])
 
     def test_the_shared_fields_are_a_game_with_a_copyright(self):
         self.assertTrue(field("copyright"))
@@ -147,28 +83,22 @@ class ListingTests(unittest.TestCase):
             text = (ROOT / policy).read_text(encoding="utf-8")
             self.assertIn(field("name", locale), text, locale)
 
-    def test_keywords_are_distinct_and_unpadded(self):
+    def test_the_keywords_waste_no_characters(self):
         for locale in locales():
-            keywords = field("keywords", locale).split(KEYWORD_SEPARATOR)
-            self.assertEqual(len(set(keywords)), len(keywords), locale)
-            # The space after a comma counts against the limit and adds nothing.
-            self.assertEqual([keyword.strip() for keyword in keywords], keywords, locale)
-
-    def test_the_name_is_not_a_keyword(self):
-        # The store already matches the name; a keyword repeating it wastes the 100 characters.
-        for locale in locales():
-            keywords = [keyword.lower() for keyword in field("keywords", locale).split(KEYWORD_SEPARATOR)]
-            self.assertNotIn(field("name", locale).lower(), keywords, locale)
+            self.assertEqual(keyword_problems(field("keywords", locale), field("name", locale)), [], locale)
 
     def test_the_listing_does_not_use_the_trademark(self):
         for locale in locales():
             for name in SEARCHED_FIELDS:
-                self.assertNotIn(TRADEMARK, field(name, locale).lower(), f"{locale} {name}")
+                self.assertFalse(uses_trademark(field(name, locale)), f"{locale} {name}")
 
 
 class ReleaseTests(unittest.TestCase):
-    def test_the_version_is_three_numbers(self):
-        self.assertRegex(project_setting("MARKETING_VERSION"), VERSION_PATTERN)
+    def test_the_version_is_three_numbers_quoted(self):
+        # Quoted, as the release workflow's check of the tag reads it.
+        version = quoted_project_setting("MARKETING_VERSION", PROJECT.read_text())
+        self.assertIsNotNone(version)
+        self.assertRegex(version, VERSION_PATTERN)
 
     def test_the_local_build_number_is_a_whole_number(self):
         self.assertRegex(project_setting("CURRENT_PROJECT_VERSION"), BUILD_PATTERN)
@@ -182,8 +112,7 @@ class ReleaseTests(unittest.TestCase):
         # 4+: abstract enemies, no violence, no gambling, nothing shared between players.
         answers = json.loads((STORE / "age_rating.json").read_text())
         self.assertTrue(answers)
-        for question, answer in answers.items():
-            self.assertIn(answer, ("NONE", False), question)
+        self.assertEqual(age_rating_problems(answers), [])
 
     def test_the_export_uploads_for_the_app_store_without_a_team(self):
         with (STORE / "ExportOptions.plist").open("rb") as file:
@@ -193,6 +122,114 @@ class ReleaseTests(unittest.TestCase):
         self.assertFalse(options["manageAppVersionAndBuildNumber"])
         # The release workflow inserts the team, and plutil -insert fails on a key already there.
         self.assertNotIn("teamID", options)
+
+
+class KeywordCheckTests(unittest.TestCase):
+    def test_distinct_unpadded_keywords_pass(self):
+        self.assertEqual(keyword_problems("arcade,no ads,1981", STORE_NAME), [])
+
+    def test_an_empty_keyword_fails(self):
+        self.assertEqual(keyword_problems("arcade,,retro", STORE_NAME), ["an empty keyword"])
+        self.assertEqual(keyword_problems("arcade,retro,", STORE_NAME), ["an empty keyword"])
+
+    def test_a_keyword_repeated_in_another_case_fails(self):
+        self.assertEqual(keyword_problems("Lines,lines", STORE_NAME), ["'lines' is repeated"])
+
+    def test_a_padded_keyword_fails(self):
+        self.assertEqual(keyword_problems("arcade, retro", STORE_NAME), ["' retro' is padded"])
+
+    def test_the_name_or_a_word_of_it_fails(self):
+        self.assertEqual(
+            keyword_problems("stix: claim the field", STORE_NAME), ["'stix: claim the field' repeats the name"]
+        )
+        self.assertEqual(keyword_problems("arcade,Stix", STORE_NAME), ["'Stix' repeats the name"])
+        self.assertEqual(keyword_problems("field", STORE_NAME), ["'field' repeats the name"])
+
+
+class TrademarkCheckTests(unittest.TestCase):
+    def test_the_trademark_is_found_in_any_case(self):
+        self.assertTrue(uses_trademark("QIX Arcade"))
+        self.assertTrue(uses_trademark("Qix"))
+        self.assertTrue(uses_trademark("a qix clone"))
+
+    def test_the_store_name_does_not_use_it(self):
+        self.assertFalse(uses_trademark(STORE_NAME))
+
+
+class ReleaseNotesCheckTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.metadata = pathlib.Path(self.directory.name)
+        for locale in FIXTURE_LOCALES:
+            (self.metadata / locale).mkdir()
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def notes(self, locale, text):
+        (self.metadata / locale / (RELEASE_NOTES + TEXT_EXTENSION)).write_text(text, encoding="utf-8")
+
+    def test_no_notes_pass(self):
+        self.assertEqual(release_notes_problems(self.metadata), [])
+
+    def test_notes_in_every_locale_at_the_limit_pass(self):
+        self.notes("en-US", FIXTURE_NOTES)
+        self.notes("fr-FR", "x" * RELEASE_NOTES_LIMIT)
+        self.assertEqual(release_notes_problems(self.metadata), [])
+
+    def test_notes_in_one_locale_only_fail(self):
+        self.notes("en-US", FIXTURE_NOTES)
+        self.assertEqual(
+            release_notes_problems(self.metadata), ["release notes in ['en-US'] but not in ['fr-FR']"]
+        )
+
+    def test_empty_notes_fail(self):
+        self.notes("en-US", FIXTURE_NOTES)
+        self.notes("fr-FR", "\n")
+        self.assertEqual(release_notes_problems(self.metadata), ["fr-FR: empty release notes"])
+
+    def test_notes_over_the_limit_fail(self):
+        self.notes("en-US", FIXTURE_NOTES)
+        over = RELEASE_NOTES_LIMIT + 1
+        self.notes("fr-FR", "x" * over)
+        self.assertEqual(release_notes_problems(self.metadata), [f"fr-FR: release notes of {over} characters"])
+
+
+class AgeRatingCheckTests(unittest.TestCase):
+    def test_no_and_none_pass(self):
+        self.assertEqual(age_rating_problems({"gambling": False, "contests": "NONE"}), [])
+
+    def test_zero_is_not_no(self):
+        self.assertEqual(age_rating_problems({"gambling": 0}), ["gambling: 0, not false"])
+
+    def test_none_is_not_an_answer_to_a_yes_or_no_question(self):
+        self.assertEqual(age_rating_problems({"lootBox": "NONE"}), ["lootBox: 'NONE', not false"])
+
+    def test_false_is_not_a_level(self):
+        self.assertEqual(age_rating_problems({"contests": False}), ["contests: False, not 'NONE'"])
+
+    def test_a_level_above_none_fails(self):
+        self.assertEqual(
+            age_rating_problems({"violenceCartoonOrFantasy": "INFREQUENT_OR_MILD"}),
+            ["violenceCartoonOrFantasy: 'INFREQUENT_OR_MILD', not 'NONE'"],
+        )
+
+
+class ProjectSettingTests(unittest.TestCase):
+    def test_a_quoted_version_is_read(self):
+        self.assertEqual(quoted_project_setting("MARKETING_VERSION", '    MARKETING_VERSION: "1.0.0"\n'), "1.0.0")
+
+    def test_an_unquoted_version_is_not(self):
+        # project_setting accepts it, but the release workflow's check of the tag would read nothing.
+        text = "    MARKETING_VERSION: 1.0.0\n"
+        self.assertEqual(project_setting("MARKETING_VERSION", text), "1.0.0")
+        self.assertIsNone(quoted_project_setting("MARKETING_VERSION", text))
+
+    def test_a_setting_set_twice_is_refused(self):
+        text = '    MARKETING_VERSION: "1.0.0"\n    MARKETING_VERSION: "1.0.1"\n'
+        self.assertIsNone(quoted_project_setting("MARKETING_VERSION", text))
+        with self.assertRaisesRegex(AssertionError, "MARKETING_VERSION is set 2 times in project.yml"):
+            project_setting("MARKETING_VERSION", text)
 
 
 if __name__ == "__main__":

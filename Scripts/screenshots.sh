@@ -13,7 +13,17 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 locales=$(find "$root/AppStore/metadata" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sort)
 output=$root/AppStore/screenshots
 work=$(mktemp -d)
-trap 'rm -rf "$work"' EXIT
+# The new shots go here, and replace the previous ones only once every locale has them.
+staging=$work/screenshots
+# A simulator this script boots is shut down on exit, failed or not, so the machine is left as it
+# was found.
+udid=
+booted_here=false
+cleanup() {
+    if $booted_here; then xcrun simctl shutdown "$udid" || true; fi
+    rm -rf "$work"
+}
+trap cleanup EXIT
 
 udid_of() {
     xcrun simctl list devices available -j | python3 -c '
@@ -50,10 +60,7 @@ PY
 }
 
 cd "$root"
-rm -rf "$output"
 udid=$(udid_of "$device")
-# A simulator this script boots is shut down after, so the machine is left as it was found.
-booted_here=false
 if xcrun simctl boot "$udid" 2>/dev/null; then booted_here=true; fi
 xcrun simctl bootstatus "$udid" -b >/dev/null
 slug=$(echo "$device" | tr -cd '[:alnum:]')
@@ -62,9 +69,10 @@ for locale in $locales; do
     TEST_RUNNER_SCREENSHOT_LOCALE=$locale xcodebuild test -project Qix.xcodeproj \
         -scheme Qix -destination "id=$udid" -only-testing:QixUITests/ScreenshotUITests \
         -resultBundlePath "$result" CODE_SIGNING_ALLOWED=NO -quiet
-    mkdir -p "$work/$slug-$locale" "$output/$locale"
+    mkdir -p "$work/$slug-$locale" "$staging/$locale"
     xcrun xcresulttool export attachments --path "$result" --output-path "$work/$slug-$locale" >/dev/null
-    collect "$work/$slug-$locale" "$output/$locale" "$slug"
+    collect "$work/$slug-$locale" "$staging/$locale" "$slug"
 done
-if $booted_here; then xcrun simctl shutdown "$udid"; fi
+rm -rf "$output"
+mv "$staging" "$output"
 ls -R "$output"

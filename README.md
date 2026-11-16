@@ -119,8 +119,9 @@ Privacy: `Qix/Resources/PrivacyInfo.xcprivacy` declares no tracking and no
 data collected, and the one API Apple asks a reason for, `UserDefaults` (the
 settings and high scores the app keeps for itself). In App Store Connect the
 App Privacy answer is "Data Not Collected". `PrivacyManifestTests` fails if
-the code starts using another API that needs a reason before the manifest
-declares it.
+the code starts using one of the required-reason symbols it searches for
+(`requiredReasonSymbols`) before the manifest declares its category; it does
+not search for Apple's whole list (`stat`, `fstat`, `statvfs` and others).
 
 Screenshots: `Scripts/screenshots.sh` runs `ScreenshotUITests` on the 6.9-inch
 iPhone simulator (iPhone 17 Pro Max, iOS 27.2), the size App Store Connect

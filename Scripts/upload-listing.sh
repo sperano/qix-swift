@@ -1,9 +1,9 @@
 #!/bin/sh
 # Uploads the App Store listing with fastlane deliver (AppStore/Deliverfile): the text of every
 # locale in AppStore/metadata, the category, copyright, age rating, review information and the
-# screenshots in AppStore/screenshots (run Scripts/screenshots.sh first). It edits the version in
-# project.yml's MARKETING_VERSION, creating it when App Store Connect has none. Run on a Mac with the
-# release API key:
+# screenshots in AppStore/screenshots (run Scripts/screenshots.sh first). It edits the App Store
+# Connect version named by project.yml's MARKETING_VERSION, creating it when there is none. Run on a
+# Mac with the release API key:
 #
 #   Scripts/upload-listing.sh <AuthKey_<KEYID>.p8> <issuer id> [--submit]
 #
