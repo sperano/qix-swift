@@ -231,6 +231,10 @@ class ProjectSettingTests(unittest.TestCase):
         with self.assertRaisesRegex(AssertionError, "MARKETING_VERSION is set 2 times in project.yml"):
             project_setting("MARKETING_VERSION", text)
 
+    def test_a_setting_set_twice_once_unquoted_is_refused(self):
+        text = '    MARKETING_VERSION: "1.0.0"\n    MARKETING_VERSION: 1.0.1\n'
+        self.assertIsNone(quoted_project_setting("MARKETING_VERSION", text))
+
 
 if __name__ == "__main__":
     unittest.main()
