@@ -1,9 +1,9 @@
 import QixKit
 import SwiftUI
 
-/// The settings sheet, opened from the title screen: the rules of the next game, the touch
-/// controls and the feedback. Each edit goes to `settings` at once. qix-rs's settings screen
-/// (`settings_menu.rs`), without its key bindings and window scale.
+/// The settings sheet, opened from the title screen: the How to play page, the rules of the next
+/// game, the touch controls and the feedback. Each edit goes to `settings` at once. qix-rs's
+/// settings screen (`settings_menu.rs`), without its key bindings and window scale.
 ///
 /// `Settings` is written `QixKit.Settings` next to SwiftUI, whose macOS `Settings` scene has the
 /// same name.
@@ -11,6 +11,7 @@ struct SettingsView: View {
     /// What UI tests find the controls by.
     static let doneIdentifier = "settingsDone"
     static let leftHandedIdentifier = "leftHanded"
+    static let howToPlayIdentifier = "howToPlayLink"
 
     @Binding var settings: QixKit.Settings
     @Environment(\.dismiss) private var dismiss
@@ -18,6 +19,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                help
                 rules
                 controls
                 feedback
@@ -30,6 +32,16 @@ struct SettingsView: View {
                         .accessibilityIdentifier(Self.doneIdentifier)
                 }
             }
+        }
+    }
+
+    /// The How to play page, telling the settings as they are.
+    private var help: some View {
+        Section {
+            NavigationLink(HowToPlayView.title) {
+                HowToPlayView(sheet: HowToPlay(settings: settings))
+            }
+            .accessibilityIdentifier(Self.howToPlayIdentifier)
         }
     }
 

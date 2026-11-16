@@ -1,7 +1,7 @@
 import XCTest
 
-/// The settings sheet as a player opens it from the title screen's gear, and the left-handed
-/// swap of the touch controls it makes.
+/// The settings sheet as a player opens it from the title screen's gear, its How to play page,
+/// and the left-handed swap of the touch controls it makes.
 @MainActor
 final class SettingsUITests: XCTestCase {
     private static let timeout: TimeInterval = 10
@@ -51,6 +51,20 @@ final class SettingsUITests: XCTestCase {
 
         XCTAssertTrue(settingsButton.exists)
         XCTAssertTrue(element("screen").label.contains("QIX"), element("screen").label)
+    }
+
+    func testHowToPlayOpensFromTheSettingsAndGoesBackToThem() {
+        openSettings()
+        let link = app.buttons["howToPlayLink"]
+        XCTAssertTrue(link.waitForExistence(timeout: Self.timeout))
+        link.tap()
+
+        XCTAssertTrue(app.navigationBars["How to play"].waitForExistence(timeout: Self.timeout))
+        XCTAssertTrue(app.staticTexts["Claim 75% of the board to clear the level."].exists)
+
+        app.navigationBars["How to play"].buttons.firstMatch.tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: Self.timeout))
+        closeSettings()
     }
 
     func testLeftHandedPutsTheStickRightOfTheSlowButton() {
