@@ -1,7 +1,7 @@
 import XCTest
 
-/// The settings sheet as a player opens it from the title screen's gear, its How to play page,
-/// and the left-handed swap of the touch controls it makes.
+/// The settings sheet as a player opens it from the title screen's gear, its How to play page
+/// (which tells the settings as they are), and the left-handed swap of the touch controls it makes.
 @MainActor
 final class SettingsUITests: XCTestCase {
     private static let timeout: TimeInterval = 10
@@ -53,13 +53,34 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(element("screen").label.contains("QIX"), element("screen").label)
     }
 
+    /// Turns the left-handed switch on, swiping the sheet down to it.
+    private func turnOnLeftHanded(file: StaticString = #filePath, line: UInt = #line) {
+        let toggle = app.switches["leftHanded"]
+        XCTAssertTrue(toggle.waitForExistence(timeout: Self.timeout), file: file, line: line)
+        for _ in 0 ..< Self.maxSwipes where !toggle.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertEqual(toggle.value as? String, "0", file: file, line: line)
+        toggle.switches.firstMatch.tap()
+        XCTAssertEqual(toggle.value as? String, "1", file: file, line: line)
+    }
+
+    /// Taps the How to play link, swiping the sheet back up to it, and waits for the page's list.
+    private func openHowToPlay(file: StaticString = #filePath, line: UInt = #line) {
+        let link = app.buttons["howToPlayLink"]
+        XCTAssertTrue(link.waitForExistence(timeout: Self.timeout), file: file, line: line)
+        for _ in 0 ..< Self.maxSwipes where !link.isHittable {
+            app.swipeDown()
+        }
+        link.tap()
+        XCTAssertTrue(element("howToPlay").waitForExistence(timeout: Self.timeout), "no page", file: file, line: line)
+    }
+
     func testHowToPlayOpensFromTheSettingsAndGoesBackToThem() {
         openSettings()
-        let link = app.buttons["howToPlayLink"]
-        XCTAssertTrue(link.waitForExistence(timeout: Self.timeout))
-        link.tap()
+        openHowToPlay()
 
-        XCTAssertTrue(app.navigationBars["How to play"].waitForExistence(timeout: Self.timeout))
+        XCTAssertTrue(app.navigationBars["How to play"].exists)
         XCTAssertTrue(app.staticTexts["Claim 75% of the board to clear the level."].exists)
 
         app.navigationBars["How to play"].buttons.firstMatch.tap()
@@ -74,16 +95,24 @@ final class SettingsUITests: XCTestCase {
         XCTAssertLessThan(stick.frame.midX, slow.frame.midX)
 
         openSettings()
-        let toggle = app.switches["leftHanded"]
-        XCTAssertTrue(toggle.waitForExistence(timeout: Self.timeout))
-        for _ in 0 ..< Self.maxSwipes where !toggle.isHittable {
-            app.swipeUp()
-        }
-        XCTAssertEqual(toggle.value as? String, "0")
-        toggle.switches.firstMatch.tap()
-        XCTAssertEqual(toggle.value as? String, "1")
+        turnOnLeftHanded()
         closeSettings()
 
         XCTAssertGreaterThan(stick.frame.midX, slow.frame.midX)
+    }
+
+    func testHowToPlayTellsTheSidesTheLeftHandedSettingChose() {
+        let slowText = app.staticTexts[
+            "Hold Slow, left of the board, while moving to draw a slow stix: it is slower, but scores x2 points."
+        ]
+        openSettings()
+        turnOnLeftHanded()
+        openHowToPlay()
+
+        let page = element("howToPlay")
+        for _ in 0 ..< Self.maxSwipes where !slowText.isHittable {
+            page.swipeUp()
+        }
+        XCTAssertTrue(slowText.isHittable)
     }
 }
