@@ -84,6 +84,15 @@ final class GameModelSettingsTests: XCTestCase {
         XCTAssertEqual(model.session.game.lives, editedLives)
     }
 
+    func testAnEditOutsideTheRulesIsSavedAtOnce() {
+        model.settings.leftHanded = true
+        model.settings.opacityPercent = Settings.opacityPercents.lowerBound
+
+        XCTAssertEqual(Persist.loadSettings(defaults), model.settings)
+        XCTAssertTrue(Persist.loadSettings(defaults).leftHanded)
+        XCTAssertEqual(Persist.loadSettings(defaults).controlsOpacity.get, ControlsOpacity.range.lowerBound)
+    }
+
     func testAnEditDuringAGameAppliesToTheNextOne() {
         model.tap()
         frames(1)
@@ -136,6 +145,16 @@ final class GameModelSettingsTests: XCTestCase {
 
         XCTAssertEqual(model.loop.controls.held, [])
         XCTAssertEqual(model.touches, TouchControls())
+    }
+
+    func testOpeningTheSettingsLetsGoOfTheTouchesHeld() {
+        model.touch(.began(touch: ObjectIdentifier(finger), on: .stick, at: stickPoint))
+        XCTAssertNotEqual(model.touches, TouchControls())
+
+        model.openSettings()
+
+        XCTAssertEqual(model.touches, TouchControls())
+        XCTAssertEqual(model.loop.controls.held, [])
     }
 
     func testTheSettingsOpenFromTheTitleOnly() {

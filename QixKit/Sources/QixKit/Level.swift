@@ -87,9 +87,9 @@ public struct ClaimThreshold: Hashable, Sendable {
 }
 
 extension ClaimThreshold: Codable {
-    /// The stored fraction, clamped as `init(_:)` clamps it.
+    /// The stored fraction, clamped as `init(_:)` clamps it, one past `Float` included.
     public init(from decoder: any Decoder) throws {
-        try self.init(decoder.singleValueContainer().decode(Float.self))
+        try self.init(decodedFloat(decoder))
     }
 
     /// Stores the fraction.
@@ -106,4 +106,10 @@ private func saturatingUInt32(_ value: Double) -> UInt32 {
         return 0
     }
     return value >= Double(UInt32.max) ? .max : UInt32(value)
+}
+
+/// The `Float` stored in `decoder`'s single value, read as a `Double` so that a number past `Float`
+/// gives an infinity, as serde's `f32` does, for the caller to clamp, instead of failing.
+func decodedFloat(_ decoder: any Decoder) throws -> Float {
+    try Float(decoder.singleValueContainer().decode(Double.self))
 }

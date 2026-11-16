@@ -9,8 +9,9 @@ private let phone = CGRect(x: 0, y: 0, width: 616, height: 280)
 /// Where the stick's thumb lands in the knob tests.
 private let centre = CGPoint(x: 100, y: 100)
 
-/// Tolerance for comparing screen coordinates, in points, and opacities.
-private let epsilon: CGFloat = 1e-9
+/// Tolerance for comparing opacities, which the settings hold as a `Float`: `Float(0.7)` is
+/// 1.2e-8 off 0.7.
+private let opacityEpsilon = 1e-6
 
 /// The standard stick's layout, away from any board.
 private let standard = ControlsLayout(in: .zero, beside: .zero)
@@ -49,16 +50,16 @@ final class ControlsLayoutTests: XCTestCase {
     func testTheStandardStickAndOpacityAreTheDefaultSettings() {
         XCTAssertEqual(standard.baseRadius, ControlsLayout.standardBaseRadius)
         XCTAssertEqual(standard.knobRadius, ControlsLayout.standardKnobRadius)
-        XCTAssertEqual(standard.touchedOpacity, 0.7, accuracy: epsilon)
-        XCTAssertEqual(standard.idleOpacity, 0.245, accuracy: epsilon)
+        XCTAssertEqual(standard.touchedOpacity, 0.7, accuracy: opacityEpsilon)
+        XCTAssertEqual(standard.idleOpacity, 0.245, accuracy: opacityEpsilon)
     }
 
     /// 1.5 times 44 and 22 points; idle, 0.35 of the touched opacity.
     func testTheStickSizeScalesTheStickAndTheOpacitySetsBothControls() {
         XCTAssertEqual(largest.baseRadius, 66)
         XCTAssertEqual(largest.knobRadius, 33)
-        XCTAssertEqual(largest.touchedOpacity, 0.4, accuracy: epsilon)
-        XCTAssertEqual(largest.idleOpacity, 0.14, accuracy: epsilon)
+        XCTAssertEqual(largest.touchedOpacity, 0.4, accuracy: opacityEpsilon)
+        XCTAssertEqual(largest.idleOpacity, 0.14, accuracy: opacityEpsilon)
     }
 
     func testTheStickSizeLeavesTheZonesAlone() {
@@ -114,8 +115,8 @@ final class ControlsLayoutTests: XCTestCase {
     func testTheKnobStaysOnTheRimTowardsAThumbBeyondIt() {
         let knob = standard.knob(centre: centre, thumb: CGPoint(x: 160, y: 180))
 
-        XCTAssertEqual(knob.x, 100 + 0.6 * 44, accuracy: epsilon)
-        XCTAssertEqual(knob.y, 100 + 0.8 * 44, accuracy: epsilon)
+        XCTAssertEqual(knob.x, 100 + 0.6 * 44, accuracy: opacityEpsilon)
+        XCTAssertEqual(knob.y, 100 + 0.8 * 44, accuracy: opacityEpsilon)
     }
 
     /// The thumb of `testTheKnobStaysOnTheRimTowardsAThumbBeyondIt`, 50 points away: inside the

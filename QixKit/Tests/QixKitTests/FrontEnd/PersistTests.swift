@@ -2,7 +2,7 @@ import Foundation
 import XCTest
 @testable import QixKit
 
-/// The keys the app has always stored its values under: a change would lose the stored ones.
+/// The keys the values are stored under: a change would lose the stored ones.
 private let highScoresKey = "highScores"
 private let settingsKey = "settings"
 

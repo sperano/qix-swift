@@ -7,6 +7,11 @@ private let thresholdPercents = 50 ... 90
 private let stickSizePercents = 75 ... 150
 private let opacityPercents = 20 ... 100
 
+/// The steps of the steppers, in percent points: qix-rs's 5 points for the threshold.
+private let thresholdStep = 5
+private let stickSizeStep = 25
+private let opacityStep = 10
+
 /// The defaults as the steppers show them, in percent points.
 private let defaultThresholdPercent = 75
 private let standardStickSizePercent = 100
@@ -23,6 +28,10 @@ private let insideLives: UInt32 = 4
 private let aboveThresholdPercent = 95
 private let belowStickSizePercent = 10
 private let belowOpacityPercent = 0
+
+/// Numbers past `Float`'s range, as stored, either side of it.
+private let pastFloat = "1e39"
+private let belowFloat = "-1e39"
 
 /// Converts percent points to a fraction.
 private let pointsPerUnit: Float = 100
@@ -173,6 +182,22 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(settings.controlsOpacity.get, ControlsOpacity.range.lowerBound)
     }
 
+    func testStoredFractionsPastFloatAreClampedAndKeepTheRest() throws {
+        for (number, atUpperBound) in [(pastFloat, true), (belowFloat, false)] {
+            let settings = try decoded(
+                #"{"threshold": \#(number), "stickSize": \#(number), "controlsOpacity": \#(number), "sounds": true}"#
+            )
+
+            func bound(_ range: ClosedRange<Float>) -> Float {
+                atUpperBound ? range.upperBound : range.lowerBound
+            }
+            XCTAssertEqual(settings.threshold.fraction, bound(Tuning.claimThresholdRange), number)
+            XCTAssertEqual(settings.stickSize.get, bound(StickSize.range), number)
+            XCTAssertEqual(settings.controlsOpacity.get, bound(ControlsOpacity.range), number)
+            XCTAssertTrue(settings.sounds, number)
+        }
+    }
+
     func testStoredLivesOutsideUInt32AreClampedAndKeepTheRest() throws {
         for (lives, expected) in [
             ("-1", Tuning.startingLivesRange.lowerBound), ("4294967296", Tuning.startingLivesRange.upperBound),
@@ -192,6 +217,12 @@ final class SettingsStepsTests: XCTestCase {
         XCTAssertEqual(Settings.stickSizePercents, stickSizePercents)
         XCTAssertEqual(Settings.opacityPercents, opacityPercents)
         XCTAssertEqual(Settings.startingLivesCounts, 1 ... Int(Tuning.maxLives))
+    }
+
+    func testTheStepsAreThoseOfTheSheet() {
+        XCTAssertEqual(Settings.thresholdStep, thresholdStep)
+        XCTAssertEqual(Settings.stickSizeStep, stickSizeStep)
+        XCTAssertEqual(Settings.opacityStep, opacityStep)
     }
 
     func testEveryStepOfTheThresholdReadsBackAsSet() {

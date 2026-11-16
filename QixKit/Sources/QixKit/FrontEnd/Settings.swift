@@ -109,9 +109,9 @@ public struct Settings: Hashable, Sendable {
 }
 
 extension StickSize: Codable {
-    /// The stored factor, clamped as `init(_:)` clamps it.
+    /// The stored factor, clamped as `init(_:)` clamps it, one past `Float` included.
     public init(from decoder: any Decoder) throws {
-        try self.init(decoder.singleValueContainer().decode(Float.self))
+        try self.init(decodedFloat(decoder))
     }
 
     /// Stores the factor.
@@ -122,9 +122,9 @@ extension StickSize: Codable {
 }
 
 extension ControlsOpacity: Codable {
-    /// The stored opacity, clamped as `init(_:)` clamps it.
+    /// The stored opacity, clamped as `init(_:)` clamps it, one past `Float` included.
     public init(from decoder: any Decoder) throws {
-        try self.init(decoder.singleValueContainer().decode(Float.self))
+        try self.init(decodedFloat(decoder))
     }
 
     /// Stores the opacity.
