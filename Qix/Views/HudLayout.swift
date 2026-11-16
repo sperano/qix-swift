@@ -2,7 +2,7 @@ import CoreGraphics
 
 /// The HUD's strip: its columns and the sizes of what they show, as fractions of the strip's
 /// height, so the HUD scales with the letterboxed board. qix-rs's `render/hud.rs`, with a column
-/// for the pause button.
+/// for the HUD's button: pause in play, settings on the title.
 enum HudLayout {
     /// The columns of the strip, left to right.
     enum Column: Int, CaseIterable {

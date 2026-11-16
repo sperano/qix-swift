@@ -2,8 +2,8 @@ import QixKit
 import SwiftUI
 
 /// The whole screen: the board letterboxed on the backdrop with the HUD above it, the screen of the
-/// session's state over the board, the HUD's pause button, and the touch controls on each side of
-/// the board. A tap anywhere but on a control confirms.
+/// session's state over the board, the HUD's button, and the touch controls on each side of the
+/// board, as the settings place them. A tap anywhere but on a control confirms.
 struct PlayfieldView: View {
     /// What UI tests find the board by.
     static let playfieldIdentifier = "playfield"
@@ -11,13 +11,14 @@ struct PlayfieldView: View {
     let scene: PlayfieldScene
     var onTap: @MainActor () -> Void = {}
     var onPause: @MainActor () -> Void = {}
+    var onSettings: @MainActor () -> Void = {}
     var onTouch: @MainActor (TouchEvent) -> Void = { _ in }
 
     var body: some View {
         GeometryReader { proxy in
             let bounds = CGRect(origin: .zero, size: proxy.size)
             let layout = PlayfieldLayout(in: bounds)
-            let controls = ControlsLayout(in: bounds, beside: layout.field)
+            let controls = ControlsLayout(in: bounds, beside: layout.field, settings: scene.settings)
             // The zones are the board's siblings, not its children: a touch on a zone is the zone's
             // alone and never a tap.
             ZStack(alignment: .topLeading) {
@@ -31,7 +32,7 @@ struct PlayfieldView: View {
         .background(Palette.backdrop)
     }
 
-    /// The board, the HUD, the screen over the board, the pause button and the controls drawn.
+    /// The board, the HUD, the screen over the board, the HUD's button and the controls drawn.
     private func board(_ layout: PlayfieldLayout, _ controls: ControlsLayout) -> some View {
         ZStack(alignment: .topLeading) {
             Rectangle()
@@ -51,8 +52,10 @@ struct PlayfieldView: View {
             if let screen = scene.screen {
                 ScreenView(screen: screen, field: layout.field)
             }
-            if let role = scene.pauseButton {
-                PauseButton(role: role, column: HudLayout.rect(of: .pause, in: layout.hud), action: onPause)
+            if let role = scene.hudButton {
+                HudButton(role: role, column: HudLayout.rect(of: .pause, in: layout.hud)) {
+                    role == .settings ? onSettings() : onPause()
+                }
             }
         }
     }

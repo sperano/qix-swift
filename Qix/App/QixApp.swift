@@ -1,8 +1,11 @@
+import Foundation
 import SwiftUI
 
 @main
 struct QixApp: App {
-    @State private var model = GameModel()
+    @State private var model = GameModel(
+        defaults: LaunchOptions.defaults(arguments: ProcessInfo.processInfo.arguments)
+    )
 
     var body: some Scene {
         WindowGroup {

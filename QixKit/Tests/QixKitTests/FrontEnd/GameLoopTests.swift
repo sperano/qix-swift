@@ -147,3 +147,121 @@ final class GameLoopTests: XCTestCase {
         XCTAssertEqual(loop.controls.held, [.slow])
     }
 }
+
+/// The initials the hold tests type.
+private let typedName = "QIX"
+
+/// Lives the rules of `testNewRulesRestartTheTitlesGameWithThem` start a game with, off the
+/// default.
+private let ruledLives: UInt32 = 5
+
+/// A loop whose session waits for the initials of a game over that made the empty table.
+private func enteringLoop(file: StaticString = #filePath, line: UInt = #line) -> GameLoop {
+    var loop = GameLoop(session: scoredGameOver(HighScores(), file: file, line: line))
+    loop.controls.press(.confirm)
+    loop.advance(frame60)
+    XCTAssertTrue(loop.isEnteringInitials, "\(loop.session.state)", file: file, line: line)
+    return loop
+}
+
+final class GameLoopHoldTests: XCTestCase {
+    func testALoopPlayingIsNotOnHold() {
+        let loop = playingLoop()
+
+        XCTAssertFalse(loop.isInterrupted)
+        XCTAssertFalse(loop.isEnteringInitials)
+        XCTAssertFalse(loop.isOnHold)
+    }
+
+    func testInterruptingPausesAGameInPlayAndRunsNoTick() {
+        var loop = playingLoop()
+
+        loop.interrupt()
+        let game = loop.session.game
+        loop.controls.keyDown(.left)
+        loop.controls.press(.pause)
+
+        XCTAssertTrue(loop.isInterrupted)
+        XCTAssertTrue(loop.isOnHold)
+        XCTAssertEqual(loop.advance(frame30), 0)
+        XCTAssertEqual(loop.session.state, .paused)
+        XCTAssertEqual(loop.session.game, game)
+    }
+
+    func testAPressDuringAnInterruptionDoesNotActAfterTheResume() {
+        var loop = titleLoop()
+        loop.interrupt()
+        loop.controls.press(.confirm)
+        XCTAssertEqual(loop.advance(frame60), 0)
+
+        loop.resume()
+
+        XCTAssertEqual(loop.advance(frame60), 1)
+        XCTAssertEqual(loop.session.state, .title)
+    }
+
+    func testResumingDropsTheKeysAndTouchesOfTheInterruption() {
+        var loop = titleLoop()
+        loop.interrupt()
+        loop.controls.keyDown(.left)
+        loop.controls.setTouch([.up, .fast])
+        loop.controls.press(.confirm)
+
+        loop.resume()
+
+        XCTAssertFalse(loop.isOnHold)
+        XCTAssertEqual(loop.controls.held, [])
+        XCTAssertEqual(loop.controls.sample(), InputState())
+    }
+
+    func testTheLoopIsOnHoldWhileTheInitialsAreTyped() {
+        var loop = enteringLoop()
+        let session = loop.session
+        loop.controls.keyDown(.up)
+
+        for _ in 0 ..< Tuning.initialsLen {
+            loop.controls.press(.confirm)
+            XCTAssertEqual(loop.advance(frame60), 0)
+        }
+
+        XCTAssertTrue(loop.isOnHold)
+        XCTAssertFalse(loop.isInterrupted)
+        XCTAssertEqual(loop.session.state, .highScoreEntry(InitialsEntry()))
+        XCTAssertEqual(loop.session.highScores, session.highScores)
+    }
+
+    func testTypedInitialsEnterTheScoreAndTheTitleRunsWithoutTheKeysHeld() throws {
+        var loop = enteringLoop()
+        let points = loop.session.game.score.points
+        loop.controls.keyDown(.left)
+        loop.controls.press(.confirm)
+
+        XCTAssertEqual(try loop.enterInitials(Initials(typedName)), 0)
+
+        XCTAssertEqual(loop.session.state, .title)
+        XCTAssertEqual(loop.session.highScores.entries, [try HighScore(name: Initials(typedName), score: points)])
+        XCTAssertFalse(loop.isOnHold)
+        XCTAssertEqual(loop.controls.held, [])
+        XCTAssertEqual(loop.advance(frame60), 1)
+        XCTAssertEqual(loop.session.state, .title)
+    }
+
+    func testTypedInitialsOutsideTheEntryDoNothing() throws {
+        var loop = titleLoop()
+        loop.controls.keyDown(.left)
+
+        XCTAssertNil(try loop.enterInitials(Initials(typedName)))
+
+        XCTAssertEqual(loop.session.state, .title)
+        XCTAssertEqual(loop.session.highScores, HighScores())
+        XCTAssertEqual(loop.controls.held, [.left])
+    }
+
+    func testNewRulesRestartTheTitlesGameWithThem() {
+        var loop = titleLoop()
+
+        loop.setRules(Rules(startingLives: StartingLives(ruledLives)))
+
+        XCTAssertEqual(loop.session.game.lives, ruledLives)
+    }
+}

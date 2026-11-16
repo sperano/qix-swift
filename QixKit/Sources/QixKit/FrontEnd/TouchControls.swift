@@ -4,9 +4,9 @@
 
 /// The touch control a touch lands on.
 public enum TouchControl: Hashable, Sendable {
-    /// The floating stick, left of the board.
+    /// The floating stick, left of the board, or right of it when left-handed.
     case stick
-    /// The Slow button, right of the board.
+    /// The Slow button, on the other side of the board.
     case slow
 }
 

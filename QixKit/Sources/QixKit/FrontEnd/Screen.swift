@@ -1,7 +1,7 @@
 // The screens over the playfield outside play: the title with the high scores and the controls,
 // the pause, the end of a level, the end of the game and the entry of a high score. qix-rs's
 // `crates/qix/src/render/screen.rs` and `high_score.rs`, without their painting, which the app
-// does, and with the keys and the taps of the iPhone.
+// does, and with the keys, the taps and the initials field of the iPhone.
 
 import Foundation
 
@@ -41,8 +41,8 @@ public struct Screen: Hashable, Sendable {
             self = .levelComplete(game, fraction: fraction, bonus: bonus, split: split)
         case .gameOver:
             self = .gameOver(game, session.highScores)
-        case let .highScoreEntry(entry):
-            self = .highScoreEntry(game, session.highScores, entry)
+        case .highScoreEntry:
+            self = .highScoreEntry(game, session.highScores)
         }
     }
 
@@ -90,29 +90,19 @@ public struct Screen: Hashable, Sendable {
         return Self(heading: "GAME OVER", lines: lines)
     }
 
-    /// The screen entering the initials of `game`'s score, which makes `highScores`: the initials
-    /// so far, the rank and the controls.
-    public static func highScoreEntry(_ game: Game, _ highScores: HighScores, _ entry: InitialsEntry) -> Self {
+    /// What the initials field asks for the initials of `game`'s score, which makes `highScores`:
+    /// the score and its rank. The field itself is the app's (`InitialsField`).
+    public static func highScoreEntry(_ game: Game, _ highScores: HighScores) -> Self {
         let points = game.score.points
         var score = "Score \(Numbers.thousands(points))"
         if let rank = highScores.rank(points) {
             score += ", rank \(rank + 1)"
         }
-        return Self(
-            heading: "NEW HIGH SCORE",
-            table: [HighScoreTable.initialsRow(entry)],
-            lines: [
-                score,
-                "",
-                "Up/Down: change the letter",
-                "Left/Right: move",
-                "\(confirmName): next letter, then done",
-            ]
-        )
+        return Self(heading: "NEW HIGH SCORE", lines: [score, "Type your initials, then Done"])
     }
 }
 
-/// The high score table as the title screen lists it, and the initials being entered.
+/// The high score table as the title screen lists it.
 public enum HighScoreTable {
     /// The rows of `highScores`, best first: rank, initials and score, with the ranks and scores
     /// right-aligned for a monospace font.
@@ -125,13 +115,6 @@ public enum HighScoreTable {
             let (entry, score) = pair
             return "\(padded(String(i + 1), rankWidth)). \(entry.name)  \(padded(score, scoreWidth))"
         }
-    }
-
-    /// The initials of `entry` as one row, the letter under the cursor in brackets: ` A [B] C `.
-    public static func initialsRow(_ entry: InitialsEntry) -> String {
-        entry.initials.letters.enumerated().map { i, letter in
-            i == entry.cursor ? "[\(letter)]" : " \(letter) "
-        }.joined()
     }
 
     /// `text` right-aligned in `width` characters with spaces.

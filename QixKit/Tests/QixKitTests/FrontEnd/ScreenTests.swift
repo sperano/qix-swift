@@ -55,12 +55,6 @@ private func completedLevel(with highScores: HighScores) -> Session {
     return session
 }
 
-/// Ticks `entry` with `dir` held for one tick, then released.
-private func tap(_ entry: inout InitialsEntry, _ dir: Dir) {
-    _ = entry.tick(InputState(dir: dir))
-    _ = entry.tick(InputState())
-}
-
 final class ScreenTests: XCTestCase {
     func testANewSessionShowsTheTitleScreen() {
         XCTAssertEqual(Screen(session: Session(game: Game(rng: Rng(seed: screenSeed)))), .title(HighScores()))
@@ -222,48 +216,27 @@ final class HighScoreTableTests: XCTestCase {
         XCTAssertEqual(HighScoreTable.rows(table), ["1. ONE  900", "2. TWO   10"])
     }
 
-    func testTheInitialsRowBracketsTheCursor() {
-        var entry = InitialsEntry()
-        XCTAssertEqual(HighScoreTable.initialsRow(entry), "[A] A  A ")
-
-        tap(&entry, .up)
-        tap(&entry, .right)
-        tap(&entry, .down)
-
-        XCTAssertEqual(HighScoreTable.initialsRow(entry), " B [Z] A ")
-    }
-
-    func testTheEntryScreenShowsTheInitialsTheRankAndTheControls() throws {
+    func testTheEntryScreenShowsTheScoreItsRankAndWhatToType() throws {
         let game = claimedGame()
         let points = claimedCells * Tuning.pointsPerCell
         let table = try HighScores([entry("TOP", points + 1)])
 
         XCTAssertEqual(
-            Screen.highScoreEntry(game, table, InitialsEntry()),
-            Screen(
-                heading: "NEW HIGH SCORE",
-                table: ["[A] A  A "],
-                lines: [
-                    "Score \(points), rank 2",
-                    "",
-                    "Up/Down: change the letter",
-                    "Left/Right: move",
-                    "Tap or press Return: next letter, then done",
-                ]
-            )
+            Screen.highScoreEntry(game, table),
+            Screen(heading: "NEW HIGH SCORE", lines: ["Score \(points), rank 2", "Type your initials, then Done"])
         )
     }
 
     func testASessionEnteringInitialsShowsTheEntryScreen() throws {
         var session = lostGame(HighScores())
         session.tick(confirmInput)
-        guard case let .highScoreEntry(entry) = session.state else {
+        guard case .highScoreEntry = session.state else {
             return XCTFail("not entering initials: \(session.state)")
         }
 
         let shown = try XCTUnwrap(Screen(session: session))
 
-        XCTAssertEqual(shown, .highScoreEntry(session.game, session.highScores, entry))
+        XCTAssertEqual(shown, .highScoreEntry(session.game, session.highScores))
         XCTAssertEqual(shown.lines[0], "Score \(lostGamePoints), rank 1")
     }
 

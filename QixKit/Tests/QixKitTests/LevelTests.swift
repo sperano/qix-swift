@@ -37,6 +37,10 @@ private let whole: UInt32 = 100
 /// Bonus steps, in whole percent points, between the lowest threshold and a full board.
 private let lowestThresholdSteps: UInt32 = 50
 
+/// Numbers past `Double`'s range, as stored, either side of it.
+private let pastDouble = "1e400"
+private let belowDouble = "-1e400"
+
 /// `speed` is `expected`, but for rounding.
 private func assertSpeed(
     _ speed: ClosedRange<Float>,
@@ -248,6 +252,14 @@ final class LevelTests: XCTestCase {
     func testAClaimThresholdThatIsNotANumberFailsToDecode() {
         for stored in [#"["high"]"#, "[null]"] {
             XCTAssertThrowsError(try JSONDecoder().decode([ClaimThreshold].self, from: Data(stored.utf8)), stored)
+        }
+    }
+
+    func testAClaimThresholdPastDoubleFailsToDecode() {
+        for stored in ["[\(pastDouble)]", "[\(belowDouble)]"] {
+            XCTAssertThrowsError(try JSONDecoder().decode([ClaimThreshold].self, from: Data(stored.utf8)), stored) {
+                XCTAssertTrue($0 is DecodingError, "\(stored): \($0)")
+            }
         }
     }
 }

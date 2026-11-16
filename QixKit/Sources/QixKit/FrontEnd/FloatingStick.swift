@@ -1,5 +1,5 @@
-// The touch screen's floating stick, which the left thumb steers with. qix-rs has no touch
-// controls: this is the iPhone front end's own.
+// The touch screen's floating stick, which a thumb steers with: the left one, unless left-handed.
+// qix-rs has no touch controls: this is the iPhone front end's own.
 
 /// A 4-way stick centred where the thumb lands: the dominant axis of the drag from there holds the
 /// direction, once the drag reaches `deadZone`. Changing axis takes a clear move, the other axis

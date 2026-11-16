@@ -3,8 +3,10 @@ import SwiftUI
 import UIKit
 
 /// Reads the hardware keyboard's keys of `KeyMap` as they go down and up, through a view that
-/// keeps the first responder; the other keys go on up the responder chain.
+/// keeps the first responder while active; the other keys go on up the responder chain. Inactive,
+/// it gives the first responder up, so the keys reach a text field or a sheet instead.
 struct HardwareKeyboard: UIViewRepresentable {
+    var isActive = true
     let onDown: @MainActor (Control) -> Void
     let onUp: @MainActor (Control) -> Void
     /// The keyboard's presses were cancelled: every key is up.
@@ -18,6 +20,7 @@ struct HardwareKeyboard: UIViewRepresentable {
         view.onDown = onDown
         view.onUp = onUp
         view.onCancel = onCancel
+        view.setActive(isActive)
     }
 }
 
@@ -26,6 +29,8 @@ final class KeyboardView: UIView {
     var onDown: @MainActor (Control) -> Void = { _ in }
     var onUp: @MainActor (Control) -> Void = { _ in }
     var onCancel: @MainActor () -> Void = {}
+    /// The view is to keep the first responder.
+    private(set) var isActive = true
 
     override var canBecomeFirstResponder: Bool {
         true
@@ -33,8 +38,17 @@ final class KeyboardView: UIView {
 
     override func didMoveToWindow() {
         super.didMoveToWindow()
-        if window != nil {
+        setActive(isActive)
+    }
+
+    /// Takes the first responder back when `active` and in a window (a text field or a sheet may
+    /// have taken it), or gives it up when not.
+    func setActive(_ active: Bool) {
+        isActive = active
+        if active, window != nil, !isFirstResponder {
             becomeFirstResponder()
+        } else if !active, isFirstResponder {
+            resignFirstResponder()
         }
     }
 

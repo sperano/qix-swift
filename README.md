@@ -11,7 +11,13 @@ the 1981 arcade game, brought to a touch screen. iPhone only, landscape only.
 
 Status: the whole game plays with the touch controls below, a hardware
 keyboard or a game controller. Tap the board to start or continue, and pause
-with the button in the HUD.
+with the button in the HUD. The title screen lists the ten best scores; a game
+that makes the table asks for three initials, typed on the keyboard. The gear
+on the title screen opens the settings: the share of the board that clears a
+level (50 to 90 %), the starting lives, the control scheme, a left-handed swap
+of the touch controls, the stick's size and the controls' opacity, haptics and
+sounds (stored, not used yet). Rule changes apply to the next game. The
+settings and the high scores are kept between launches.
 
 | Key | Game controller | |
 | --- | --- | --- |
@@ -28,7 +34,8 @@ side for a thumb, so the controls never cover the board.
 
 - **Steering: a floating stick** under the left thumb. Where the thumb lands
   is the stick's centre; dragging picks one of four directions. Lifting the
-  thumb stops the marker. A left-handed swap is planned.
+  thumb stops the marker. The left-handed setting puts the stick on the
+  right and the Slow button on the left.
 - **Drawing** starts by steering off the border: holding a direction draws
   fast. Hold the **Slow** button under the other thumb to draw slowly, for
   more points.

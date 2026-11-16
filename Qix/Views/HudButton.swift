@@ -1,16 +1,18 @@
 import QixKit
 import SwiftUI
 
-/// What the HUD's pause button does: pause a game in play, or resume a paused one.
-enum PauseButtonRole: Equatable {
-    case pause, resume
+/// What the HUD's button does: pause a game in play, resume a paused one, or open the settings
+/// from the title screen.
+enum HudButtonRole: Equatable {
+    case pause, resume, settings
 
-    /// The button's role in `state`; none outside play and the pause.
+    /// The button's role in `state`; none on the other screens.
     init?(_ state: GameState) {
         switch state {
         case .playing: self = .pause
         case .paused: self = .resume
-        case .title, .levelComplete, .gameOver, .highScoreEntry: return nil
+        case .title: self = .settings
+        case .levelComplete, .gameOver, .highScoreEntry: return nil
         }
     }
 
@@ -19,6 +21,7 @@ enum PauseButtonRole: Equatable {
         switch self {
         case .pause: "pause.fill"
         case .resume: "play.fill"
+        case .settings: "gearshape.fill"
         }
     }
 
@@ -27,15 +30,22 @@ enum PauseButtonRole: Equatable {
         switch self {
         case .pause: "Pause"
         case .resume: "Resume"
+        case .settings: "Settings"
+        }
+    }
+
+    /// What UI tests find the button by: one for pausing and resuming, whose label tells which.
+    var identifier: String {
+        switch self {
+        case .pause, .resume: "pause"
+        case .settings: "settings"
         }
     }
 }
 
-/// The pause button, in the HUD's last column: it presses pause, as the Escape key does.
-struct PauseButton: View {
-    /// What UI tests find the button by.
-    static let identifier = "pause"
-
+/// The button in the HUD's last column: it presses pause, as the Escape key does, or opens the
+/// settings.
+struct HudButton: View {
     /// The smallest side of the area that takes the tap, in points: Apple's minimum touch target.
     static let minimumTarget: CGFloat = 44
 
@@ -48,7 +58,7 @@ struct PauseButton: View {
         CGSize(width: max(column.width, minimumTarget), height: max(column.height, minimumTarget))
     }
 
-    let role: PauseButtonRole
+    let role: HudButtonRole
     /// The HUD column the button sits in.
     let column: CGRect
     let action: @MainActor () -> Void
@@ -70,7 +80,7 @@ struct PauseButton: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(role.label)
-        .accessibilityIdentifier(Self.identifier)
+        .accessibilityIdentifier(role.identifier)
         .position(x: column.midX, y: column.midY)
     }
 }

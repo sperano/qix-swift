@@ -1,4 +1,5 @@
 import CoreGraphics
+import QixKit
 import XCTest
 @testable import Qix
 
@@ -8,8 +9,22 @@ private let phone = CGRect(x: 0, y: 0, width: 616, height: 280)
 /// Where the stick's thumb lands in the knob tests.
 private let centre = CGPoint(x: 100, y: 100)
 
+/// Tolerance for comparing opacities, which the settings hold as a `Float`: `Float(0.7)` is
+/// 1.2e-8 off 0.7.
+private let opacityEpsilon = 1e-6
+
 /// Tolerance for comparing screen coordinates, in points.
-private let epsilon: CGFloat = 1e-9
+private let pointEpsilon: CGFloat = 1e-9
+
+/// The standard stick's layout, away from any board.
+private let standard = ControlsLayout(in: .zero, beside: .zero)
+
+/// The stick at its largest size, 1.5 times the standard one, and the controls at an opacity of
+/// 0.4, away from any board.
+private let largest = ControlsLayout(
+    in: .zero, beside: .zero,
+    settings: Settings(stickSize: StickSize(StickSize.range.upperBound), controlsOpacity: ControlsOpacity(0.4))
+)
 
 final class ControlsLayoutTests: XCTestCase {
     /// 16 points from the safe area's edges and 8 from the board: 148 - 8 - 16 = 124 points wide,
@@ -21,6 +36,43 @@ final class ControlsLayoutTests: XCTestCase {
         XCTAssertEqual(layout.slow, CGRect(x: 476, y: 16, width: 124, height: 248))
         XCTAssertEqual(layout.stickRest, CGPoint(x: 78, y: 140))
         XCTAssertEqual(layout.slowCentre, CGPoint(x: 538, y: 140))
+    }
+
+    /// The zones of `testTheZonesFlankTheBoardClearOfTheEdges`, swapped.
+    func testLeftHandedTheStickIsRightOfTheBoardAndTheSlowButtonLeftOfIt() {
+        let field = PlayfieldLayout(in: phone).field
+
+        let layout = ControlsLayout(in: phone, beside: field, settings: Settings(leftHanded: true))
+
+        XCTAssertEqual(layout.stick, CGRect(x: 476, y: 16, width: 124, height: 248))
+        XCTAssertEqual(layout.slow, CGRect(x: 16, y: 16, width: 124, height: 248))
+        XCTAssertEqual(layout.stickRest, CGPoint(x: 538, y: 140))
+        XCTAssertEqual(layout.slowCentre, CGPoint(x: 78, y: 140))
+    }
+
+    func testTheStandardStickAndOpacityAreTheDefaultSettings() {
+        XCTAssertEqual(standard.baseRadius, ControlsLayout.standardBaseRadius)
+        XCTAssertEqual(standard.knobRadius, ControlsLayout.standardKnobRadius)
+        XCTAssertEqual(standard.touchedOpacity, 0.7, accuracy: opacityEpsilon)
+        XCTAssertEqual(standard.idleOpacity, 0.245, accuracy: opacityEpsilon)
+    }
+
+    /// 1.5 times 44 and 22 points; idle, 0.35 of the touched opacity.
+    func testTheStickSizeScalesTheStickAndTheOpacitySetsBothControls() {
+        XCTAssertEqual(largest.baseRadius, 66)
+        XCTAssertEqual(largest.knobRadius, 33)
+        XCTAssertEqual(largest.touchedOpacity, 0.4, accuracy: opacityEpsilon)
+        XCTAssertEqual(largest.idleOpacity, 0.14, accuracy: opacityEpsilon)
+    }
+
+    func testTheStickSizeLeavesTheZonesAlone() {
+        let field = PlayfieldLayout(in: phone).field
+        let settings = Settings(stickSize: StickSize(StickSize.range.upperBound))
+
+        let layout = ControlsLayout(in: phone, beside: field, settings: settings)
+
+        XCTAssertEqual(layout.stick, ControlsLayout(in: phone, beside: field).stick)
+        XCTAssertEqual(layout.slow, ControlsLayout(in: phone, beside: field).slow)
     }
 
     func testTheZonesFollowAnOffsetSafeArea() {
@@ -53,20 +105,29 @@ final class ControlsLayoutTests: XCTestCase {
     func testTheKnobIsUnderAThumbOnTheBase() {
         let thumb = CGPoint(x: 110, y: 120)
 
-        XCTAssertEqual(ControlsLayout.knob(centre: centre, thumb: thumb), thumb)
+        XCTAssertEqual(standard.knob(centre: centre, thumb: thumb), thumb)
     }
 
     func testTheKnobIsUnderAThumbOnTheRim() {
-        let thumb = CGPoint(x: centre.x, y: centre.y - ControlsLayout.baseRadius)
+        let thumb = CGPoint(x: centre.x, y: centre.y - ControlsLayout.standardBaseRadius)
 
-        XCTAssertEqual(ControlsLayout.knob(centre: centre, thumb: thumb), thumb)
+        XCTAssertEqual(standard.knob(centre: centre, thumb: thumb), thumb)
     }
 
     /// A thumb 100 points away along a 3-4-5 triangle: the knob is 44 points away along it.
     func testTheKnobStaysOnTheRimTowardsAThumbBeyondIt() {
-        let knob = ControlsLayout.knob(centre: centre, thumb: CGPoint(x: 160, y: 180))
+        let knob = standard.knob(centre: centre, thumb: CGPoint(x: 160, y: 180))
 
-        XCTAssertEqual(knob.x, 100 + 0.6 * ControlsLayout.baseRadius, accuracy: epsilon)
-        XCTAssertEqual(knob.y, 100 + 0.8 * ControlsLayout.baseRadius, accuracy: epsilon)
+        XCTAssertEqual(knob.x, 100 + 0.6 * 44, accuracy: pointEpsilon)
+        XCTAssertEqual(knob.y, 100 + 0.8 * 44, accuracy: pointEpsilon)
+    }
+
+    /// The thumb of `testTheKnobStaysOnTheRimTowardsAThumbBeyondIt`, 50 points away: inside the
+    /// largest stick's 66-point base, beyond the standard one's 44.
+    func testALargerStickTakesTheKnobFurther() {
+        let thumb = CGPoint(x: 130, y: 140)
+
+        XCTAssertEqual(largest.knob(centre: centre, thumb: thumb), thumb)
+        XCTAssertNotEqual(standard.knob(centre: centre, thumb: thumb), thumb)
     }
 }
