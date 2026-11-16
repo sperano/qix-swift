@@ -364,6 +364,20 @@ final class GameLoopSteeringTests: XCTestCase {
         XCTAssertEqual(loop.haptics, [])
     }
 
+    /// Drawing up from the border, a frame of `stepsPerFrame` steps' ticks queues the blip of each
+    /// step, in order.
+    func testTheSoundsOfSeveralTicksOfAFrameAccumulate() {
+        let stepsPerFrame: UInt32 = 2
+        let ticks = stepsPerFrame * Tuning.markerStepTicks
+        var loop = steeringLoop()
+        loop.controls.keyDown(.fast)
+        loop.controls.keyDown(.up)
+
+        XCTAssertEqual(loop.advance(Float(ticks) * frame60), ticks)
+
+        XCTAssertEqual(loop.takeSounds(), Array(repeating: .draw(.fast), count: Int(stepsPerFrame)))
+    }
+
     func testAPausedGameQueuesNoSoundOrHaptic() {
         var loop = playingLoop()
         loop.controls.press(.pause)

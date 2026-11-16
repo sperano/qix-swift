@@ -22,6 +22,17 @@ private func pennedSession(file: StaticString = #filePath, line: UInt = #line) -
     return playing(Game(board: board, qix: [qix], sparx: [], rng: Rng(seed: gameSeed)), file: file, line: line)
 }
 
+/// The columns `splitSession` pens a Qix in, either side of the stix drawn up from the marker.
+private let splitColumns: [UInt16] = [penColumn, width - 1 - penColumn]
+
+/// A session in play over a game on a `width x height` board with a Qix penned in each of
+/// `splitColumns` and no Sparx: a stix up from the marker splits them and claims nothing.
+private func splitSession(file: StaticString = #filePath, line: UInt = #line) -> Session {
+    var board = Board(width: width, height: height)
+    let qix = splitColumns.map { pen(&board, $0) }
+    return playing(Game(board: board, qix: qix, sparx: [], rng: Rng(seed: gameSeed)), file: file, line: line)
+}
+
 /// The event is a claim.
 private func isClaim(_ event: Event) -> Bool {
     if case .claim = event {
@@ -97,6 +108,14 @@ final class HapticTests: XCTestCase {
         XCTAssertEqual(feel(drawing(.down, .fast), Tuning.markerStepTicks), [.tick, .bump])
     }
 
+    /// Off the bottom edge, then into the board with no draw button: the new direction's refusal
+    /// bumps again with no release between the two.
+    func testARefusedStepInAnotherDirectionBumpsAgain() {
+        XCTAssertEqual(feel(drawing(.down, .fast), Tuning.markerStepTicks), [.tick, .bump])
+        XCTAssertEqual(feel(holding(.up), Tuning.markerStepTicks), [.tick, .bump])
+        XCTAssertEqual(session.game.marker.pos, Marker.start(session.game.board).pos)
+    }
+
     /// With no draw button, the core does not step the marker off the border.
     func testADirectionIntoTheBoardWithNoDrawButtonBumps() {
         XCTAssertEqual(feel(holding(.up), Tuning.markerStepTicks), [.tick, .bump])
@@ -127,6 +146,18 @@ final class HapticTests: XCTestCase {
         XCTAssertEqual(haptics.last, .success)
         XCTAssertTrue(session.events.contains(where: isClaim))
         XCTAssertNil(session.game.stix)
+    }
+
+    /// A split claims nothing: the level's end alone succeeds.
+    func testASplitEndingTheLevelWithNoClaimSucceeds() {
+        session = splitSession()
+        let ticks = UInt32(height) * Tuning.markerStepTicks
+
+        let haptics = feel(drawing(.up, .fast), ticks)
+
+        XCTAssertEqual(haptics.last, .success)
+        XCTAssertFalse(session.events.contains(where: isClaim))
+        XCTAssertTrue(session.game.isLevelComplete)
     }
 
     /// The tick before the claim turns, so the turn's step count closes the stix on the next one:
