@@ -62,6 +62,7 @@
 		B9E318F113191D889CB7EB5E /* GameModelSteeringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98895ADF391C5B897E6208EC /* GameModelSteeringTests.swift */; };
 		BE4BB7DEF915CF686BC5FF90 /* HapticPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67861757DC8162197AD394D /* HapticPlayer.swift */; };
 		BED9240BC733758F72EB9672 /* HudLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 970969D3E728AF18724145CE /* HudLayout.swift */; };
+		BFEE834A29FD8830471241AF /* ScreenshotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25AB6C608DC9E267A0D3FDCC /* ScreenshotUITests.swift */; };
 		C0CD96F79D61CE30B2558C9F /* QixApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = C02F82F7C3BFD2F9B144A417 /* QixApp.swift */; };
 		C51DD040EAA398BCE71A0B8E /* GameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF306261B821BB6452B7994 /* GameView.swift */; };
 		CC9FAEB7CBE9DECF0F6E66EC /* GameModelFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B0415FBDF5CBE687487AD9C /* GameModelFeedbackTests.swift */; };
@@ -105,6 +106,7 @@
 		1B0415FBDF5CBE687487AD9C /* GameModelFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModelFeedbackTests.swift; sourceTree = "<group>"; };
 		1E5BD720EF6751D6FCEC00F8 /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		2421F3A3636D246F9AA07658 /* QixKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = QixKit; path = QixKit; sourceTree = SOURCE_ROOT; };
+		25AB6C608DC9E267A0D3FDCC /* ScreenshotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotUITests.swift; sourceTree = "<group>"; };
 		26EEF4C324013F6BE2157A6D /* Qix.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Qix.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		31E5595EB0C266E18A0EFC2E /* AppIconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconTests.swift; sourceTree = "<group>"; };
 		3711604D715BE49DC3F21337 /* LaunchOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchOptionsTests.swift; sourceTree = "<group>"; };
@@ -335,6 +337,7 @@
 				4F65118F085BABFAC90BEAD8 /* FollowTheFingerUITests.swift */,
 				7DEA0C82F7BA63EBE779BCEA /* GameUITests.swift */,
 				540549E8DDA4D2188E6A0C88 /* LaunchUITests.swift */,
+				25AB6C608DC9E267A0D3FDCC /* ScreenshotUITests.swift */,
 				64DF8F5EC33DF16E19671350 /* SettingsUITests.swift */,
 			);
 			path = QixUITests;
@@ -550,6 +553,7 @@
 				620B9E8A42B30C61F800584F /* FollowTheFingerUITests.swift in Sources */,
 				F1B993A7BE6FB499087CB279 /* GameUITests.swift in Sources */,
 				053D4B7BFDC2A945B06937D7 /* LaunchUITests.swift in Sources */,
+				BFEE834A29FD8830471241AF /* ScreenshotUITests.swift in Sources */,
 				8AB1F2D5D90246EB7EF7B048 /* SettingsUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -672,7 +676,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -785,7 +789,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

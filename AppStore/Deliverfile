@@ -1,0 +1,43 @@
+# The App Store listing that Scripts/upload-listing.sh uploads with fastlane deliver: the text under
+# metadata/ (every locale, the category and the copyright), the screenshots Scripts/screenshots.sh
+# writes, the age rating and the review information. The build comes from the release workflow,
+# so no binary goes up from here. The script passes the API key, the version and submit_for_review
+# (true with its --submit).
+
+app_identifier "quebec.spe.Qix"
+metadata_path "./metadata"
+screenshots_path "./screenshots"
+skip_binary_upload true
+overwrite_screenshots true
+
+# Every answer None or No: the enemies are abstract lines and sparks that end a life on contact, so
+# there is no violence to rate, and the scores are points, never money.
+app_rating_config_path "./age_rating.json"
+
+# Released by hand after approval.
+automatic_release false
+
+# precheck cannot read in-app purchases with an API key and fails on them; the app has none.
+run_precheck_before_submit false
+submission_information({
+  add_id_info_uses_idfa: false,
+  export_compliance_uses_encryption: false,
+})
+
+# The contact details stay out of the public repository: they come from the environment. One left
+# unset is not sent, so App Store Connect keeps what it has; an empty value would be sent and
+# refused. The first upload of a version needs all four (the phone as +<country code> <number>).
+review_contact = {
+  first_name: ENV["REVIEW_FIRST_NAME"],
+  last_name: ENV["REVIEW_LAST_NAME"],
+  phone_number: ENV["REVIEW_PHONE"],
+  email_address: ENV["REVIEW_EMAIL"],
+}.reject { |_, value| value.to_s.strip.empty? }
+app_review_information(
+  review_contact.merge(
+    notes: "An offline game: no account, no sign-in, no network access, nothing to buy. Tap the " \
+      "playfield to start. Drag the stick left of the board to move along the border and push " \
+      "into the open to draw; hold Slow, right of the board, to draw slowly. The gear on the " \
+      "title screen opens the settings and How to play."
+  )
+)

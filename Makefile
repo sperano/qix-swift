@@ -49,11 +49,16 @@ coverage:
 	cd QixKit && swift test --parallel --enable-code-coverage
 	Scripts/coverage.sh "$$(cd QixKit && swift test --show-codecov-path)"
 
-# Tests of the coverage gate itself (Scripts/coverage_test.sh), on fixture coverage exports, and of
-# the icon renderer (Design/render_icons_test.py).
+# Tests of the coverage gate itself (Scripts/coverage_test.sh), on fixture coverage exports, of the
+# icon renderer (Design/render_icons_test.py), the checks of the App Store listing and release
+# settings (Scripts/app_store_test.py), and of the screenshot and listing upload scripts with Xcode's
+# and fastlane's tools stubbed (Scripts/screenshots_test.sh, Scripts/upload-listing_test.sh).
 test-scripts:
 	Scripts/coverage_test.sh
 	python3 Design/render_icons_test.py
+	python3 Scripts/app_store_test.py
+	Scripts/screenshots_test.sh
+	Scripts/upload-listing_test.sh
 
 # Renders the app icon's light, dark and tinted PNGs into the asset catalog; commit them.
 icons:
